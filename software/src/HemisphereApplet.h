@@ -25,6 +25,13 @@
 //// Hemisphere Applet Base Class
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifndef _HEM_APPLET_H_
+#define _HEM_APPLET_H_
+
+#include "OC_digital_inputs.h"
+#include "OC_DAC.h"
+#include "OC_ADC.h"
+#include "src/drivers/FreqMeasure/OC_FreqMeasure.h"
 #include "HSicons.h"
 #include "HSClockManager.h"
 
@@ -470,3 +477,5 @@ private:
     bool changed_cv[2]; // Has the input changed by more than 1/8 semitone since the last read?
     int last_cv[2]; // For change detection
 };
+
+#endif // _HEM_APPLET_H_

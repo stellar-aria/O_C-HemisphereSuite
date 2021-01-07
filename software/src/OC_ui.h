@@ -1,11 +1,13 @@
 #ifndef OC_UI_H_
 #define OC_UI_H_
 
+#include <stdint.h>
 #include "OC_config.h"
 #include "OC_debug.h"
 #include "UI/ui_button.h"
 #include "UI/ui_encoder.h"
 #include "UI/ui_event_queue.h"
+#include "UI/ui_events.h"
 
 namespace OC {
 

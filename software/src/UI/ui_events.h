@@ -23,27 +23,30 @@
 #ifndef UI_EVENTS_H_
 #define UI_EVENTS_H_
 
+#include <Arduino.h>
+#include <stdint.h>
+
 namespace UI {
 
-enum EventType {
-  EVENT_NONE,
-  EVENT_BUTTON_PRESS,
-  EVENT_BUTTON_LONG_PRESS,
-  EVENT_ENCODER
-};
+  enum EventType {
+    EVENT_NONE,
+    EVENT_BUTTON_PRESS,
+    EVENT_BUTTON_LONG_PRESS,
+    EVENT_ENCODER
+  };
 
-// UI event struct
-// Yes, looks similar to stmlib::Event but hey, they're UI events.
-struct Event {
-  EventType type;
-  uint16_t control;
-  int16_t value;
-  uint16_t mask;
+  // UI event struct
+  // Yes, looks similar to stmlib::Event but hey, they're UI events.
+  struct Event {
+    uint16_t control;
+    int16_t value;
+    uint16_t mask;
+    EventType type;
 
-  Event() { }
-  Event(EventType t, uint16_t c, int16_t v, uint16_t m)
-  : type(t), control(c), value(v), mask(m) { }
-};
+    Event() { }
+    Event(UI::EventType t, uint16_t c, int16_t v, uint16_t m)
+    : type(t), control(c), value(v), mask(m) { }
+  };
 
 }; // namespace UI
 
