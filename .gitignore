@@ -25,3 +25,5 @@ shelved/
 
 # text editors
 *.swp
+
+software/.vscode/settings.json
