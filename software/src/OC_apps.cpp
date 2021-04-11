@@ -30,12 +30,14 @@
 
 #include "APP_HEMISPHERE.h"
 #include "APP_MIDI.h"
-#include "APP_THEDARKESTTIMELINE.h"
-#include "APP_ENIGMA.h"
-#include "APP_NeuralNetwork.h"
+#include "APP_QQ.h"
+#include "APP_BYTEBEATGEN.h"
+// #include "APP_THEDARKESTTIMELINE.h"
+// #include "APP_ENIGMA.h"
+// #include "APP_NeuralNetwork.h"
 #include "APP_SCALEEDITOR.h"
 #include "APP_WAVEFORMEDITOR.h"
-#include "APP_PONGGAME.h"
+// #include "APP_PONGGAME.h"
 #include "APP_Backup.h"
 #include "APP_SETTINGS.h"
 
@@ -52,12 +54,14 @@
 OC::App available_apps[] = {
   DECLARE_APP('H','S', "Hemisphere", HEMISPHERE),
   DECLARE_APP('M','I', "Captain MIDI", MIDI),
-  DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
-  DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
-  DECLARE_APP('N','N', "Neural Net", NeuralNetwork),
+  DECLARE_APP('B','B', "Viznut!", BYTEBEATGEN),
+  DECLARE_APP('Q','Q', "Quantermain", QQ),
+  // DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
+  // DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
+  // DECLARE_APP('N','N', "Neural Net", NeuralNetwork),
   DECLARE_APP('S','C', "Scale Editor", SCALEEDITOR),
   DECLARE_APP('W','A', "Waveform Editor", WaveformEditor),
-  DECLARE_APP('P','O', "Pong", PONGGAME),
+  // DECLARE_APP('P','O', "Pong", PONGGAME),
   DECLARE_APP('B','R', "Backup / Restore", Backup),
   DECLARE_APP('S','E', "Setup / About", Settings),
 };
