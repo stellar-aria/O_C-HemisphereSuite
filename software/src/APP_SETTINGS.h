@@ -77,9 +77,10 @@ public:
     void View() {
         gfxHeader("Setup / About");
         gfxPrint(0, 15, "Hemisphere Suite");
-        gfxPrint(0, 25, OC_VERSION);
+        gfxPrint(98, 15, OC_VERSION);
+        gfxPrint(0, 25, "beigemaze.com/hs");
         gfxPrint(0, 35, "A.DEGANI custom 2021");
-        gfxPrint(0, 45, "beigemaze.com/hs");
+        gfxPrint(0, 45, "adegani.com");
         gfxPrint(0, 55, "[CALIBRATE]   [RESET]");
 
 #ifdef BUCHLA_4U
