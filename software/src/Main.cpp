@@ -22,7 +22,6 @@
 // SOFTWARE.
 
 // Main startup/loop for O&C firmware
-
 #include <EEPROM.h>
 
 #include "OC_apps.h"
@@ -111,7 +110,7 @@ void setup() {
 
   OC::DEBUG::Init();
   OC::DigitalInputs::Init();
-  delay(400); <
+  delay(400);
   OC::ADC::Init(&OC::calibration_data.adc); // Yes, it's using the calibration_data before it's loaded...
   OC::DAC::Init(&OC::calibration_data.dac);
 
