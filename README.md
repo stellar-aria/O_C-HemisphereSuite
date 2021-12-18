@@ -1,8 +1,11 @@
 Hemisphere Suite: Alternate Alternate Firmware for Ornament and Crime
 ===
 
-![My image](https://farm1.staticflickr.com/676/20090774694_b56e557693_b.jpg)
+This is a fork of the Hemisphere Suite with some custom changes:
 
+1. It compiles with PlatformIO and VS-Code
+2. Add some original apps from OC firmware like Quantermain and Viznut Tracker and eliminates Enigma, Darkest timeline, Neural Net and Pong
+3. Some HEM apps were also removed (GatedVCA, BootsNCat, Binary, Trending, Palimpsest, TrigSeq16, EnvFollow, Squanch, MixerBal)
 
 ### firmware:
 
@@ -17,4 +20,3 @@ eurorack / teensy 3.2 DAC8565 quad 16bit CV module w/ OLED display
 14HP, depth ~ 25mm
 
 build guide: http://ornament-and-cri.me/
-
