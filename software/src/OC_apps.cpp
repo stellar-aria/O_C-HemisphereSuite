@@ -32,7 +32,8 @@
 #include "APP_MIDI.h"
 #include "APP_QQ.h"
 #include "APP_BYTEBEATGEN.h"
-// #include "APP_THEDARKESTTIMELINE.h"
+#include "APP_THEDARKESTTIMELINE.h"
+#include "APP_SEQ.h"
 // #include "APP_ENIGMA.h"
 // #include "APP_NeuralNetwork.h"
 #include "APP_SCALEEDITOR.h"
@@ -56,7 +57,8 @@ OC::App available_apps[] = {
   DECLARE_APP('M','I', "Captain MIDI", MIDI),
   DECLARE_APP('B','B', "Viznut!", BYTEBEATGEN),
   DECLARE_APP('Q','Q', "Quantermain", QQ),
-  // DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
+  DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
+  DECLARE_APP('S','Q', "Sequins", SEQ),
   // DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
   // DECLARE_APP('N','N', "Neural Net", NeuralNetwork),
   DECLARE_APP('S','C', "Scale Editor", SCALEEDITOR),
