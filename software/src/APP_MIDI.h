@@ -657,13 +657,31 @@ private:
 
             // A MIDI message has been received; go through each channel to see if it
             // needs to be routed to any of the CV outputs
+            //////////////////// ALE: for note replace when monophonic
+            bool isMonophonic = false;
+            int noteChannelCount = 0;
+            for (int ch = 0; ch < 4; ch++)
+            {
+                int in_fn = get_in_assign(ch);
+                int in_ch = get_in_channel(ch);
+                if (message == MIDI_MSG_NOTE_ON && in_ch == channel && in_fn == MIDI_IN_NOTE )
+                    {
+                        noteChannelCount++;
+                    }
+            }
+            if (noteChannelCount == 1)
+            {
+                isMonophonic = true;
+            }
+            ///////////////////////////////
             for (int ch = 0; ch < 4; ch++)
             {
                 int in_fn = get_in_assign(ch);
                 int in_ch = get_in_channel(ch);
                 bool indicator = 0;
                 if (message == MIDI_MSG_NOTE_ON && in_ch == channel) {
-                    if (note_in[ch] == -1) { // If this channel isn't already occupied with another note, handle Note On
+                    if (note_in[ch] == -1 || isMonophonic) { // If this channel isn't already occupied with another note, handle Note On
+                    // if (1) {
                         if (in_fn == MIDI_IN_NOTE && !note_captured) {
                             // Send quantized pitch CV. Isolate transposition to quantizer so that it notes off aren't
                             // misinterpreted if transposition is changed during the note.
