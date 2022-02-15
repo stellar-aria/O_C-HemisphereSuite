@@ -633,7 +633,7 @@ public:
               int_seq_index += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_int_seq_index_cv_source() - 1)) + 127) >> 8;
             }
             if (int_seq_index < 0) int_seq_index = 0;
-            if (int_seq_index > 8) int_seq_index = 8;
+            if (int_seq_index > 11) int_seq_index = 11;
             int_seq_.set_int_seq(int_seq_index);
             int16_t int_seq_modulus_ = get_int_seq_modulus();
             if (get_int_seq_modulus_cv_source()) {
@@ -1156,7 +1156,7 @@ SETTINGS_DECLARE(QuantizerChannel, CHANNEL_SETTING_LAST) {
   { 0, 0, 4, "Bb P0  CV src", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
   { 0, 0, 4, "Bb P1  CV src", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
   { 0, 0, 4, "Bb P2  CV src", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 9, "IntSeq", OC::Strings::integer_sequence_names, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 11, "IntSeq", OC::Strings::integer_sequence_names, settings::STORAGE_TYPE_U4 },
   { 24, 2, 121, "IntSeq modul.", NULL, settings::STORAGE_TYPE_U8 },
   { 12, 1, 120, "IntSeq range", NULL, settings::STORAGE_TYPE_U8 },
   { 1, 0, 1, "IntSeq dir", OC::Strings::integer_sequence_dirs, settings::STORAGE_TYPE_U4 },

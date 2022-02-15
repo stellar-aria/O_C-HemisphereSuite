@@ -66,6 +66,9 @@ class Quantizer {
   // HACK for TM
   int32_t Lookup(int32_t index) const;
 
+  // HACK for TB-3PO
+  uint16_t GetLatestNoteNumber() { return note_number_;}
+
   // Force Process to process again
   void Requantize();
 

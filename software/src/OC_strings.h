@@ -37,9 +37,9 @@ namespace OC {
     extern const char* const falling_gate_behaviours[];
     // Not strings but are constant integer sequences
     extern const uint8_t pi_digits[kIntSeqLen];
-    // extern const uint8_t phi_digits[kIntSeqLen];
+    extern const uint8_t phi_digits[kIntSeqLen];
     // extern const uint8_t tau_digits[kIntSeqLen];
-    // extern const uint8_t eul_digits[kIntSeqLen];
+    extern const uint8_t eul_digits[kIntSeqLen];
     // extern const uint8_t rt2_digits[kIntSeqLen];
     extern const uint8_t van_eck[kIntSeqLen];
     extern const uint8_t sum_of_squares_of_digits_of_n[kIntSeqLen];
