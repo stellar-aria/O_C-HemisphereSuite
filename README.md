@@ -4,8 +4,9 @@ Hemisphere Suite: Alternate Alternate Firmware for Ornament and Crime
 This is a fork of the Hemisphere Suite with some custom changes:
 
 1. It compiles with PlatformIO and VS-Code
-2. Add some original apps from OC firmware like Quantermain and Viznut Tracker and eliminates Enigma, Darkest timeline, Neural Net and Pong
-3. Some HEM apps were also removed (GatedVCA, BootsNCat, Binary, Trending, Palimpsest, TrigSeq16, EnvFollow, Squanch, MixerBal)
+2. Add some original apps from OC firmware like Quantermain, Viznut Tracker, Quantermain, Sequins, Darkest Timeline and eliminates Enigma, Neural Net and Pong
+3. Adds new Hemisphere applet Stairs and TB-3PO by Logarhythm1 (https://github.com/Logarhythm1/O_C-HemisphereSuite/)
+3. Some HEM apps were also removed (CVRecV2, DrCrusher, GatedVCA, BootsNCat, Binary, LoFiPCM, LowerRenz, Trending, Palimpsest, Squanch, MixerBal)
 
 ### firmware:
 
