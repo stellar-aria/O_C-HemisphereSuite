@@ -40,7 +40,8 @@
 #include "HEM_hMIDIOut.h"
 // #include "HEM_MixerBal.h"
 // #include "HEM_Palimpsest.h"
-#include "HEM_RunglBook.h"
+#include "HEM_RndWalk.h"
+// #include "HEM_RunglBook.h"
 #include "HEM_ScaleDuet.h"
 #include "HEM_Schmitt.h"
 #include "HEM_Scope.h"
@@ -90,7 +91,7 @@
     DECLARE_APPLET( 50, 0x04, Metronome), \
     DECLARE_APPLET(150, 0x20, hMIDIIn), \
     DECLARE_APPLET( 27, 0x20, hMIDIOut), \
-    DECLARE_APPLET( 44, 0x01, RunglBook), \
+    DECLARE_APPLET( 44, 0x01, RndWalk), \
     DECLARE_APPLET( 26, 0x08, ScaleDuet), \
     DECLARE_APPLET( 40, 0x40, Schmitt), \
     DECLARE_APPLET( 23, 0x80, Scope), \
@@ -114,6 +115,7 @@
     DECLARE_APPLET( 43, 0x10, Voltage), \
 }
 /*
+    DECLARE_APPLET( 44, 0x01, RunglBook), \
     DECLARE_APPLET( 24, 0x02, CVRecV2), \
     DECLARE_APPLET( 55, 0x80, DrCrusher), \
     DECLARE_APPLET( 16, 0x80, LoFiPCM), \
