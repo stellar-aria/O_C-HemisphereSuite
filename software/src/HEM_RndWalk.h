@@ -41,6 +41,7 @@ public:
         {
             // rndSeed[ch] = random(1, 255);
             currentVal[ch] = 0;
+            currentOut[ch] = 0;
             range = RANGE;
             step = STEP;
         }
@@ -48,31 +49,35 @@ public:
     }
 
     void Controller() {
+        float alpha = (float)smoothness/100;
         // Main LOOP
         // for triggers read from Clock(0|1)
         // for CV in read from In(0|1)
         // for CV out write to Out(0|1, value)
         ForEachChannel(ch)
         {
-            if (Clock(ch) || MasterClockForwarded()) {
+            if ((Clock(ch) || MasterClockForwarded()) || 
+                ((ch == 1) && (yClkSrc == 0) && (Clock(0)))) {
+                
                 int randInt = random(0, 1000);
-                int randStep = random(1, step);
-                currentVal[ch] += randStep * (((randInt > PROB_UP) && (currentVal[ch] < range)) -
-                                              ((randInt < PROB_DN) && (currentVal[ch] > -range)));
+                int randStep = random(1, step)*10;
+                int rangeScaled = (int)( ((float)range)/100.0 * HEMISPHERE_MAX_CV );
+                currentVal[ch] += randStep * (((randInt > PROB_UP) && (currentVal[ch] < rangeScaled)) -
+                                              ((randInt < PROB_DN) && (currentVal[ch] > -rangeScaled)));
 
                 // outVal[ch] = Proportion(currentVal[ch], MAX_INT_VAL, 2*range);
                 // outVal[ch] = (int)((float)currentVal[ch] * ((float)range/(float)MAX_INT_VAL));
                 // outVal[ch] = outVal[ch] - range + step;
-
-                outVal[ch] = currentVal[ch];
-
-                // Out(ch, constrain(outVal[ch], -HEMISPHERE_MAX_CV, HEMISPHERE_MAX_CV));
                 // HEMISPHERE_MAX_CV
 
 
             }
+
             // gfxCircle(x, y, r);
             // gfxLine(x1, y1, x2, y2);
+
+            currentOut[ch] = alpha*currentOut[ch] + (1-alpha)*(float)currentVal[ch];
+            Out(ch, constrain((int)currentOut[ch], -HEMISPHERE_MAX_CV, HEMISPHERE_MAX_CV));
         }
     }
 
@@ -92,6 +97,17 @@ public:
         // var cursor is the param pointer
         // var direction is the the movement of the encoder
         // use valConstrained = constrain(val, min, max) to apply value limit
+        if (cursor == 0) {
+            range = constrain(range + direction, 0, 100);
+        } else if (cursor == 1) {
+            step = constrain(step + direction, 0, 100);
+        } else if (cursor == 2) {
+            smoothness = constrain(smoothness + direction, 0, 100);
+        } else if (cursor == 3) {
+            yClkSrc = constrain(yClkSrc + direction, 0, 1);
+        } else if (cursor == 4) {
+            yClkDiv = constrain(yClkDiv + direction, 1, 32);
+        }
 
     }
 
@@ -134,18 +150,47 @@ private:
     // Runtime parameters
     // unsigned int rndSeed[2];
     int currentVal[2];
-    int outVal[2];
+    float currentOut[2];
     int cursor; // 0=Y clk src, 1=Y clk div, 2=Range,  3=step, 4=Smoothnes
     
     void DrawDisplay() {
+
+        if (cursor < 2) {
+            gfxPrint(1, 15, "Range");
+            gfxPrint(41, 15, range);
+            if (cursor == 0) gfxCursor(41, 22, 18);
+
+            gfxPrint(1, 25, "Step");
+            gfxPrint(41, 25, step);
+            if (cursor == 1) gfxCursor(41, 32, 18);
+        } else if (cursor < 4) {
+            gfxPrint(1, 15, "Smooth");
+            gfxPrint(41, 15, smoothness);
+            if (cursor == 2) gfxCursor(41, 22, 18);
+
+            gfxPrint(1, 25, "Y TR");
+            if (yClkSrc == 0) {
+                gfxPrint(41, 25, "TR1");
+            } else {
+                gfxPrint(41, 25, "TR2");
+            }
+            if (cursor == 3) gfxCursor(41, 32, 18);
+        } else {
+            gfxPrint(1, 15, "Y DIV");
+            gfxPrint(41, 15, yClkDiv);
+            if (cursor == 4) gfxCursor(41, 22, 18);
+        }
+
         gfxPrint(1, 38, "x");
         gfxPrint(1, 50, "y");
+
+        gfxPrint(7, 38, currentVal[0]);
+        gfxPrint(7, 50, currentVal[1]);
+
         // ForEachChannel(ch)
         // {
-            gfxPrint(7, 38, currentVal[0]);
-            gfxPrint(7, 50, currentVal[1]);
-            // gfxCircle(x, y, r);
-            // gfxLine(x1, y1, x2, y2);
+        //     int w = ProportionCV(ViewOut(ch)/HEMISPHERE_MAX_CV*range, 62);
+        //     gfxInvert(1, 38 + (12 * ch), w, 10);
         // }
     }
 };
