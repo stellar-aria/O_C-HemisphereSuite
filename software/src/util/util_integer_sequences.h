@@ -129,19 +129,19 @@ public:
       	x_ = 12 + bit_sum_ + pending_bit_ ; // add final bit
       	// x_ = bit_sum_ ;
       	break;
+      // case 7:
+      // 	x_ = OC::Strings::digsum_of_n[k_];
+      // 	break;
       case 7:
-      	x_ = OC::Strings::digsum_of_n[k_];
-      	break;
-      case 8:
        	x_ = OC::Strings::digsum_of_n_base4[k_];
        	break;
-      case 9:
+      case 8:
        	x_ = OC::Strings::digsum_of_n_base5[k_];
        	break;    
-      case 10:
+      case 9:
       	x_ = OC::Strings::count_down_by_2[k_];
       	break;      	
-      case 11:
+      case 10:
       	x_ = OC::Strings::interspersion_of_A163253[k_];
       	break;      	
       default:
