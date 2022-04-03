@@ -25,9 +25,13 @@
 #define PROB_UP 500
 #define PROB_DN 500
 
-#define RANGE 200
-#define STEP 20
-#define MAX_INT_VAL 65532
+#define MAX_RANGE 255
+#define MAX_STEP 255
+#define MAX_SMOOTH 255
+
+#define HEM_1V 1536 //ADC value for 1 Volt
+#define HEM_1ST 128 //ADC value for 1 semitone
+#define HEM_HST 64 //ADC value for half semitone
 
 class RndWalk : public HemisphereApplet {
 public:
@@ -42,42 +46,51 @@ public:
             // rndSeed[ch] = random(1, 255);
             currentVal[ch] = 0;
             currentOut[ch] = 0;
-            range = RANGE;
-            step = STEP;
+            UpdateAlpha();
         }
         cursor = 0;
     }
 
     void Controller() {
-        float alpha = (float)smoothness/100;
         // Main LOOP
         // for triggers read from Clock(0|1)
         // for CV in read from In(0|1)
         // for CV out write to Out(0|1, value)
-        ForEachChannel(ch)
-        {
-            if ((Clock(ch) || MasterClockForwarded()) || 
-                ((ch == 1) && (yClkSrc == 0) && (Clock(0)))) {
-                
+        // INPUT
+        int maxVal = HEMISPHERE_MAX_CV;
+        switch (cvRange) {
+            case 0:
+                maxVal = HEM_HST;
+                break;
+            case 1:
+                maxVal = HEM_1ST;
+                break;
+            case 2:
+                maxVal = HEM_1V;
+                break;
+            default:
+                break;
+        }
+        int rangeCv = Proportion(In(0), HEMISPHERE_MAX_CV, MAX_RANGE);
+        int stepCv = Proportion(In(1), HEMISPHERE_MAX_CV, MAX_STEP);
+        
+        ForEachChannel(ch) {
+            // OUTPUT
+            if ( ((ch == 0) && Clock(0)) ||
+            ((ch == 1) && Clock(yClkSrc)) )
+            {
+                if ((ch == 1) && ((clkMod++ % yClkDiv) > 0) ){
+                    continue;
+                }
                 int randInt = random(0, 1000);
-                int randStep = random(1, step)*10;
-                int rangeScaled = (int)( ((float)range)/100.0 * HEMISPHERE_MAX_CV );
+                int randStep = (float)(random(1, constrain(step+stepCv, 0, MAX_STEP)))/MAX_STEP*maxVal/2;
+                int rangeScaled = (int)( ((float)constrain(range + rangeCv, 0, MAX_RANGE))/MAX_RANGE * maxVal);
                 currentVal[ch] += randStep * (((randInt > PROB_UP) && (currentVal[ch] < rangeScaled)) -
                                               ((randInt < PROB_DN) && (currentVal[ch] > -rangeScaled)));
-
-                // outVal[ch] = Proportion(currentVal[ch], MAX_INT_VAL, 2*range);
-                // outVal[ch] = (int)((float)currentVal[ch] * ((float)range/(float)MAX_INT_VAL));
-                // outVal[ch] = outVal[ch] - range + step;
-                // HEMISPHERE_MAX_CV
-
-
             }
-
-            // gfxCircle(x, y, r);
-            // gfxLine(x1, y1, x2, y2);
-
             currentOut[ch] = alpha*currentOut[ch] + (1-alpha)*(float)currentVal[ch];
-            Out(ch, constrain((int)currentOut[ch], -HEMISPHERE_MAX_CV, HEMISPHERE_MAX_CV));
+
+            Out(ch, constrain((int)currentOut[ch], -HEMISPHERE_3V_CV, HEMISPHERE_MAX_CV));
         }
     }
 
@@ -88,7 +101,7 @@ public:
 
     void OnButtonPress() {
         cursor++;
-        if (cursor > 4) cursor = 0;
+        if (cursor > 5) cursor = 0;
         ResetCursor();
     }
 
@@ -98,15 +111,35 @@ public:
         // var direction is the the movement of the encoder
         // use valConstrained = constrain(val, min, max) to apply value limit
         if (cursor == 0) {
-            range = constrain(range + direction, 0, 100);
+            range = constrain(range + direction, 0, MAX_RANGE);
         } else if (cursor == 1) {
-            step = constrain(step + direction, 0, 100);
+            step = constrain(step + direction, 1, MAX_STEP);
         } else if (cursor == 2) {
-            smoothness = constrain(smoothness + direction, 0, 100);
+            smoothness = constrain(smoothness + direction, 0, MAX_SMOOTH);
+            UpdateAlpha();
         } else if (cursor == 3) {
             yClkSrc = constrain(yClkSrc + direction, 0, 1);
         } else if (cursor == 4) {
             yClkDiv = constrain(yClkDiv + direction, 1, 32);
+        } else if (cursor == 5) {
+            cvRange = constrain(cvRange + direction, 0, 3);
+            int maxVal = HEMISPHERE_MAX_CV;
+            switch (cvRange) {
+                case 0:
+                    maxVal = HEM_HST;
+                    break;
+                case 1:
+                    maxVal = HEM_1ST;
+                    break;
+                case 2:
+                    maxVal = HEM_1V;
+                    break;
+                default:
+                    break;
+            }
+            ForEachChannel(ch) {
+                currentVal[ch] = currentVal[ch]%maxVal;
+            }
         }
 
     }
@@ -115,18 +148,21 @@ public:
         uint32_t data = 0;
         Pack(data, PackLocation {0,1}, yClkSrc);
         Pack(data, PackLocation {1,4}, yClkDiv);
-        Pack(data, PackLocation {5,10}, range);
-        Pack(data, PackLocation {15,10}, step);
-        Pack(data, PackLocation {25,7}, smoothness);
+        Pack(data, PackLocation {5,8}, range);
+        Pack(data, PackLocation {13,8}, step);
+        Pack(data, PackLocation {21,8}, smoothness);
+        Pack(data, PackLocation {29,2}, cvRange);
         return data;
     }
 
     void OnDataReceive(uint32_t data) {
         yClkSrc = Unpack(data, PackLocation {0,1});
         yClkDiv = Unpack(data, PackLocation {1,4});
-        range = Unpack(data, PackLocation {5,10});
-        step = Unpack(data, PackLocation {15,10});
-        smoothness = Unpack(data, PackLocation {25,7});
+        range = Unpack(data, PackLocation {5,8});
+        step = Unpack(data, PackLocation {13,8});
+        smoothness = Unpack(data, PackLocation {21,8});
+        cvRange = Unpack(data, PackLocation {29,2});
+        UpdateAlpha();
     }
 
 protected:
@@ -141,11 +177,14 @@ protected:
     
 private:
     // Parameters (saved in EEPROM)
-    bool yClkSrc; // 0=TR1, 1=TR2
-    uint8_t yClkDiv; // 4 bits [1 .. 32]
-    uint16_t range; // 10 bits
-    uint16_t step; // 10 bits
-    uint8_t smoothness; // 7 bits
+    bool yClkSrc = 0; // 0=TR1, 1=TR2
+    uint8_t yClkDiv = 1; // 4 bits [1 .. 32]
+    int range = 20; // 8 bits
+    int step = 20; // 8 bits
+    uint8_t smoothness = 20; // 8 bits
+    uint8_t cvRange = 3; // 2 bit
+    uint8_t clkMod = 0; //not stored, used for clock division
+    float alpha; // not stored, used for smoothing
 
     // Runtime parameters
     // unsigned int rndSeed[2];
@@ -155,43 +194,126 @@ private:
     
     void DrawDisplay() {
 
-        if (cursor < 2) {
+        if (cursor < 3) {
             gfxPrint(1, 15, "Range");
-            gfxPrint(41, 15, range);
-            if (cursor == 0) gfxCursor(41, 22, 18);
+            gfxPrint(43, 15, range);
+            if (cursor == 0) gfxCursor(43, 22, 18);
 
             gfxPrint(1, 25, "Step");
-            gfxPrint(41, 25, step);
-            if (cursor == 1) gfxCursor(41, 32, 18);
-        } else if (cursor < 4) {
-            gfxPrint(1, 15, "Smooth");
-            gfxPrint(41, 15, smoothness);
-            if (cursor == 2) gfxCursor(41, 22, 18);
-
-            gfxPrint(1, 25, "Y TR");
-            if (yClkSrc == 0) {
-                gfxPrint(41, 25, "TR1");
-            } else {
-                gfxPrint(41, 25, "TR2");
-            }
-            if (cursor == 3) gfxCursor(41, 32, 18);
+            gfxPrint(43, 25, step);
+            if (cursor == 1) gfxCursor(43, 32, 18);
+            gfxPrint(1, 35, "Smooth");
+            gfxPrint(43, 35, smoothness);
+            if (cursor == 2) gfxCursor(43, 42, 18);
         } else {
-            gfxPrint(1, 15, "Y DIV");
-            gfxPrint(41, 15, yClkDiv);
-            if (cursor == 4) gfxCursor(41, 22, 18);
+
+            gfxPrint(1, 15, "Y TRIG");
+            if (yClkSrc == 0) {
+                gfxPrint(43, 15, "TR1");
+            } else {
+                gfxPrint(43, 15, "TR2");
+            }
+            if (cursor == 3) gfxCursor(43, 22, 18);
+    
+            gfxPrint(1, 25, "Y CLK /");
+            gfxPrint(43, 25, yClkDiv);
+            if (cursor == 4) gfxCursor(43, 32, 18);
+
+            gfxPrint(1, 35, "CV Rng");
+            if (cvRange == 0) {
+                gfxPrint(43, 35, ".5st");
+            } else if (cvRange == 1) {
+                gfxPrint(43, 35, "1 st");
+            } else if (cvRange == 2) {
+                gfxPrint(43, 35, "1oct");
+            } else if (cvRange == 3) {
+                gfxPrint(43, 35, "FULL");
+            }
+            if (cursor == 5) gfxCursor(43, 42, 24);
         }
 
-        gfxPrint(1, 38, "x");
-        gfxPrint(1, 50, "y");
+        // gfxPrint(1, 38, "x");
+        // gfxPrint(1, 50, "y");
 
-        gfxPrint(7, 38, currentVal[0]);
-        gfxPrint(7, 50, currentVal[1]);
+        // gfxPrint(7, 38, currentVal[0]);
+        // gfxPrint(7, 50, currentVal[1]);
 
-        // ForEachChannel(ch)
-        // {
-        //     int w = ProportionCV(ViewOut(ch)/HEMISPHERE_MAX_CV*range, 62);
-        //     gfxInvert(1, 38 + (12 * ch), w, 10);
+        int maxVal = HEMISPHERE_MAX_CV;
+        switch (cvRange) {
+            case 0:
+                maxVal = HEM_HST;
+                break;
+            case 1:
+                maxVal = HEM_1ST;
+                break;
+            case 2:
+                maxVal = HEM_1V;
+                break;
+            default:
+                break;
+        }
+        // gfxPrint(1, 47, currentVal[0]);
+        // gfxPrint(1, 55, currentVal[1]);
+        gfxPrint(1, 47, "x");
+        gfxPrint(55, 55, "y");
+        ForEachChannel(ch) {
+            int w = 0;
+            if (range > 0) {
+                w = (currentOut[ch]/((float)range/MAX_RANGE*maxVal))*31;
+                if (w > 31) {
+                    w = 31;
+                }
+                if (w < -31) {
+                    w = -31;
+                }
+            }
+            if (w >= 0) {
+                gfxInvert(31, 48 + (8 * ch), w, 7);
+            } else {
+                gfxInvert(31+w, 48 + (8 * ch), -w, 7);
+            }
+        }
+        
+    }
+
+    void UpdateAlpha() {
+
+        // switch (smoothness) {
+        //     case 90:
+        //         alpha = 0.95;
+        //         break;
+        //     case 91:
+        //         alpha = 0.99;
+        //         break;
+        //     case 92:
+        //         alpha = 0.999;
+        //         break;
+        //     case 93:
+        //         alpha = 0.9999;
+        //         break;
+        //     case 94:
+        //         alpha = 0.99999;
+        //         break;
+        //     case 95:
+        //         alpha = 0.999999;
+        //         break;
+        //     case 96:
+        //         alpha = 0.9999999;
+        //         break;
+        //     case 97:
+        //         alpha = 0.99999999;
+        //         break;
+        //     case 98:
+        //         alpha = 0.999999999;
+        //         break;
+        //     case 99:
+        //         alpha = 0.9999999999;
+        //         break;
+        //     default:
+        //         alpha = (float)smoothness/100;
         // }
+        alpha = log(1+smoothness)/log(1+MAX_SMOOTH);
+        // alpha = (float)smoothness/(float)MAX_SMOOTH;
     }
 };
 
