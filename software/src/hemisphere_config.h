@@ -53,21 +53,24 @@
 #include "HEM_Slew.h"
 // #include "HEM_Squanch.h"
 #include "HEM_Switch.h"
-#include "HEM_TLNeuron.h"
+// #include "HEM_TLNeuron.h"
 // #include "HEM_Trending.h"
 #include "HEM_TrigSeq.h"
 #include "HEM_TrigSeq16.h"
 #include "HEM_Tuner.h"
-#include "HEM_VectorEG.h"
-#include "HEM_VectorLFO.h"
-#include "HEM_VectorMod.h"
-#include "HEM_VectorMorph.h"
+// #include "HEM_VectorEG.h"
+// #include "HEM_VectorLFO.h"
+// #include "HEM_VectorMod.h"
+// #include "HEM_VectorMorph.h"
 #include "HEM_Voltage.h"
 
 #include "HEM_Stairs.h"
 #include "HEM_TB3PO.h"
 
-#define HEMISPHERE_AVAILABLE_APPLETS 42 //51
+#include "HEM_DrumMap.h"
+#include "HEM_Shredder.h"
+
+#define HEMISPHERE_AVAILABLE_APPLETS 39 //51
 
 //////////////////  id  cat   class name
 #define HEMISPHERE_APPLETS { \
@@ -104,17 +107,19 @@
     DECLARE_APPLET(  3, 0x10, Switch), \
     DECLARE_APPLET( 57, 0x01, Stairs), \
     DECLARE_APPLET( 58, 0x01, TB_3PO), \
-    DECLARE_APPLET( 13, 0x40, TLNeuron), \
     DECLARE_APPLET( 11, 0x06, TrigSeq), \
     DECLARE_APPLET( 25, 0x06, TrigSeq16), \
+    DECLARE_APPLET( 52, 0x01, Shredder), \
+    DECLARE_APPLET( 49, 0x01, DrumMap), \
     DECLARE_APPLET( 39, 0x80, Tuner), \
-    DECLARE_APPLET( 52, 0x01, VectorEG), \
-    DECLARE_APPLET( 49, 0x01, VectorLFO), \
-    DECLARE_APPLET( 53, 0x01, VectorMod), \
-    DECLARE_APPLET( 54, 0x01, VectorMorph), \
     DECLARE_APPLET( 43, 0x10, Voltage), \
 }
 /*
+    // DECLARE_APPLET( 52, 0x01, VectorEG), \
+    // DECLARE_APPLET( 49, 0x01, VectorLFO), \
+    // DECLARE_APPLET( 53, 0x01, VectorMod), \
+    // DECLARE_APPLET( 54, 0x01, VectorMorph), \
+    // DECLARE_APPLET( 13, 0x40, TLNeuron), \
     DECLARE_APPLET( 44, 0x01, RunglBook), \
     DECLARE_APPLET( 24, 0x02, CVRecV2), \
     DECLARE_APPLET( 55, 0x80, DrCrusher), \
