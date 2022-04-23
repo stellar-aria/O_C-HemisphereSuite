@@ -277,41 +277,7 @@ private:
     }
 
     void UpdateAlpha() {
-
-        // switch (smoothness) {
-        //     case 90:
-        //         alpha = 0.95;
-        //         break;
-        //     case 91:
-        //         alpha = 0.99;
-        //         break;
-        //     case 92:
-        //         alpha = 0.999;
-        //         break;
-        //     case 93:
-        //         alpha = 0.9999;
-        //         break;
-        //     case 94:
-        //         alpha = 0.99999;
-        //         break;
-        //     case 95:
-        //         alpha = 0.999999;
-        //         break;
-        //     case 96:
-        //         alpha = 0.9999999;
-        //         break;
-        //     case 97:
-        //         alpha = 0.99999999;
-        //         break;
-        //     case 98:
-        //         alpha = 0.999999999;
-        //         break;
-        //     case 99:
-        //         alpha = 0.9999999999;
-        //         break;
-        //     default:
-        //         alpha = (float)smoothness/100;
-        // }
+        // Use log mapping for better feeling
         alpha = log(1+smoothness)/log(1+MAX_SMOOTH);
         // alpha = (float)smoothness/(float)MAX_SMOOTH;
     }
