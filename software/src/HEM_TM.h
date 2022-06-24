@@ -41,7 +41,7 @@ class TM : public HemisphereApplet {
 public:
 
     const char* applet_name() {
-        return "ShiftReg";
+        return "Turing";
     }
 
     void Start() {
@@ -58,14 +58,14 @@ public:
 
         // CV 1 control over length
         int lengthCv = DetentedIn(0);
-        if (lengthCv < 0) length = TM_MIN_LENGTH;        
+        if (lengthCv < 0) length = TM_MIN_LENGTH;
         if (lengthCv > 0) {
             length = constrain(ProportionCV(lengthCv, TM_MAX_LENGTH + 1), TM_MIN_LENGTH, TM_MAX_LENGTH);
         }
-      
+
         // CV 2 bi-polar modulation of probability
         int pCv = Proportion(DetentedIn(1), HEMISPHERE_MAX_CV, 100);
-        
+
         if (Clock(0)) {
             // If the cursor is not on the p value, and Digital 2 is not gated, the sequence remains the same
             int prob = (cursor == 1 || Gate(1)) ? p + pCv : 0;
@@ -80,7 +80,7 @@ public:
             // Shift left, then potentially add the bit from the other side
             reg = (reg << 1) + last;
         }
-        
+
         // Send 5-bit quantized CV
         int note = reg & 0x1f;
         Out(0, quantizer.Lookup(note + 64));
@@ -110,7 +110,7 @@ public:
             quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
         }
     }
-        
+
     uint32_t OnDataRequest() {
         uint32_t data = 0;
         Pack(data, PackLocation {0,16}, reg);
@@ -137,7 +137,7 @@ protected:
         help[HEMISPHERE_HELP_ENCODER]  = "Length/Prob/Scale";
         //                               "------------------" <-- Size Guide
     }
-    
+
 private:
     int length; // Sequence length
     int cursor;  // 0 = length, 1 = p, 2 = scale
