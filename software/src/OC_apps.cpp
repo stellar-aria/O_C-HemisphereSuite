@@ -30,14 +30,15 @@
 
 #include "APP_HEMISPHERE.h"
 #include "APP_MIDI.h"
+#include "APP_CHORDS.h"
 #include "APP_QQ.h"
-#include "APP_BYTEBEATGEN.h"
-#include "APP_THEDARKESTTIMELINE.h"
+// #include "APP_BYTEBEATGEN.h"
+// #include "APP_THEDARKESTTIMELINE.h"
 #include "APP_SEQ.h"
-// #include "APP_ENIGMA.h"
+#include "APP_ENIGMA.h"
 // #include "APP_NeuralNetwork.h"
 #include "APP_SCALEEDITOR.h"
-#include "APP_WAVEFORMEDITOR.h"
+// #include "APP_WAVEFORMEDITOR.h"
 // #include "APP_PONGGAME.h"
 #include "APP_Backup.h"
 #include "APP_SETTINGS.h"
@@ -55,14 +56,15 @@
 OC::App available_apps[] = {
   DECLARE_APP('H','S', "Hemisphere", HEMISPHERE),
   DECLARE_APP('M','I', "Captain MIDI", MIDI),
-  DECLARE_APP('B','B', "Viznut!", BYTEBEATGEN),
+  // DECLARE_APP('B','B', "Viznut!", BYTEBEATGEN),
+  DECLARE_APP('A','C', "Chords", CHORDS),
   DECLARE_APP('Q','Q', "Quantermain", QQ),
-  DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
+  // DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
   DECLARE_APP('S','Q', "Sequins", SEQ),
-  // DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
+  DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
   // DECLARE_APP('N','N', "Neural Net", NeuralNetwork),
   DECLARE_APP('S','C', "Scale Editor", SCALEEDITOR),
-  DECLARE_APP('W','A', "Waveform Editor", WaveformEditor),
+  // DECLARE_APP('W','A', "Waveform Editor", WaveformEditor),
   // DECLARE_APP('P','O', "Pong", PONGGAME),
   DECLARE_APP('B','R', "Backup / Restore", Backup),
   DECLARE_APP('S','E', "Setup / About", Settings),
@@ -82,11 +84,11 @@ struct GlobalSettings {
   bool reserved1;
   uint32_t DAC_scaling;
   uint16_t current_app_id;
-  
+
   OC::Scale user_scales[OC::Scales::SCALE_USER_LAST];
   OC::Pattern user_patterns[OC::Patterns::PATTERN_USER_ALL];
   HS::TuringMachine user_turing_machines[HS::TURING_MACHINE_COUNT];
-  HS::VOSegment user_waveforms[HS::VO_SEGMENT_COUNT];
+  // HS::VOSegment user_waveforms[HS::VO_SEGMENT_COUNT];
   OC::Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
 };
 
@@ -126,11 +128,11 @@ void save_global_settings() {
   memcpy(global_settings.user_scales, OC::user_scales, sizeof(OC::user_scales));
   memcpy(global_settings.user_patterns, OC::user_patterns, sizeof(OC::user_patterns));
   memcpy(global_settings.user_turing_machines, HS::user_turing_machines, sizeof(HS::user_turing_machines));
-  memcpy(global_settings.user_waveforms, HS::user_waveforms, sizeof(HS::user_waveforms));
+  // memcpy(global_settings.user_waveforms, HS::user_waveforms, sizeof(HS::user_waveforms));
   memcpy(global_settings.auto_calibration_data, OC::auto_calibration_data, sizeof(OC::auto_calibration_data));
   // scaling settings:
   global_settings.DAC_scaling = OC::DAC::store_scaling();
-  
+
   global_settings_storage.Save(global_settings);
   SERIAL_PRINTLN("Saved global settings: page_index %d", global_settings_storage.page_index());
 }
@@ -249,7 +251,7 @@ void Init(bool reset_settings) {
   global_settings.encoders_enable_acceleration = OC_ENCODERS_ENABLE_ACCELERATION_DEFAULT;
   global_settings.reserved0 = false;
   global_settings.reserved1 = false;
-  global_settings.DAC_scaling = VOLTAGE_SCALING_1V_PER_OCT; 
+  global_settings.DAC_scaling = VOLTAGE_SCALING_1V_PER_OCT;
 
   if (reset_settings) {
     if (ui.ConfirmReset()) {
@@ -282,7 +284,7 @@ void Init(bool reset_settings) {
       memcpy(user_scales, global_settings.user_scales, sizeof(user_scales));
       memcpy(user_patterns, global_settings.user_patterns, sizeof(user_patterns));
       memcpy(HS::user_turing_machines, global_settings.user_turing_machines, sizeof(HS::user_turing_machines));
-      memcpy(HS::user_waveforms, global_settings.user_waveforms, sizeof(HS::user_waveforms));
+      // memcpy(HS::user_waveforms, global_settings.user_waveforms, sizeof(HS::user_waveforms));
       memcpy(auto_calibration_data, global_settings.auto_calibration_data, sizeof(auto_calibration_data));
       DAC::choose_calibration_data(); // either use default data, or auto_calibration_data
       DAC::restore_scaling(global_settings.DAC_scaling); // recover output scaling settings

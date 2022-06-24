@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-// 
+//
 // Menu drawing helpers
 
 #ifndef OC_MENUS_H
@@ -166,7 +166,7 @@ inline void DrawEditIcon(weegfx::coord_t x, weegfx::coord_t y, int value, const 
 
 /* Removed jej 8/26/2018
 inline void DrawChord(weegfx::coord_t x, weegfx::coord_t y, int width, int value, int mem_offset) {
-  
+
    OC::Chord *active_chord = &OC::user_chords[value + mem_offset * OC::Chords::NUM_CHORDS];
    int8_t _quality = active_chord->quality;
    int8_t _voicing = active_chord->voicing;
@@ -240,8 +240,8 @@ void DrawMask(weegfx::coord_t x, weegfx::coord_t y, uint32_t mask, size_t count,
       graphics.drawRect(x, y + 1, 2, height);
     else
       graphics.drawRect(x, y + height, 2, 1);
-      
-    if (clock_indicator == i)  
+
+    if (clock_indicator == i)
       graphics.drawRect(x, y + height + 2, 2, 2);
   }
 }
@@ -265,7 +265,7 @@ public:
   }
 
   inline static void Draw() {
-    
+
     if (OC::DAC::get_voltage_scaling(DAC_CHANNEL_A) || OC::DAC::get_voltage_scaling(DAC_CHANNEL_B) || OC::DAC::get_voltage_scaling(DAC_CHANNEL_C) || OC::DAC::get_voltage_scaling(DAC_CHANNEL_D))
       graphics.drawHLineDots(start_x, kMenuLineH, kDisplayWidth - start_x);
     else
@@ -334,7 +334,7 @@ struct SettingsListItem {
     DrawCharName(name_string);
 
     graphics.setPrintPos(endx, y + kTextDy);
-    
+
     if(attr.value_names)
       graphics.print_right(attr.value_names[value]);
     else {
@@ -342,7 +342,7 @@ struct SettingsListItem {
         graphics.print_right("echo");
       else if (value == 0xFF) // 50%
         graphics.print_right("50%");
-      else 
+      else
         graphics.pretty_print_right(value);
     }
 
@@ -351,12 +351,12 @@ struct SettingsListItem {
     if (selected)
       graphics.invertRect(x, y, kDisplayWidth - x, kMenuLineH - 1);
   }
-  
+
   inline void Draw_PW_Value(int value, const settings::value_attr &attr) const {
     DrawName(attr);
 
     graphics.setPrintPos(endx, y + kTextDy);
-    
+
     if(attr.value_names)
       graphics.print_right(attr.value_names[value]);
     else {
@@ -364,7 +364,7 @@ struct SettingsListItem {
         graphics.print_right("echo");
       else if (value == 0xFF) // 50%
         graphics.print_right("50%");
-      else 
+      else
         graphics.pretty_print_right(value);
     }
 
