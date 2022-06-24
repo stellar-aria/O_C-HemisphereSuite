@@ -30,7 +30,7 @@
 #include "HEM_DualQuant.h"
 #include "HEM_EnigmaJr.h"
 #include "HEM_EnvFollow.h"
-#include "HEM_GateDelay.h"
+// #include "HEM_GateDelay.h"
 // #include "HEM_GatedVCA.h"
 // #include "HEM_LoFiPCM.h"
 #include "HEM_Logic.h"
@@ -43,16 +43,16 @@
 #include "HEM_RndWalk.h"
 // #include "HEM_RunglBook.h"
 #include "HEM_ScaleDuet.h"
-#include "HEM_Schmitt.h"
+// #include "HEM_Schmitt.h"
 #include "HEM_Scope.h"
 #include "HEM_Sequence5.h"
 #include "HEM_ShiftGate.h"
 #include "HEM_TM.h"
 #include "HEM_Shuffle.h"
-#include "HEM_SkewedLFO.h"
+// #include "HEM_SkewedLFO.h"
 #include "HEM_Slew.h"
 // #include "HEM_Squanch.h"
-#include "HEM_Switch.h"
+// #include "HEM_Switch.h"
 // #include "HEM_TLNeuron.h"
 // #include "HEM_Trending.h"
 #include "HEM_TrigSeq.h"
@@ -67,10 +67,10 @@
 #include "HEM_Stairs.h"
 #include "HEM_TB3PO.h"
 
-#include "HEM_DrumMap.h"
+// #include "HEM_DrumMap.h"
 #include "HEM_Shredder.h"
 
-#define HEMISPHERE_AVAILABLE_APPLETS 39 //51
+#define HEMISPHERE_AVAILABLE_APPLETS 34 //51
 
 //////////////////  id  cat   class name
 #define HEMISPHERE_APPLETS { \
@@ -89,37 +89,37 @@
     DECLARE_APPLET(  9, 0x08, DualQuant), \
     DECLARE_APPLET( 45, 0x02, EnigmaJr), \
     DECLARE_APPLET( 42, 0x11, EnvFollow), \
-    DECLARE_APPLET( 29, 0x04, GateDelay), \
     DECLARE_APPLET( 10, 0x44, Logic), \
     DECLARE_APPLET( 50, 0x04, Metronome), \
     DECLARE_APPLET(150, 0x20, hMIDIIn), \
     DECLARE_APPLET( 27, 0x20, hMIDIOut), \
     DECLARE_APPLET( 44, 0x01, RndWalk), \
     DECLARE_APPLET( 26, 0x08, ScaleDuet), \
-    DECLARE_APPLET( 40, 0x40, Schmitt), \
     DECLARE_APPLET( 23, 0x80, Scope), \
     DECLARE_APPLET( 14, 0x02, Sequence5), \
     DECLARE_APPLET( 48, 0x45, ShiftGate), \
-    DECLARE_APPLET( 18, 0x02, TM), \
+    DECLARE_APPLET( 52, 0x01, Shredder), \
     DECLARE_APPLET( 36, 0x04, Shuffle), \
-    DECLARE_APPLET(  7, 0x01, SkewedLFO), \
-    DECLARE_APPLET( 19, 0x01, Slew), \
-    DECLARE_APPLET(  3, 0x10, Switch), \
     DECLARE_APPLET( 57, 0x01, Stairs), \
+    DECLARE_APPLET( 19, 0x01, Slew), \
     DECLARE_APPLET( 58, 0x01, TB_3PO), \
+    DECLARE_APPLET( 18, 0x02, TM), \
     DECLARE_APPLET( 11, 0x06, TrigSeq), \
     DECLARE_APPLET( 25, 0x06, TrigSeq16), \
-    DECLARE_APPLET( 52, 0x01, Shredder), \
-    DECLARE_APPLET( 49, 0x01, DrumMap), \
     DECLARE_APPLET( 39, 0x80, Tuner), \
     DECLARE_APPLET( 43, 0x10, Voltage), \
 }
 /*
-    // DECLARE_APPLET( 52, 0x01, VectorEG), \
-    // DECLARE_APPLET( 49, 0x01, VectorLFO), \
-    // DECLARE_APPLET( 53, 0x01, VectorMod), \
-    // DECLARE_APPLET( 54, 0x01, VectorMorph), \
-    // DECLARE_APPLET( 13, 0x40, TLNeuron), \
+    DECLARE_APPLET( 49, 0x01, DrumMap), \
+    DECLARE_APPLET( 40, 0x40, Schmitt), \
+    DECLARE_APPLET(  3, 0x10, Switch), \
+    DECLARE_APPLET( 29, 0x04, GateDelay), \
+    DECLARE_APPLET( 53, 0x01, VectorMod), \
+    DECLARE_APPLET(  7, 0x01, SkewedLFO), \
+    DECLARE_APPLET( 52, 0x01, VectorEG), \
+    DECLARE_APPLET( 49, 0x01, VectorLFO), \
+    DECLARE_APPLET( 54, 0x01, VectorMorph), \
+    DECLARE_APPLET( 13, 0x40, TLNeuron), \
     DECLARE_APPLET( 44, 0x01, RunglBook), \
     DECLARE_APPLET( 24, 0x02, CVRecV2), \
     DECLARE_APPLET( 55, 0x80, DrCrusher), \
