@@ -59,7 +59,7 @@ def parse_args(argv):
         ArgumentParser: Parsed arguments
     """
     parser = argparse.ArgumentParser(
-        description='Generate O_C and Hemisphere app list',
+        description='Generate O_C and Hemisphere app list. Requires OC_apps.cpp and hemisphere_config.h.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--src', help='Main scr path (where OC_apps.cpp and hemisphere_config.h are located)',
                         default='./software/src/')
