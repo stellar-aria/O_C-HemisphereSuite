@@ -1362,20 +1362,20 @@ inline int32_t chords_render_pitch(int32_t pitch, weegfx::coord_t x, weegfx::coo
 
 void Chords::RenderScreensaver(weegfx::coord_t start_x) const {
 
-  int _active_chord = active_chord();
-  int _num_progression = get_active_progression();
-  int _num_chords = get_display_num_chords();
-  int x = start_x + 4;
-  int y = 42;
+  // int _active_chord = active_chord();
+  // int _num_progression = get_active_progression();
+  // int _num_chords = get_display_num_chords();
+  // int x = start_x + 4;
+  // int y = 42;
 
-  // todo: CV
-  for (int j = 0; j <= _num_chords; j++) {
+  // // todo: CV
+  // for (int j = 0; j <= _num_chords; j++) {
 
-    // if (j == _active_chord)
-    //   OC::menu::DrawChord(x + (j << 4) + 1, y, 6, j, _num_progression);
-    // else
-    //   OC::menu::DrawChord(x + (j << 4) + 2, y, 4, j, _num_progression);
-  }
+  //   // if (j == _active_chord)
+  //   //   OC::menu::DrawChord(x + (j << 4) + 1, y, 6, j, _num_progression);
+  //   // else
+  //   //   OC::menu::DrawChord(x + (j << 4) + 2, y, 4, j, _num_progression);
+  // }
 }
 
 
