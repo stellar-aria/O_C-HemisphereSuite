@@ -29,9 +29,10 @@
 #include "util/EEPROMStorage.h"
 
 #include "APP_HEMISPHERE.h"
-#include "APP_MIDI.h"
+// #include "APP_MIDI.h"
 #include "APP_CHORDS.h"
 #include "APP_QQ.h"
+#include "APP_DQ.h"
 // #include "APP_BYTEBEATGEN.h"
 // #include "APP_THEDARKESTTIMELINE.h"
 #include "APP_SEQ.h"
@@ -55,10 +56,11 @@
 
 OC::App available_apps[] = {
   DECLARE_APP('H','S', "Hemisphere", HEMISPHERE),
-  DECLARE_APP('M','I', "Captain MIDI", MIDI),
+  // DECLARE_APP('M','I', "Captain MIDI", MIDI),
   // DECLARE_APP('B','B', "Viznut!", BYTEBEATGEN),
   DECLARE_APP('A','C', "Chords", CHORDS),
   DECLARE_APP('Q','Q', "Quantermain", QQ),
+  DECLARE_APP('M','!', "Meta-Q", DQ),
   // DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
   DECLARE_APP('S','Q', "Sequins", SEQ),
   DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
