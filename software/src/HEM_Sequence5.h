@@ -49,7 +49,7 @@ public:
         int play_note = note[step] + 60 + transpose;
         play_note = constrain(play_note, 0, 127);
 
-        if (Clock(0)) StartADCLag();
+        if (Clock(0) && !Clock(1)) StartADCLag();
 
         if (EndOfADCLag()) {
             Advance(step);
@@ -110,7 +110,7 @@ protected:
         help[HEMISPHERE_HELP_ENCODER]  = "Note";
         //                               "------------------" <-- Size Guide
     }
-    
+
 private:
     int cursor = 0;
     char muted = 0; // Bitfield for muted steps; ((muted >> step) & 1) means muted

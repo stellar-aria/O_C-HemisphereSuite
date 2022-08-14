@@ -121,7 +121,7 @@ public:
             if (div == -1) div = 1; // Must be moving up to hit -1 (see previous line)
         }
     }
-        
+
     uint32_t OnDataRequest() {
         uint32_t data = 0;
         Pack(data, PackLocation {0,8}, number);
@@ -141,11 +141,11 @@ protected:
         //                               "------------------" <-- Size Guide
         help[HEMISPHERE_HELP_DIGITALS] = "1=Clock 2=Burst";
         help[HEMISPHERE_HELP_CVS]      = "1=Number 2=Spacing";
-        help[HEMISPHERE_HELP_OUTS]     = "1=Burst 2=Gate";
+        help[HEMISPHERE_HELP_OUTS]     = "A=Burst B=Gate";
         help[HEMISPHERE_HELP_ENCODER]  = "Number/Spacing/Div";
         //                               "------------------" <-- Size Guide
     }
-    
+
 private:
     int cursor; // Number and Spacing
     int burst_countdown; // Number of ticks to the next expected burst

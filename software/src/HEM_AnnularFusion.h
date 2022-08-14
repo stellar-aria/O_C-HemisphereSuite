@@ -60,7 +60,7 @@ public:
         if (Clock(1)) step = 0; // Reset
 
         // Advance both rings
-        if (Clock(0)) {
+        if (Clock(0) && !Gate(1)) {
             last_clock = OC::CORE::ticks;
             ForEachChannel(ch)
             {
@@ -105,7 +105,7 @@ public:
             beats[ch] = constrain(beats[ch] + direction, 1, length[ch]);
         }
     }
-        
+
     uint32_t OnDataRequest() {
         uint32_t data = 0;
         Pack(data, PackLocation {0,4}, length[0] - 1);
@@ -131,7 +131,7 @@ protected:
         help[HEMISPHERE_HELP_ENCODER]  = "Length/Hits Ch1,2";
         //                               "------------------" <-- Size Guide
     }
-    
+
 private:
     int step;
     int cursor = 0; // Ch1: 0=Length, 1=Hits; Ch2: 2=Length 3=Hits
@@ -139,7 +139,7 @@ private:
     uint32_t pattern[2];
     int last_clock;
     uint32_t display_timeout;
-    
+
     // Settings
     int length[2];
     int beats[2];
