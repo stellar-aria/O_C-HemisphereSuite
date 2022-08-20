@@ -13,7 +13,8 @@
 
 // #include "HEM_ADSREG.h"
 #include "HEM_ADEG.h"
-#include "HEM_AnnularFusion.h"
+// #include "HEM_AnnularFusion.h"
+#include "HEM_Euclid.h"
 // #include "HEM_ASR.h"
 #include "HEM_AttenuateOffset.h"
 // #include "HEM_Binary.h"
@@ -75,7 +76,6 @@
 //////////////////  id  cat   class name
 #define HEMISPHERE_APPLETS { \
     DECLARE_APPLET( 34, 0x01, ADEG), \
-    DECLARE_APPLET( 15, 0x02, AnnularFusion), \
     DECLARE_APPLET( 56, 0x10, AttenuateOffset), \
     DECLARE_APPLET(  4, 0x14, Brancher), \
     DECLARE_APPLET( 31, 0x04, Burst), \
@@ -89,6 +89,7 @@
     DECLARE_APPLET( 29, 0x04, GateDelay), \
     DECLARE_APPLET( 45, 0x02, EnigmaJr), \
     DECLARE_APPLET( 42, 0x11, EnvFollow), \
+    DECLARE_APPLET( 15, 0x02, Euclid), \
     DECLARE_APPLET( 10, 0x44, Logic), \
     DECLARE_APPLET( 50, 0x04, Metronome), \
     DECLARE_APPLET(150, 0x20, hMIDIIn), \
@@ -108,6 +109,7 @@
 }
 
 /*
+    // DECLARE_APPLET( 15, 0x02, AnnularFusion), \
     // DECLARE_APPLET( 48, 0x45, ShiftGate), \
     // DECLARE_APPLET( 14, 0x02, Sequence5), \
     // DECLARE_APPLET(  8, 0x01, ADSREG), \
