@@ -779,6 +779,7 @@ public:
     menu_page_ = PARAMETERS;
     apply_value(SEQ_CHANNEL_SETTING_CLOCK, trigger_source);
     quantizer_.Init();
+    quantizer_.Requantize();
     input_map_.Init();
     env_.Init();
     force_update_ = true;
