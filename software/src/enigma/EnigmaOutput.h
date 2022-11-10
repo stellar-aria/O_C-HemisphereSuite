@@ -36,7 +36,7 @@ enum EnigmaOutputType {
     MODULATION,
     EXPRESSION,
     TRIGGER,
-    GATE,
+    GATE_E,
 };
 const char* enigma_type_names[] = {"Note 3-Bit", "Note 4-Bit", "Note 5-Bit", "Note 6-Bit", "Note 7-Bit", "Modulation", "Expression", "Trigger", "Gate"};
 const char* enigma_type_short_names[] = {"Note-3", "Note-4", "Note-5", "Note-6", "Note-7", "Mod", "Expr", "Trigger", "Gate"};
@@ -70,7 +70,7 @@ public:
         if (o == 0) set_type(EnigmaOutputType::NOTE5);
         if (o == 1) set_type(EnigmaOutputType::MODULATION);
         if (o == 2) set_type(EnigmaOutputType::TRIGGER);
-        if (o == 3) set_type(EnigmaOutputType::GATE);
+        if (o == 3) set_type(EnigmaOutputType::GATE_E);
     }
 
     // Getters
@@ -84,7 +84,7 @@ public:
     // Setters
     void set_output(byte output_) {out = constrain(output_, 0, 3);}
     void set_track(byte track_) {tk = constrain(track_, 0, 3);}
-    void set_type(byte type_) {ty = constrain(type_, 0, EnigmaOutputType::GATE);}
+    void set_type(byte type_) {ty = constrain(type_, 0, EnigmaOutputType::GATE_E);}
     void set_scale(byte scale_) {
         sc = constrain(scale_, 0, OC::Scales::NUM_SCALES - 1);
         quantizer.Init();
@@ -123,7 +123,7 @@ public:
         }
 
         // Gate goes high or low based on the low bit, and stays there until changed
-        if (ty == EnigmaOutputType::GATE) {
+        if (ty == EnigmaOutputType::GATE_E) {
             app->GateOut(out, clock);
         }
     }

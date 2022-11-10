@@ -263,7 +263,7 @@ enum SEQ_DIRECTIONS {
 };
 
 enum SQ_AUX_MODES {
-  GATE2,
+  GATE,
   COPY,
   ENV_AD,
   ENV_ADR,
