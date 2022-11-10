@@ -16,7 +16,7 @@
 // #include "HEM_AnnularFusion.h"
 #include "HEM_Euclid.h"
 // #include "HEM_ASR.h"
-#include "HEM_AttenuateOffset.h"
+// #include "HEM_AttenuateOffset.h"
 // #include "HEM_Binary.h"
 // #include "HEM_BootsNCat.h"
 #include "HEM_Brancher.h"
@@ -71,12 +71,11 @@
 #include "HEM_DrumMap.h"
 #include "HEM_Shredder.h"
 
-#define HEMISPHERE_AVAILABLE_APPLETS 31 //51
+#define HEMISPHERE_AVAILABLE_APPLETS 30 //51
 
 //////////////////  id  cat   class name
 #define HEMISPHERE_APPLETS { \
     DECLARE_APPLET( 34, 0x01, ADEG), \
-    DECLARE_APPLET( 56, 0x10, AttenuateOffset), \
     DECLARE_APPLET(  4, 0x14, Brancher), \
     DECLARE_APPLET( 31, 0x04, Burst), \
     DECLARE_APPLET( 12, 0x10, Calculate),\
@@ -109,6 +108,7 @@
 }
 
 /*
+    // DECLARE_APPLET( 56, 0x10, AttenuateOffset), \
     // DECLARE_APPLET( 15, 0x02, AnnularFusion), \
     // DECLARE_APPLET( 48, 0x45, ShiftGate), \
     // DECLARE_APPLET( 14, 0x02, Sequence5), \
