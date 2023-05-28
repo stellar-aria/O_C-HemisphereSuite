@@ -26,6 +26,9 @@
 #include "HemisphereApplet.h"
 #include "bjorklund.h"
 
+#define PAD_LEFT 5
+#define SPACING 16
+
 class Euclid : public HemisphereApplet {
 public:
 
@@ -88,6 +91,7 @@ public:
 
     void View() {
         gfxHeader(applet_name());
+        DrawSteps();
         DrawEditor();
     }
 
@@ -188,6 +192,29 @@ private:
     uint8_t cv_dest[2];
     int cv_data[2];
 
+    void DrawSteps() {
+        gfxLine(0, 45, 63, 45);
+        gfxLine(0, 62, 63, 62);
+        gfxLine(0, 53, 63, 53);
+        gfxLine(0, 54, 63, 54);
+        ForEachChannel(ch) {
+            for (int i = 0; i < 16; i++) {
+                if ((pattern[ch] >> ((i + step) % (actual_length[ch]) )) & 0x1) {
+                    gfxRect(4 * i + 1, 48 + 9 * ch, 3, 3);
+                    //gfxLine(4 * i + 2, 47 + 9 * ch, 4 * i + 2, 47 + 9 * ch + 4);
+                } else {
+                    gfxPixel(4 * i + 2, 47 + 9 * ch + 2);
+                }
+
+                if ((i + step) % (actual_length[ch]) == 0) {
+                    //gfxLine(4 * i, 46 + 9 * ch, 4 * i, 52 + 9 * ch);
+                    gfxLine(4 * i, 46 + 9 * ch, 4 * i, 46 + 9 * ch + 1);
+                    gfxLine(4 * i, 52 + 9 * ch - 1, 4 * i, 52 + 9 * ch);
+                }
+            }
+        }
+    }
+
     void DrawEditor() {
         int f = 0;
 
@@ -196,29 +223,30 @@ private:
             f = cursor - (ch * 4); // Cursor function
 
             // Length cursor
-            gfxPrint(12 + 24*ch + pad(10, actual_length[ch]), 15, actual_length[ch]);
-            if (f == 0) gfxCursor(13 + 24*ch, 23, 12);
+            gfxPrint(PAD_LEFT + 0*SPACING, 25+10*ch, actual_length[ch]);
+            if (f == 0) gfxCursor(PAD_LEFT + 0*SPACING, 33+10*ch, 12);
             for (int ch_dest = 0; ch_dest < 2; ch_dest++){
-                if (cv_dest[ch_dest] == 0+3*ch) gfxBitmap(26 + 24*ch, 14+ch, 3, ch_dest?SUB_TWO:SUP_ONE);
+                if (cv_dest[ch_dest] == 0+3*ch) gfxBitmap(PAD_LEFT + 0*SPACING+10, 23+10*ch, 3, ch_dest?SUB_TWO:SUP_ONE);
             }
 
             // Beats cursor
-            gfxPrint(12 + 24*ch + pad(10, actual_beats[ch]), 25, actual_beats[ch]);
-            if (f == 1) gfxCursor(13 + 24*ch, 33, 12);
+            gfxPrint(PAD_LEFT + 1*SPACING, 25+10*ch, actual_beats[ch]);
+            if (f == 1) gfxCursor(PAD_LEFT + 1*SPACING, 33+10*ch, 12);
             for (int ch_dest = 0; ch_dest < 2; ch_dest++){
-                if (cv_dest[ch_dest] == 1+3*ch) gfxBitmap(26 + 24*ch, 24+ch, 3, ch_dest?SUB_TWO:SUP_ONE);
+                if (cv_dest[ch_dest] == 1+3*ch) gfxBitmap(PAD_LEFT + 1*SPACING+10, 23+10*ch, 3, ch_dest?SUB_TWO:SUP_ONE);
             }
 
             // Rotation cursor
-            gfxPrint(12 + 24*ch + pad(10, actual_rotation[ch]), 35, actual_rotation[ch]);
-            if (f == 2) gfxCursor(13 + 24*ch, 43, 12);
+            gfxPrint(PAD_LEFT + 2*SPACING, 25+10*ch, actual_rotation[ch]);
+            if (f == 2) gfxCursor(PAD_LEFT + 2*SPACING, 33+10*ch, 12);
             for (int ch_dest = 0; ch_dest < 2; ch_dest++){
-                if (cv_dest[ch_dest] == 2+3*ch) gfxBitmap(26 + 24*ch, 34+ch, 3, ch_dest?SUB_TWO:SUP_ONE);
+                if (cv_dest[ch_dest] == 2+3*ch) gfxBitmap(PAD_LEFT + 2*SPACING+10, 23+10*ch, 3, ch_dest?SUB_TWO:SUP_ONE);
             }
 
             // CV destination
-            gfxPrint(12 + 24*ch + pad(10, cv_dest[ch]), 45, cv_dest[ch]);
-            if (f == 3) gfxCursor(13 + 24*ch, 53, 12);
+            gfxPrint(PAD_LEFT + 3*SPACING, 25+10*ch, cv_dest[ch]);
+            // if (f == 3) gfxCursor(13 + 24*ch, 53, 12);
+            if (f == 3) gfxCursor(PAD_LEFT + 3*SPACING, 33+10*ch, 12);
 
             // int curr_cv = 0;
             // for (int ch_src = 0; ch_src < 2; ch_src++) {
@@ -229,11 +257,11 @@ private:
             // gfxPrint(12 + 24*ch + pad(10, pattern[ch]), 55, pattern[ch]);
         }
 
-        gfxBitmap(1, 15, 8, LEFT_RIGHT_ICON);
-        gfxBitmap(1, 25, 8, X_NOTE_ICON);
-        gfxBitmap(1, 35, 8, LOOP_ICON);
-        gfxBitmap(1, 45, 8, CV_ICON);
-        gfxLine(34, 15, 34, 55);
+        gfxBitmap(PAD_LEFT + 0*SPACING, 15, 8, LEFT_RIGHT_ICON);
+        gfxBitmap(PAD_LEFT + 1*SPACING, 15, 8, X_NOTE_ICON);
+        gfxBitmap(PAD_LEFT + 2*SPACING, 15, 8, LOOP_ICON);
+        gfxBitmap(PAD_LEFT + 3*SPACING, 15, 8, CV_ICON);
+        // gfxLine(34, 15, 34, 55);
     }
 };
 
