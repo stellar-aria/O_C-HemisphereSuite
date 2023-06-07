@@ -23,7 +23,7 @@
 #include "oc/digital_inputs.h"
 #include "oc/visualfx.h"
 #include "oc/patterns.h"
-#include "drivers/FreqMeasure/OC_FreqMeasure.h"
+#include "FreqMeasure.h"
 #include "oc/ui.h"
 #include "oc/apps.h"
 #include "oc/menus.h"

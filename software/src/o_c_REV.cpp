@@ -24,7 +24,6 @@
 // Main startup/loop for O&C firmware
 
 
-
 #include <Arduino.h>
 #include <EEPROM.h>
 
@@ -41,7 +40,6 @@
 #include "oc/ui.h"
 #include "oc/options.h"
 #include "drivers/display.h"
-#include "drivers/ADC/OC_util_ADC.h"
 #include "util/debugpins.h"
 #include "VBiasManager.h"
 

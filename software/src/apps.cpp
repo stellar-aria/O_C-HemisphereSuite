@@ -30,7 +30,7 @@
 #include "oc/ui.h"
 #include "oc/menus.h"
 #include "enigma/TuringMachine.h"
-#include "drivers/FreqMeasure/OC_FreqMeasure.h"
+#include "FreqMeasure.h"
 #include "ui/events.h"
 #include "vector_osc/HSVectorOscillator.h"
 #include "hemisphere/icons.h"

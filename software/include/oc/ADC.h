@@ -2,12 +2,13 @@
 #define OC_ADC_H_
 
 #include <Arduino.h>
-#include "drivers/ADC/OC_util_ADC.h"
 #include "oc/config.h"
+#include "settings_defines.h"
 
 #include <stdint.h>
 #include <string.h>
 
+#include <ADC.h>
 //#define ENABLE_ADC_DEBUG
 
 enum ADC_CHANNEL {
@@ -32,8 +33,8 @@ public:
   // 16 bit has best-case 13 bits useable, but we only want 12 so we discard 4 anyway
   static constexpr uint8_t kAdcScanResolution = 16;
   static constexpr uint8_t kAdcScanAverages = 16;
-  static constexpr uint8_t kAdcSamplingSpeed = ADC_HIGH_SPEED_16BITS;
-  static constexpr uint8_t kAdcConversionSpeed = ADC_HIGH_SPEED;
+  static constexpr ADC_settings::ADC_SAMPLING_SPEED kAdcSamplingSpeed = ADC_settings::ADC_SAMPLING_SPEED::HIGH_SPEED;
+  static constexpr ADC_settings::ADC_CONVERSION_SPEED kAdcConversionSpeed = ADC_settings::ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS;
 
   static constexpr uint32_t kAdcValueShift = kAdcSmoothBits;
 

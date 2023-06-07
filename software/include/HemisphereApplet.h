@@ -30,7 +30,7 @@
 
 #include "hemisphere/icons.h"
 #include "hemisphere/ClockManager.h"
-#include "drivers/FreqMeasure/OC_FreqMeasure.h"
+#include "FreqMeasure.h"
 #include "oc/digital_inputs.h"
 #include "oc/ADC.h"
 #include "oc/DAC.h"

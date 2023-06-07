@@ -33,7 +33,7 @@
 #include "braids_quantizer_scales.h"
 #include "oc/scales.h"
 #include "SegmentDisplay.h"
-#include "drivers/FreqMeasure/OC_FreqMeasure.h"
+#include "FreqMeasure.h"
 #include "HemisphereApplet.h"
 #include "ui/events.h"
 #include "oc/apps.h"

@@ -1,5 +1,6 @@
 #include "oc/ADC.h"
 #include "oc/gpio.h"
+#include "settings_defines.h"
 
 #include <algorithm>
 
@@ -37,14 +38,23 @@ template <> struct ChannelDesc<ADC_CHANNEL_4> {
   //pinMode(ChannelDesc<ADC_CHANNEL_3>::PIN, INPUT);
   //pinMode(ChannelDesc<ADC_CHANNEL_4>::PIN, INPUT);
 
-  adc_.setReference(ADC_REF_3V3);
-  adc_.setResolution(kAdcScanResolution);
-  adc_.setConversionSpeed(kAdcConversionSpeed);
-  adc_.setSamplingSpeed(kAdcSamplingSpeed);
-  adc_.setAveraging(kAdcScanAverages);
-  adc_.disableDMA();
-  adc_.disableInterrupts();
-  adc_.disableCompare();
+  adc_.adc0->setReference(ADC_settings::ADC_REFERENCE::REF_3V3);
+  adc_.adc0->setResolution(kAdcScanResolution);
+  adc_.adc0->setConversionSpeed(kAdcConversionSpeed);
+  adc_.adc0->setSamplingSpeed(kAdcSamplingSpeed);
+  adc_.adc0->setAveraging(kAdcScanAverages);
+  adc_.adc0->disableDMA();
+  adc_.adc0->disableInterrupts();
+  adc_.adc0->disableCompare();
+
+  adc_.adc1->setReference(ADC_settings::ADC_REFERENCE::REF_3V3);
+  adc_.adc1->setResolution(kAdcScanResolution);
+  adc_.adc1->setConversionSpeed(kAdcConversionSpeed);
+  adc_.adc1->setSamplingSpeed(kAdcSamplingSpeed);
+  adc_.adc1->setAveraging(kAdcScanAverages);
+  adc_.adc1->disableDMA();
+  adc_.adc1->disableInterrupts();
+  adc_.adc1->disableCompare();
 
   scan_channel_ = ADC_CHANNEL_1;
   adc_.startSingleRead(ChannelDesc<ADC_CHANNEL_1>::PIN);

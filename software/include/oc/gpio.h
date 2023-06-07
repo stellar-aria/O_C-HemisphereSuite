@@ -4,31 +4,31 @@
 #include "oc/options.h"
 
 #ifdef FLIP_180
-  #define CV4 19
-  #define CV3 18
-  #define CV2 20
-  #define CV1 17
+constexpr auto CV4 = 19;
+constexpr auto CV3 = 18;
+constexpr auto CV2 = 20;
+constexpr auto CV1 = 17;
   
-  #define TR4 0
-  #define TR3 1
-  #define TR2 2
-  #define TR1 3
+constexpr auto TR4 = 0;
+constexpr auto TR3 = 1;
+constexpr auto TR2 = 2;
+constexpr auto TR1 = 3;
   
-  #define but_top 4
-  #define but_bot 5
+constexpr auto but_top = 4;
+constexpr auto but_bot = 5;
 #else
-  #define CV1 19
-  #define CV2 18
-  #define CV3 20
-  #define CV4 17
+constexpr auto CV1 = 19;
+constexpr auto CV2 = 18;
+constexpr auto CV3 = 20;
+constexpr auto CV4 = 17;
   
-  #define TR1 0
-  #define TR2 1
-  #define TR3 2
-  #define TR4 3
+constexpr auto TR1 = 0;
+constexpr auto TR2 = 1;
+constexpr auto TR3 = 2;
+constexpr auto TR4 = 3;
   
-  #define but_top 5
-  #define but_bot 4
+constexpr auto but_top = 5;
+constexpr auto but_bot = 4;
 #endif
 
 #define OLED_DC 6
