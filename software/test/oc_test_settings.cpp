@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "util/util_settings.h"
+#include "util/settings.h"
 
 class TestU8Settings : public settings::SettingsBase<TestU8Settings, 1> { };
 SETTINGS_DECLARE(TestU8Settings, 1) {

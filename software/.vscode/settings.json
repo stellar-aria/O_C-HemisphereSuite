@@ -1,0 +1,6 @@
+{
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "clangd.arguments": [
+    "--query-driver=C:\\Users\\Kate\\.platformio\\packages\\toolchain-gccarmnoneeabi@1.50401.190816\\bin\\arm-none-eabi-g++.exe"
+  ]
+}
