@@ -23,6 +23,8 @@
 
 #ifndef CLOCK_MANAGER_H
 #define CLOCK_MANAGER_H
+#include <Arduino.h>
+#include "oc/core.h"
 
 #define CLOCK_PPQN 4
 
@@ -254,7 +256,5 @@ public:
 
     bool Cycle(int ch = 0) {return cycle;}
 };
-
-ClockManager *ClockManager::instance = 0;
 
 #endif // CLOCK_MANAGER_H

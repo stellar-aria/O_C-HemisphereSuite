@@ -4,6 +4,10 @@
 #include "oc/bitmaps.h"
 #include "oc/strings.h"
 #include "oc/DAC.h"
+#include "oc/ui.h"
+#include "oc/scales.h"
+#include "oc/ui.h"
+#include "drivers/display.h"
 
 namespace OC {
 

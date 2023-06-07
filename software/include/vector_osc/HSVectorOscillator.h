@@ -20,6 +20,7 @@
 
 #ifndef HS_VECTOR_OSCILLATOR
 #define HS_VECTOR_OSCILLATOR
+#include <Arduino.h>
 
 namespace HS {
 
@@ -37,18 +38,18 @@ struct VOSegment {
     byte level;
     byte time;
 
-    bool IsTOC() {return (time == 0xff && level > 0);}
+    bool IsTOC() const {return (time == 0xff && level > 0);}
     void SetTOC(byte segments) {
         time = 0xff;
         level = segments;
     }
 
     /* If this is a TOC segment, Segments() will return how many segments are in the waveform */
-    byte Segments() {return level;}
+    byte Segments() const {return level;}
 
 };
 
-VOSegment user_waveforms[VO_SEGMENT_COUNT];
+static VOSegment user_waveforms[VO_SEGMENT_COUNT];
 
 }; // namespace HS
 

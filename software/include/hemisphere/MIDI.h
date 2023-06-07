@@ -29,6 +29,8 @@
 
 #ifndef HSMIDI_H
 #define HSMIDI_H
+#include <Arduino.h>
+#include <usb_midi.h>
 
 // Teensyduino USB MIDI Library message numbers
 // See https://www.pjrc.com/teensy/td_midi.html

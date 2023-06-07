@@ -21,3 +21,4 @@ shelved/
 Hemisphere\ Suite.cpp
 builds
 .pio
+compile_commands.json

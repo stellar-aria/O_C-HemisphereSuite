@@ -25,6 +25,11 @@
  * for consistency in development, or ease of porting apps or applets in either direction.
  */
 
+#include <stdint.h>
+#include "oc/ADC.h"
+#include "oc/DAC.h"
+#include "oc/digital_inputs.h"
+
 #ifndef int2simfloat
 #define int2simfloat(x) (x << 14)
 #define simfloat2int(x) (x >> 14)

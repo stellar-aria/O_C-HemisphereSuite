@@ -22,6 +22,8 @@
 
 #ifndef UTIL_GRID_H_
 #define UTIL_GRID_H_
+#include <stdint.h>
+#include <stddef.h>
 
 template <typename T>
 struct vec2 {

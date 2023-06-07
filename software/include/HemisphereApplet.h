@@ -31,6 +31,10 @@
 #include "hemisphere/icons.h"
 #include "hemisphere/ClockManager.h"
 #include "drivers/FreqMeasure/OC_FreqMeasure.h"
+#include "oc/digital_inputs.h"
+#include "oc/ADC.h"
+#include "oc/DAC.h"
+#include "HemisphereApplet.h"
 
 #define LEFT_HEMISPHERE 0
 #define RIGHT_HEMISPHERE 1
@@ -105,10 +109,10 @@ typedef struct Applet {
   void (*OnDataReceive)(bool, uint64_t); // Send a data int to the applet
 } Applet;
 
-Applet available_applets[] = HEMISPHERE_APPLETS;
-Applet clock_setup_applet = DECLARE_APPLET(9999, 0x01, ClockSetup);
+constexpr Applet available_applets[] = HEMISPHERE_APPLETS;
+constexpr Applet clock_setup_applet = DECLARE_APPLET(9999, 0x01, ClockSetup);
 
-int octave_max = 5;
+extern int octave_max;
 }
 
 // Specifies where data goes in flash storage for each selcted applet, and how big it is
@@ -579,18 +583,5 @@ private:
     bool applet_started; // Allow the app to maintain state during switching
     bool help_active;
 };
-
-uint8_t HemisphereApplet::modal_edit_mode = 2; // 0=old behavior, 1=modal editing, 2=modal with wraparound
-uint8_t HemisphereApplet::trig_length = 2; // multiplier for HEMISPHERE_CLOCK_TICKS
-int HemisphereApplet::inputs[4];
-int HemisphereApplet::outputs[4];
-int HemisphereApplet::outputs_smooth[4];
-int HemisphereApplet::clock_countdown[4];
-int HemisphereApplet::adc_lag_countdown[4];
-uint32_t HemisphereApplet::last_clock[4];
-uint32_t HemisphereApplet::cycle_ticks[4];
-bool HemisphereApplet::changed_cv[4];
-int HemisphereApplet::last_cv[4];
-int HemisphereApplet::cursor_countdown[2];
 
 #endif // HEMISPHEREAPPLET_H_

@@ -11,6 +11,83 @@
 // * Category filtering is deprecated at 1.8, but I'm leaving the per-applet categorization
 // alone to avoid breaking forked codebases by other developers.
 
+#include <stdint.h>
+
+#define APPLET(class_name) \
+  extern void class_name ## _Start(bool); \
+  extern void class_name ## _Controller(bool, bool); \
+  extern void class_name ## _View(bool); \
+  extern void class_name ## _OnButtonPress(bool); \
+  extern void class_name ## _OnEncoderMove(bool, int); \
+  extern void class_name ## _ToggleHelpScreen(bool); \
+  extern uint64_t class_name ## _OnDataRequest(bool); \
+  extern void class_name ## _OnDataReceive(bool, uint64_t); \
+
+
+APPLET(ADSREG);
+APPLET(ADEG);
+APPLET(ASR);
+APPLET(AttenuateOffset);
+APPLET(Binary);
+APPLET(BootsNCat);
+APPLET(Brancher);
+APPLET(BugCrack);
+APPLET(Burst);
+APPLET(Button);
+APPLET(Calculate);
+APPLET(Calibr8);
+APPLET(Carpeggio);
+APPLET(Chordinator);
+APPLET(ClockDivider);
+APPLET(ClockSetup);
+APPLET(ClockSkip);
+APPLET(Compare);
+APPLET(CVRecV2);
+APPLET(DrumMap);
+APPLET(DualQuant);
+APPLET(DualTM);
+APPLET(EbbAndLfo);
+APPLET(EnigmaJr);
+APPLET(EnvFollow);
+APPLET(EuclidX);
+APPLET(GameOfLife);
+APPLET(GateDelay);
+APPLET(GatedVCA);
+APPLET(LoFiPCM);
+APPLET(Logic);
+APPLET(LowerRenz);
+APPLET(Metronome);
+APPLET(hMIDIIn);
+APPLET(hMIDIOut);
+APPLET(MixerBal);
+APPLET(Palimpsest);
+APPLET(ProbabilityDivider);
+APPLET(ProbabilityMelody);
+APPLET(RndWalk);
+APPLET(RunglBook);
+APPLET(ScaleDuet);
+APPLET(Schmitt);
+APPLET(Scope);
+APPLET(SequenceX);
+APPLET(ShiftGate);
+APPLET(Shredder);
+APPLET(Shuffle);
+APPLET(Slew);
+APPLET(Squanch);
+APPLET(Stairs);
+APPLET(Switch);
+APPLET(TB_3PO);
+APPLET(TLNeuron);
+APPLET(Trending);
+APPLET(TrigSeq);
+APPLET(TrigSeq16);
+APPLET(Tuner);
+APPLET(VectorEG);
+APPLET(VectorLFO);
+APPLET(VectorMod);
+APPLET(VectorMorph);
+APPLET(Voltage);
+
 //////////////////  id  cat   class name
 #define HEMISPHERE_APPLETS { \
     DECLARE_APPLET(  8, 0x01, ADSREG), \

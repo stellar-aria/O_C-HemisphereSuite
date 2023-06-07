@@ -29,6 +29,9 @@
 #define VBIAS_MANAGER_H
 
 #include "oc/options.h"
+#include "oc/core.h"
+#include "oc/DAC.h"
+#include "oc/calibration.h"
 
 #ifdef VOR 
 

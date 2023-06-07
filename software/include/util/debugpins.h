@@ -1,5 +1,6 @@
 #ifndef UTIL_DEBUGPINS_H_
 #define UTIL_DEBUGPINS_H_
+#include <Arduino.h>
 
 namespace util {
 

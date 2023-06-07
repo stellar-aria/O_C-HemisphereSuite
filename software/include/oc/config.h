@@ -1,5 +1,7 @@
 #ifndef OC_CONFIG_H_
 #define OC_CONFIG_H_
+#include <stdint.h>
+#include <stddef.h>
 
 #if F_CPU != 120000000
 #error "Please compile O&C firmware with CPU speed 120MHz"

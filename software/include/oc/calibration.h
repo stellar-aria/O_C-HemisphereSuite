@@ -76,4 +76,7 @@ extern CalibrationData calibration_data;
 struct CalibrationStep;
 struct CalibrationState;
 
+void calibration_load();
+void calibration_draw(const CalibrationState &state);
+void calibration_update(CalibrationState &state);
 #endif // OC_CALIBRATION_H_

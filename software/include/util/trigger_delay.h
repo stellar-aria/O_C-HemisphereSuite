@@ -23,6 +23,7 @@
 
 #ifndef UTIL_TRIGGER_DELAY_H_
 #define UTIL_TRIGGER_DELAY_H_
+#include <Arduino.h>
 
 namespace util {
 

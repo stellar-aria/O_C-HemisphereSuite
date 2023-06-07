@@ -20,6 +20,8 @@
 
 #ifndef PROB_LOOP_LINKER_H_
 #define PROB_LOOP_LINKER_H_
+#include <stdint.h>
+#include "apps/HEMISPHERE.hpp"
 
 class ProbLoopLinker {
 	static ProbLoopLinker *instance;
@@ -106,7 +108,5 @@ public:
     }
 
 };
-
-ProbLoopLinker *ProbLoopLinker::instance = 0;
 
 #endif

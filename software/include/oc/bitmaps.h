@@ -23,6 +23,8 @@
 #ifndef OC_BITMAPS_H_
 #define OC_BITMAPS_H_
 
+#include <stdint.h>
+
 // weegfx::Graphics only supports drawing of 8px high bitmaps right now...
 // TODO Embed width in first byte?
 

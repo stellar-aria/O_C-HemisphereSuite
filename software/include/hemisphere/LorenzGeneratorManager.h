@@ -1,3 +1,4 @@
+#pragma once
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,6 +26,9 @@
 // hemispheres to share a single Lorenz generator.
 
 #define LORENZ_PROCESS_TICKS 16
+#include <stdint.h>
+#include "streams_lorenz_generator.h"
+#include "oc/core.h"
 
 class LorenzGeneratorManager {
     static LorenzGeneratorManager *instance;

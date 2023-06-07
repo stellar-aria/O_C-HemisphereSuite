@@ -24,6 +24,7 @@
 #define SETTINGS_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace settings {
 

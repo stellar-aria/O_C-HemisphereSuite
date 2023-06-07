@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "oc/strings.h"
+#include "oc/ADC.h"
 
 namespace util {
 

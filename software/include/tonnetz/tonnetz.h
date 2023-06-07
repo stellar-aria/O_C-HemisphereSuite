@@ -60,16 +60,7 @@ namespace tonnetz {
     { { 2, { -1, -1,  1 } }, { 1, { -1,  1,  1 } } }, // TRANSFORM_H
   };
 
-  abstract_triad apply_transformation(ETransformType type, const abstract_triad &source) {
-
-    const tonnetz::transformation &t = tonnetz::transformations[type][source.mode()];
-
-    abstract_triad result = source;
-    result.change_mode();
-    result.apply_offsets(t.offsets);
-    result.shift_root(t.root_shift);
-    return result;
-  }
+  abstract_triad apply_transformation(ETransformType type, const abstract_triad &source);
 };
 
 #endif // TONNETZ_H_
