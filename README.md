@@ -1,4 +1,4 @@
-Hemisphere Suite: Alternate Alternate Firmware for Ornament and Crime
+Hemisphere Suite: Alternate-Alternate Firmware for Ornament and Crime
 ===
 
 This is a fork of the Hemisphere Suite with some custom changes:
