@@ -82,7 +82,6 @@
     DECLARE_APPLET( 34, 0x01, ADEG), \
     DECLARE_APPLET(  4, 0x14, Brancher), \
     DECLARE_APPLET( 31, 0x04, Burst), \
-    DECLARE_APPLET( 57, 0x10, Button), \
     DECLARE_APPLET( 12, 0x10, Calculate),\
     DECLARE_APPLET( 32, 0x0a, Carpeggio), \
     DECLARE_APPLET(  6, 0x04, ClockDivider), \
@@ -113,6 +112,7 @@
 }
 
 /*
+    DECLARE_APPLET( 57, 0x10, Button), \
     DECLARE_APPLET( 50, 0x08, GameOfLife), \
     DECLARE_APPLET( 37, 0x08, Harmonizer), \
     DECLARE_APPLET( 56, 0x10, AttenuateOffset), \
