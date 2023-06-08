@@ -52,7 +52,7 @@ public:
   	// msb_pos_ = 0;
   	bit_sum_ = 0;
   	pending_bit_ = 0;
-  	uint32_t _seed = OC::ADC::value<ADC_CHANNEL_1>() + OC::ADC::value<ADC_CHANNEL_2>() + OC::ADC::value<ADC_CHANNEL_3>() + OC::ADC::value<ADC_CHANNEL_4>();
+  	uint32_t _seed = oc::ADC::value<ADC_CHANNEL_1>() + oc::ADC::value<ADC_CHANNEL_2>() + oc::ADC::value<ADC_CHANNEL_3>() + oc::ADC::value<ADC_CHANNEL_4>();
     randomSeed(_seed);
   }
 
@@ -86,25 +86,25 @@ public:
 
   	switch (n_) {
       case 0:
-      	x_ = OC::Strings::pi_digits[k_];
+      	x_ = oc::Strings::pi_digits[k_];
       	break;
 //      case 1:
-//      	x_ = OC::Strings::phi_digits[k_];
+//      	x_ = oc::Strings::phi_digits[k_];
 //      	break;
 //       case 2:
-//       	x_ = OC::Strings::tau_digits[k_];
+//       	x_ = oc::Strings::tau_digits[k_];
 //       	break;
 //       case 3:
-//       	x_ = OC::Strings::eul_digits[k_];
+//       	x_ = oc::Strings::eul_digits[k_];
 //       	break;
 //       case 4:
-//       	x_ = OC::Strings::rt2_digits[k_];
+//       	x_ = oc::Strings::rt2_digits[k_];
 //       	break;
       case 1:
-      	x_ = OC::Strings::van_eck[k_];
+      	x_ = oc::Strings::van_eck[k_];
       	break;
       case 2:
-      	x_ = OC::Strings::sum_of_squares_of_digits_of_n[k_];
+      	x_ = oc::Strings::sum_of_squares_of_digits_of_n[k_];
       	break;
       case 3: // Dress sequence
         x_ =  __builtin_popcountll(s_ * k_);
@@ -131,19 +131,19 @@ public:
       	// x_ = bit_sum_ ;
       	break;
       case 5:
-      	x_ = OC::Strings::digsum_of_n[k_];
+      	x_ = oc::Strings::digsum_of_n[k_];
       	break;
       case 6:
-       	x_ = OC::Strings::digsum_of_n_base4[k_];
+       	x_ = oc::Strings::digsum_of_n_base4[k_];
        	break;
       case 7:
-       	x_ = OC::Strings::digsum_of_n_base5[k_];
+       	x_ = oc::Strings::digsum_of_n_base5[k_];
        	break;    
       case 8:
-      	x_ = OC::Strings::count_down_by_2[k_];
+      	x_ = oc::Strings::count_down_by_2[k_];
       	break;      	
       case 9:
-      	x_ = OC::Strings::interspersion_of_A163253[k_];
+      	x_ = oc::Strings::interspersion_of_A163253[k_];
       	break;      	
       default:
         break;

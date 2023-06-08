@@ -27,7 +27,7 @@
 #include "oc/digital_inputs.h"
 #include "util/trigger_delay.h"
 
-namespace OC {
+namespace oc {
 
 template <uint32_t max_delay>
 class TriggerDelays {
@@ -60,7 +60,7 @@ protected:
 
 };
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_TRIGGER_DELAYS_H_
 

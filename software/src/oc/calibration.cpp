@@ -12,9 +12,9 @@
 #include "oc/digital_inputs.h"
 #include "oc/strings.h"
 #include "VBiasManager.h"
-namespace menu = OC::menu;
+namespace menu = oc::menu;
 
-using OC::DAC;
+using oc::DAC;
 
 #if defined(BUCHLA_cOC) || defined(VOR)
 static constexpr uint16_t DAC_OFFSET = 0;  // DAC offset, initial approx., ish (Easel card)
@@ -23,12 +23,12 @@ static constexpr uint16_t DAC_OFFSET = 4890; // DAC offset, initial approx., ish
 #endif
 
 #ifdef BUCHLA_4U
-  static constexpr uint16_t _ADC_OFFSET = (uint16_t)((float)pow(2,OC::ADC::kAdcResolution)*1.0f);       // ADC offset @3.3V
+  static constexpr uint16_t _ADC_OFFSET = (uint16_t)((float)pow(2,oc::ADC::kAdcResolution)*1.0f);       // ADC offset @3.3V
 #else
-  static constexpr uint16_t _ADC_OFFSET = (uint16_t)((float)pow(2,OC::ADC::kAdcResolution)*0.6666667f); // ADC offset @2.2V
+  static constexpr uint16_t _ADC_OFFSET = (uint16_t)((float)pow(2,oc::ADC::kAdcResolution)*0.6666667f); // ADC offset @2.2V
 #endif
 
-namespace OC {
+namespace oc {
 CalibrationStorage calibration_storage;
 CalibrationData calibration_data;
 };
@@ -36,7 +36,7 @@ CalibrationData calibration_data;
 static constexpr unsigned kCalibrationAdcSmoothing = 4;
 bool calibration_data_loaded = false;
 
-const OC::CalibrationData kCalibrationDefaults = {
+const oc::CalibrationData kCalibrationDefaults = {
   // DAC
   { {
     #ifdef BUCHLA_cOC 
@@ -75,12 +75,12 @@ const OC::CalibrationData kCalibrationDefaults = {
 };
 
 void calibration_reset() {
-  memcpy(&OC::calibration_data, &kCalibrationDefaults, sizeof(OC::calibration_data));
+  memcpy(&oc::calibration_data, &kCalibrationDefaults, sizeof(oc::calibration_data));
   for (int i = 0; i < OCTAVES; ++i) {
-    OC::calibration_data.dac.calibrated_octaves[0][i] += DAC_OFFSET;
-    OC::calibration_data.dac.calibrated_octaves[1][i] += DAC_OFFSET;
-    OC::calibration_data.dac.calibrated_octaves[2][i] += DAC_OFFSET;
-    OC::calibration_data.dac.calibrated_octaves[3][i] += DAC_OFFSET;
+    oc::calibration_data.dac.calibrated_octaves[0][i] += DAC_OFFSET;
+    oc::calibration_data.dac.calibrated_octaves[1][i] += DAC_OFFSET;
+    oc::calibration_data.dac.calibrated_octaves[2][i] += DAC_OFFSET;
+    oc::calibration_data.dac.calibrated_octaves[3][i] += DAC_OFFSET;
   }
 }
 
@@ -89,23 +89,23 @@ void calibration_flip() {
     uint16_t flip_dac[OCTAVES + 1];
     uint16_t flip_adc;
     for (int i = 0; i < 2; ++i) {
-        flip_adc = OC::calibration_data.adc.offset[i];
-        OC::calibration_data.adc.offset[i] = OC::calibration_data.adc.offset[ADC_CHANNEL_LAST-1 - i];
-        OC::calibration_data.adc.offset[ADC_CHANNEL_LAST-1 - i] = flip_adc;
+        flip_adc = oc::calibration_data.adc.offset[i];
+        oc::calibration_data.adc.offset[i] = oc::calibration_data.adc.offset[ADC_CHANNEL_LAST-1 - i];
+        oc::calibration_data.adc.offset[ADC_CHANNEL_LAST-1 - i] = flip_adc;
 
-        memcpy(flip_dac, OC::calibration_data.dac.calibrated_octaves[i], sizeof(flip_dac));
-        memcpy(OC::calibration_data.dac.calibrated_octaves[i], OC::calibration_data.dac.calibrated_octaves[DAC_CHANNEL_LAST-1 - i], sizeof(flip_dac));
-        memcpy(OC::calibration_data.dac.calibrated_octaves[DAC_CHANNEL_LAST-1 - i], flip_dac, sizeof(flip_dac));
+        memcpy(flip_dac, oc::calibration_data.dac.calibrated_octaves[i], sizeof(flip_dac));
+        memcpy(oc::calibration_data.dac.calibrated_octaves[i], oc::calibration_data.dac.calibrated_octaves[DAC_CHANNEL_LAST-1 - i], sizeof(flip_dac));
+        memcpy(oc::calibration_data.dac.calibrated_octaves[DAC_CHANNEL_LAST-1 - i], flip_dac, sizeof(flip_dac));
     }
 }
 #endif
 
 void calibration_load() {
   SERIAL_PRINTLN("Cal.Storage: PAGESIZE=%u, PAGES=%u, LENGTH=%u",
-                 OC::CalibrationStorage::PAGESIZE, OC::CalibrationStorage::PAGES, OC::CalibrationStorage::LENGTH);
+                 oc::CalibrationStorage::PAGESIZE, oc::CalibrationStorage::PAGES, oc::CalibrationStorage::LENGTH);
 
   calibration_reset();
-  calibration_data_loaded = OC::calibration_storage.Load(OC::calibration_data);
+  calibration_data_loaded = oc::calibration_storage.Load(oc::calibration_data);
   if (!calibration_data_loaded) {
 #ifdef CALIBRATION_LOAD_LEGACY
     if (EEPROM.read(0x2) > 0) {
@@ -125,13 +125,13 @@ void calibration_load() {
   }
 
   // Fix-up left-overs from development
-  if (!OC::calibration_data.adc.pitch_cv_scale) {
+  if (!oc::calibration_data.adc.pitch_cv_scale) {
     SERIAL_PRINTLN("CV scale not set, using default");
-    OC::calibration_data.adc.pitch_cv_scale = OC::ADC::kDefaultPitchCVScale;
+    oc::calibration_data.adc.pitch_cv_scale = oc::ADC::kDefaultPitchCVScale;
   }
 
-  if (!OC::calibration_data.screensaver_timeout)
-    OC::calibration_data.screensaver_timeout = SCREENSAVER_TIMEOUT_S;
+  if (!oc::calibration_data.screensaver_timeout)
+    oc::calibration_data.screensaver_timeout = SCREENSAVER_TIMEOUT_S;
 }
 
 void calibration_save() {
@@ -139,7 +139,7 @@ void calibration_save() {
 #ifdef FLIP_180
   calibration_flip();
 #endif
-  OC::calibration_storage.Save(OC::calibration_data);
+  oc::calibration_storage.Save(oc::calibration_data);
 #ifdef FLIP_180
   calibration_flip();
 #endif
@@ -219,7 +219,7 @@ struct CalibrationState {
   bool used_defaults;
 };
 
-OC::DigitalInputDisplay digital_input_displays[4];
+oc::DigitalInputDisplay digital_input_displays[4];
 
 // 128/6=21                  |                     |
 const char *start_footer   = "[CANCEL]         [OK]";
@@ -229,7 +229,7 @@ const char *default_help_r = "[R] => Adjust";
 const char *select_help    = "[R] => Select";
 
 const CalibrationStep calibration_steps[CALIBRATION_STEP_LAST] = {
-  { HELLO, "Setup: Calibrate", "Use defaults? ", select_help, start_footer, CALIBRATE_NONE, 0, OC::Strings::no_yes, 0, 1 },
+  { HELLO, "Setup: Calibrate", "Use defaults? ", select_help, start_footer, CALIBRATE_NONE, 0, oc::Strings::no_yes, 0, 1 },
   { CENTER_DISPLAY, "Center Display", "Pixel offset ", default_help_r, default_footer, CALIBRATE_DISPLAY, 0, nullptr, 0, 2 },
 
   #if defined(BUCHLA_4U) && !defined(IO_10V)
@@ -433,14 +433,14 @@ const CalibrationStep calibration_steps[CALIBRATION_STEP_LAST] = {
   #endif
   
   // Changing screensaver to screen blank, and seconds to minutes
-  { CALIBRATION_SCREENSAVER_TIMEOUT, "Screen Blank", "(minutes)", default_help_r, default_footer, CALIBRATE_SCREENSAVER, 0, nullptr, (OC::Ui::kLongPressTicks * 2 + 500) / 1000, SCREENSAVER_TIMEOUT_MAX_S },
+  { CALIBRATION_SCREENSAVER_TIMEOUT, "Screen Blank", "(minutes)", default_help_r, default_footer, CALIBRATE_SCREENSAVER, 0, nullptr, (oc::Ui::kLongPressTicks * 2 + 500) / 1000, SCREENSAVER_TIMEOUT_MAX_S },
 
-  { CALIBRATION_EXIT, "Calibration complete", "Save values? ", select_help, end_footer, CALIBRATE_NONE, 0, OC::Strings::no_yes, 0, 1 }
+  { CALIBRATION_EXIT, "Calibration complete", "Save values? ", select_help, end_footer, CALIBRATE_NONE, 0, oc::Strings::no_yes, 0, 1 }
 };
 
 
 /*     loop calibration menu until done       */
-void OC::Ui::Calibrate() {
+void oc::Ui::Calibrate() {
 
   // Calibration data should be loaded (or defaults) by now
   SERIAL_PRINTLN("Start calibration...");
@@ -492,10 +492,10 @@ void OC::Ui::Calibrate() {
           if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
             switch (calibration_state.current_step->step) {
               case ADC_PITCH_C2:
-                calibration_state.adc_1v = OC::ADC::value(ADC_CHANNEL_1);
+                calibration_state.adc_1v = oc::ADC::value(ADC_CHANNEL_1);
                 break;
               case ADC_PITCH_C4:
-                calibration_state.adc_3v = OC::ADC::value(ADC_CHANNEL_1);
+                calibration_state.adc_3v = oc::ADC::value(ADC_CHANNEL_1);
                 break;
               default: break;
             }
@@ -541,10 +541,10 @@ void OC::Ui::Calibrate() {
           break;
         case ADC_PITCH_C4:
           if (calibration_state.adc_1v && calibration_state.adc_3v) {
-            OC::ADC::CalibratePitch(calibration_state.adc_1v, calibration_state.adc_3v);
+            oc::ADC::CalibratePitch(calibration_state.adc_1v, calibration_state.adc_3v);
             SERIAL_PRINTLN("ADC SCALE 1V=%d, 3V=%d -> %d",
                            calibration_state.adc_1v, calibration_state.adc_3v,
-                           OC::calibration_data.adc.pitch_cv_scale);
+                           oc::calibration_data.adc.pitch_cv_scale);
           }
           break;
 
@@ -555,32 +555,32 @@ void OC::Ui::Calibrate() {
       switch (next_step->calibration_type) {
       case CALIBRATE_OCTAVE:
         calibration_state.encoder_value =
-            OC::calibration_data.dac.calibrated_octaves[step_to_channel(next_step->step)][next_step->index + DAC::kOctaveZero];
+            oc::calibration_data.dac.calibrated_octaves[step_to_channel(next_step->step)][next_step->index + DAC::kOctaveZero];
         break;
 
       #ifdef VOR
       case CALIBRATE_VBIAS_BIPOLAR:
-        calibration_state.encoder_value = (0xFFFF & OC::calibration_data.v_bias); // bipolar = lower 2 bytes
+        calibration_state.encoder_value = (0xFFFF & oc::calibration_data.v_bias); // bipolar = lower 2 bytes
       break;
       case CALIBRATE_VBIAS_ASYMMETRIC:
-        calibration_state.encoder_value = (OC::calibration_data.v_bias >> 16);  // asymmetric = upper 2 bytes
+        calibration_state.encoder_value = (oc::calibration_data.v_bias >> 16);  // asymmetric = upper 2 bytes
       break;
       #endif
       
       case CALIBRATE_ADC_OFFSET:
-        calibration_state.encoder_value = OC::calibration_data.adc.offset[next_step->index];
+        calibration_state.encoder_value = oc::calibration_data.adc.offset[next_step->index];
         break;
       case CALIBRATE_DISPLAY:
-        calibration_state.encoder_value = OC::calibration_data.display_offset;
+        calibration_state.encoder_value = oc::calibration_data.display_offset;
         break;
 
       case CALIBRATE_ADC_1V:
       case CALIBRATE_ADC_3V:
-        SERIAL_PRINTLN("offset=%d", OC::calibration_data.adc.offset[ADC_CHANNEL_1]);
+        SERIAL_PRINTLN("offset=%d", oc::calibration_data.adc.offset[ADC_CHANNEL_1]);
         break;
 
       case CALIBRATE_SCREENSAVER:
-        calibration_state.encoder_value = OC::calibration_data.screensaver_timeout;
+        calibration_state.encoder_value = oc::calibration_data.screensaver_timeout;
         SERIAL_PRINTLN("timeout=%d", calibration_state.encoder_value);
         break;
 
@@ -646,7 +646,7 @@ void calibration_draw(const CalibrationState &state) {
     case CALIBRATE_ADC_OFFSET:
       graphics.print(step->message);
       graphics.setPrintPos(kValueX, y + 2);
-      graphics.print((int)OC::ADC::value(static_cast<ADC_CHANNEL>(step->index)), 5);
+      graphics.print((int)oc::ADC::value(static_cast<ADC_CHANNEL>(step->index)), 5);
       menu::DrawEditIcon(kValueX, y, state.encoder_value, step->min, step->max);
       break;
 
@@ -664,7 +664,7 @@ void calibration_draw(const CalibrationState &state) {
       graphics.print(step->message);
       y += menu::kMenuLineH;
       graphics.setPrintPos(menu::kIndentDx, y + 2);
-      graphics.print((int)OC::ADC::value(ADC_CHANNEL_1), 2);
+      graphics.print((int)oc::ADC::value(ADC_CHANNEL_1), 2);
       break;
 
     case CALIBRATE_NONE:
@@ -702,15 +702,15 @@ void calibration_draw(const CalibrationState &state) {
       y += menu::kMenuLineH;
       graphics.setPrintPos(menu::kIndentDx, y + 2);
       graphics.print("Encoders: ");
-      graphics.print(OC::Strings::encoder_config_strings[ OC::calibration_data.encoder_config() ]);
+      graphics.print(oc::Strings::encoder_config_strings[ oc::calibration_data.encoder_config() ]);
   }
 
   weegfx::coord_t x = menu::kDisplayWidth - 22;
   y = 2;
-  for (int input = OC::DIGITAL_INPUT_1; input < OC::DIGITAL_INPUT_LAST; ++input) {
+  for (int input = oc::DIGITAL_INPUT_1; input < oc::DIGITAL_INPUT_LAST; ++input) {
     uint8_t state = (digital_input_displays[input].getState() + 3) >> 2;
     if (state)
-      graphics.drawBitmap8(x, y, 4, OC::bitmap_gate_indicators_8 + (state << 2));
+      graphics.drawBitmap8(x, y, 4, oc::bitmap_gate_indicators_8 + (state << 2));
     x += 5;
   }
 
@@ -734,7 +734,7 @@ void calibration_update(CalibrationState &state) {
       DAC::set_all_octave(0);
       break;
     case CALIBRATE_OCTAVE:
-      OC::calibration_data.dac.calibrated_octaves[step_to_channel(step->step)][step->index + DAC::kOctaveZero] =
+      oc::calibration_data.dac.calibrated_octaves[step_to_channel(step->step)][step->index + DAC::kOctaveZero] =
         state.encoder_value;
       DAC::set_all_octave(step->index);
       #ifdef VOR
@@ -746,18 +746,18 @@ void calibration_update(CalibrationState &state) {
     case CALIBRATE_VBIAS_BIPOLAR:
       /* set 0V @ bipolar range */
       DAC::set_all_octave(5);
-      OC::calibration_data.v_bias = (OC::calibration_data.v_bias & 0xFFFF0000) | state.encoder_value;
-      DAC::set_Vbias(0xFFFF & OC::calibration_data.v_bias);
+      oc::calibration_data.v_bias = (oc::calibration_data.v_bias & 0xFFFF0000) | state.encoder_value;
+      DAC::set_Vbias(0xFFFF & oc::calibration_data.v_bias);
       break;
     case CALIBRATE_VBIAS_ASYMMETRIC:
       /* set 0V @ asym. range */
       DAC::set_all_octave(3);
-      OC::calibration_data.v_bias = (OC::calibration_data.v_bias & 0xFFFF) | (state.encoder_value << 16);
-      DAC::set_Vbias(OC::calibration_data.v_bias >> 16);
+      oc::calibration_data.v_bias = (oc::calibration_data.v_bias & 0xFFFF) | (state.encoder_value << 16);
+      DAC::set_Vbias(oc::calibration_data.v_bias >> 16);
     break;
     #endif
     case CALIBRATE_ADC_OFFSET:
-      OC::calibration_data.adc.offset[step->index] = state.encoder_value;
+      oc::calibration_data.adc.offset[step->index] = state.encoder_value;
       DAC::set_all_octave(0);
       #ifdef VOR
       /* set 0V @ unipolar range */
@@ -771,12 +771,12 @@ void calibration_update(CalibrationState &state) {
       DAC::set_all_octave(3);
       break;
     case CALIBRATE_DISPLAY:
-      OC::calibration_data.display_offset = state.encoder_value;
-      display::AdjustOffset(OC::calibration_data.display_offset);
+      oc::calibration_data.display_offset = state.encoder_value;
+      display::AdjustOffset(oc::calibration_data.display_offset);
       break;
     case CALIBRATE_SCREENSAVER:
       DAC::set_all_octave(0);
-      OC::calibration_data.screensaver_timeout = state.encoder_value;
+      oc::calibration_data.screensaver_timeout = state.encoder_value;
       break;
   }
 }
@@ -787,8 +787,8 @@ uint32_t adc_average() {
   delay(OC_CORE_TIMER_RATE + 1);
 
   return
-    OC::ADC::smoothed_raw_value(ADC_CHANNEL_1) + OC::ADC::smoothed_raw_value(ADC_CHANNEL_2) +
-    OC::ADC::smoothed_raw_value(ADC_CHANNEL_3) + OC::ADC::smoothed_raw_value(ADC_CHANNEL_4);
+    oc::ADC::smoothed_raw_value(ADC_CHANNEL_1) + oc::ADC::smoothed_raw_value(ADC_CHANNEL_2) +
+    oc::ADC::smoothed_raw_value(ADC_CHANNEL_3) + oc::ADC::smoothed_raw_value(ADC_CHANNEL_4);
 }
 
 // end

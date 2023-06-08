@@ -5,7 +5,7 @@
 
 static const int kIntSeqLen = 128;
 
-namespace OC {
+namespace oc {
 
   static const int kNumDelayTimes = 8;
 
@@ -62,7 +62,7 @@ namespace OC {
 
 inline
 const char *note_name(int note) {
-  return OC::Strings::note_names[(note + 120) % 12];
+  return oc::Strings::note_names[(note + 120) % 12];
 }
 
 #endif // OC_STRINGS_H_

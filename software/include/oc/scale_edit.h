@@ -9,7 +9,7 @@
 #include "oc/ui.h"
 #include "drivers/display.h"
 
-namespace OC {
+namespace oc {
 
 // Scale editor
 // Edits both scale length and note note values, as well as a mask of "active"
@@ -53,18 +53,18 @@ public:
   }
 
   void Edit(Owner *owner, int scale) {
-    if (OC::Scales::SCALE_NONE == scale)
+    if (oc::Scales::SCALE_NONE == scale)
       return;
 
-    if (scale < OC::Scales::SCALE_USER_LAST) {
-      scale_ = mutable_scale_ = &OC::user_scales[scale];
-      scale_name_ = OC::scale_names_short[scale];
+    if (scale < oc::Scales::SCALE_USER_LAST) {
+      scale_ = mutable_scale_ = &oc::user_scales[scale];
+      scale_name_ = oc::scale_names_short[scale];
       // Serial.print("Editing mutable scale "); 
       // Serial.println(scale_name_);
     } else {
-      scale_ = &OC::Scales::GetScale(scale);
+      scale_ = &oc::Scales::GetScale(scale);
       mutable_scale_ = nullptr;
-      scale_name_ = OC::scale_names_short[scale];
+      scale_name_ = oc::scale_names_short[scale];
       // Serial.print("Editing const scale "); 
       // Serial.println(scale_name_);
     }
@@ -145,7 +145,7 @@ void ScaleEditor<Owner>::Draw() {
       uint8_t id = edit_this_scale_;
       if (edit_this_scale_ == owner_->get_scale_select())
         id += 4;
-      graphics.print(OC::Strings::scale_id[id]);
+      graphics.print(oc::Strings::scale_id[id]);
     }
   
     if (SEQ_MODE && edit_page_) {
@@ -163,7 +163,7 @@ void ScaleEditor<Owner>::Draw() {
             graphics.setPrintPos(x + 7, y + 7);
           else 
             graphics.setPrintPos(x + 9, y + 7);
-          graphics.print(OC::Strings::note_names_unpadded[root]);
+          graphics.print(oc::Strings::note_names_unpadded[root]);
           // print transpose:
           int transpose = owner_->get_transpose(edit_this_scale_);
           graphics.setPrintPos(x + 32 + 5, y + 7);
@@ -186,7 +186,7 @@ void ScaleEditor<Owner>::Draw() {
       graphics.setPrintPos(x, y + 24);
       if (cursor_pos_ != num_notes) {
         graphics.movePrintPos(weegfx::Graphics::kFixedFontW, 0);
-        if (mutable_scale_ && OC::ui.read_immediate(OC::CONTROL_BUTTON_L))
+        if (mutable_scale_ && oc::ui.read_immediate(oc::CONTROL_BUTTON_L))
           graphics.drawBitmap8(x + 1, y + 23, kBitmapEditIndicatorW, bitmap_edit_indicators_8);
         else if (mutable_scale_)
           graphics.drawBitmap8(x + 1, y + 23, 4, bitmap_indicator_4x8);
@@ -242,28 +242,28 @@ void ScaleEditor<Owner>::Draw() {
     x += 5;
     y += 5;
     graphics.setPrintPos(x, y);
-    graphics.print(OC::Strings::scaling_string[0]);
-    graphics.print(OC::Strings::channel_id[DAC_CHANNEL_A]);
+    graphics.print(oc::Strings::scaling_string[0]);
+    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_A]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(OC::voltage_scalings[OC::DAC::get_voltage_scaling(DAC_CHANNEL_A)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_A)]);
     y += 16;
     graphics.setPrintPos(x, y);
-    graphics.print(OC::Strings::scaling_string[0]);
-    graphics.print(OC::Strings::channel_id[DAC_CHANNEL_B]);
+    graphics.print(oc::Strings::scaling_string[0]);
+    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_B]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(OC::voltage_scalings[OC::DAC::get_voltage_scaling(DAC_CHANNEL_B)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_B)]);
     y += 16;
     graphics.setPrintPos(x, y);
-    graphics.print(OC::Strings::scaling_string[0]);
-    graphics.print(OC::Strings::channel_id[DAC_CHANNEL_C]);
+    graphics.print(oc::Strings::scaling_string[0]);
+    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_C]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(OC::voltage_scalings[OC::DAC::get_voltage_scaling(DAC_CHANNEL_C)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_C)]);
     y += 16;
     graphics.setPrintPos(x, y);
-    graphics.print(OC::Strings::scaling_string[0]);
-    graphics.print(OC::Strings::channel_id[DAC_CHANNEL_D]);
+    graphics.print(oc::Strings::scaling_string[0]);
+    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_D]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(OC::voltage_scalings[OC::DAC::get_voltage_scaling(DAC_CHANNEL_D)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_D)]);
     // draw cursor:
     graphics.invertRect(x - 2, (scaling_cursor_pos_ << 4) + 3, w - 6, 11);
   }
@@ -273,16 +273,16 @@ template <typename Owner>
 void ScaleEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         handleButtonUp(event);
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         handleButtonDown(event);
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         handleButtonLeft(event);
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
       {
         if (edit_page_ < _SCALING)
           Close();
@@ -297,7 +297,7 @@ void ScaleEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
   else if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
     
      switch (event.control) {
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
       {
         if (edit_page_ < _SCALING)
           edit_page_ = _SCALING;
@@ -318,16 +318,16 @@ void ScaleEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
   bool scale_changed = false;
   uint16_t mask = mask_;
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     
-    if (SEQ_MODE && OC::ui.read_immediate(OC::CONTROL_BUTTON_UP)) {
+    if (SEQ_MODE && oc::ui.read_immediate(oc::CONTROL_BUTTON_UP)) {
       
           // we're in Meta-Q, so we can change the scale:
          
           int _scale = owner_->get_scale(edit_this_scale_) + event.value;
-          CONSTRAIN(_scale, OC::Scales::SCALE_USER_0, OC::Scales::NUM_SCALES-1);
+          CONSTRAIN(_scale, oc::Scales::SCALE_USER_0, oc::Scales::NUM_SCALES-1);
           
-          if (_scale == OC::Scales::SCALE_NONE) {
+          if (_scale == oc::Scales::SCALE_NONE) {
              // just skip this here ...
              if (event.value > 0) 
                 _scale++;
@@ -338,14 +338,14 @@ void ScaleEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
           owner_->set_scale_at_slot(_scale, mask_, owner_->get_root(edit_this_scale_), owner_->get_transpose(edit_this_scale_), edit_this_scale_); 
           scale_changed = true; 
           
-          if (_scale < OC::Scales::SCALE_USER_LAST) {
-            scale_ = mutable_scale_ = &OC::user_scales[_scale];
-            scale_name_ = OC::scale_names_short[_scale];
+          if (_scale < oc::Scales::SCALE_USER_LAST) {
+            scale_ = mutable_scale_ = &oc::user_scales[_scale];
+            scale_name_ = oc::scale_names_short[_scale];
           } 
           else {
-            scale_ = &OC::Scales::GetScale(_scale);
+            scale_ = &oc::Scales::GetScale(_scale);
             mutable_scale_ = nullptr;
-            scale_name_ = OC::scale_names_short[_scale];
+            scale_name_ = oc::scale_names_short[_scale];
           }
           cursor_pos_ = 0;
           num_notes_ = scale_->num_notes;
@@ -355,7 +355,7 @@ void ScaleEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
     else {
       move_cursor(event.value);
     }
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
 
       switch (edit_page_) {
 
@@ -364,8 +364,8 @@ void ScaleEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
           bool handled = false;
           if (mutable_scale_) {
             if (cursor_pos_ < num_notes_) {
-              if (event.mask & OC::CONTROL_BUTTON_L) {
-                OC::ui.IgnoreButton(OC::CONTROL_BUTTON_L);
+              if (event.mask & oc::CONTROL_BUTTON_L) {
+                oc::ui.IgnoreButton(oc::CONTROL_BUTTON_L);
                 change_note(cursor_pos_, event.value, false);
                 scale_changed = true;
                 handled = true;
@@ -446,9 +446,9 @@ void ScaleEditor<Owner>::move_cursor(int offset) {
     break;
     case _SCALING:
     {
-      int8_t scaling = OC::DAC::get_voltage_scaling(scaling_cursor_pos_) + offset;
+      int8_t scaling = oc::DAC::get_voltage_scaling(scaling_cursor_pos_) + offset;
       CONSTRAIN(scaling, VOLTAGE_SCALING_1V_PER_OCT, VOLTAGE_SCALING_LAST - 0x1);
-      OC::DAC::set_scaling(scaling, scaling_cursor_pos_);
+      oc::DAC::set_scaling(scaling, scaling_cursor_pos_);
     }
     break;
     default:
@@ -465,8 +465,8 @@ void ScaleEditor<Owner>::move_cursor(int offset) {
 template <typename Owner>
 void ScaleEditor<Owner>::handleButtonUp(const UI::Event &event) {
 
-  if (event.mask & OC::CONTROL_BUTTON_L) {
-    OC::ui.IgnoreButton(OC::CONTROL_BUTTON_L);
+  if (event.mask & oc::CONTROL_BUTTON_L) {
+    oc::ui.IgnoreButton(oc::CONTROL_BUTTON_L);
     if (cursor_pos_ == num_notes_)
       reset_scale();
     else
@@ -483,16 +483,16 @@ void ScaleEditor<Owner>::handleButtonUp(const UI::Event &event) {
           
         uint8_t scale = owner_->get_scale(edit_this_scale_);  
         // Serial.println(scale);
-        if (scale < OC::Scales::SCALE_USER_LAST) {
-          scale_ = mutable_scale_ = &OC::user_scales[scale];
-          scale_name_ = OC::scale_names_short[scale];
+        if (scale < oc::Scales::SCALE_USER_LAST) {
+          scale_ = mutable_scale_ = &oc::user_scales[scale];
+          scale_name_ = oc::scale_names_short[scale];
           // Serial.print("Editing mutable scale "); 
           // Serial.println(scale_name_);
          } 
          else {
-          scale_ = &OC::Scales::GetScale(scale);
+          scale_ = &oc::Scales::GetScale(scale);
           mutable_scale_ = nullptr;
-          scale_name_ = OC::scale_names_short[scale];
+          scale_name_ = oc::scale_names_short[scale];
           // Serial.print("Editing const scale "); 
           // Serial.println(scale_name_);
         }
@@ -506,8 +506,8 @@ void ScaleEditor<Owner>::handleButtonUp(const UI::Event &event) {
 
 template <typename Owner>
 void ScaleEditor<Owner>::handleButtonDown(const UI::Event &event) {
-  if (event.mask & OC::CONTROL_BUTTON_L) {
-    OC::ui.IgnoreButton(OC::CONTROL_BUTTON_L);
+  if (event.mask & oc::CONTROL_BUTTON_L) {
+    oc::ui.IgnoreButton(oc::CONTROL_BUTTON_L);
     change_note(cursor_pos_, -128, true);
   } else {
     if (!SEQ_MODE)
@@ -521,16 +521,16 @@ void ScaleEditor<Owner>::handleButtonDown(const UI::Event &event) {
           
         uint8_t scale = owner_->get_scale(edit_this_scale_);  
         // Serial.println(scale);
-        if (scale < OC::Scales::SCALE_USER_LAST) {
-          scale_ = mutable_scale_ = &OC::user_scales[scale];
-          scale_name_ = OC::scale_names_short[scale];
+        if (scale < oc::Scales::SCALE_USER_LAST) {
+          scale_ = mutable_scale_ = &oc::user_scales[scale];
+          scale_name_ = oc::scale_names_short[scale];
           // Serial.print("Editing mutable scale "); 
           // Serial.println(scale_name_);
          } 
          else {
-          scale_ = &OC::Scales::GetScale(scale);
+          scale_ = &oc::Scales::GetScale(scale);
           mutable_scale_ = nullptr;
-          scale_name_ = OC::scale_names_short[scale];
+          scale_name_ = oc::scale_names_short[scale];
           // Serial.print("Editing const scale "); 
           // Serial.println(scale_name_);
         }
@@ -545,7 +545,7 @@ void ScaleEditor<Owner>::handleButtonDown(const UI::Event &event) {
 template <typename Owner>
 void ScaleEditor<Owner>::handleButtonLeft(const UI::Event &) {
 
-  if (SEQ_MODE && OC::ui.read_immediate(OC::CONTROL_BUTTON_UP)) {
+  if (SEQ_MODE && oc::ui.read_immediate(oc::CONTROL_BUTTON_UP)) {
 
     if (edit_page_ == _SCALE) 
       edit_page_ = _ROOT; // switch to root
@@ -603,7 +603,7 @@ template <typename Owner>
 void ScaleEditor<Owner>::reset_scale() {
   // Serial.println("Resetting scale to SEMI");
 
-  *mutable_scale_ = OC::Scales::GetScale(OC::Scales::SCALE_SEMI);
+  *mutable_scale_ = oc::Scales::GetScale(oc::Scales::SCALE_SEMI);
   num_notes_ = mutable_scale_->num_notes;
   cursor_pos_ = num_notes_;
   mask_ = ~(0xfff << num_notes_);
@@ -639,7 +639,7 @@ void ScaleEditor<Owner>::BeginEditing(bool mode) {
   if (mode) { // == meta-Q
     edit_this_scale_ = owner_->get_scale_select();
     mask_ = owner_->get_scale_mask(edit_this_scale_);
-    OC::ui._preemptScreensaver(true);
+    oc::ui._preemptScreensaver(true);
   }
   else { 
     mask_ = owner_->get_scale_mask(DUMMY); 
@@ -649,12 +649,12 @@ void ScaleEditor<Owner>::BeginEditing(bool mode) {
 template <typename Owner>
 void ScaleEditor<Owner>::Close() {
   ui.SetButtonIgnoreMask();
-  OC::ui._preemptScreensaver(false);
+  oc::ui._preemptScreensaver(false);
   owner_ = nullptr;
   edit_this_scale_ = 0;
   edit_page_ = _SCALE;
 }
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_SCALE_EDIT_H_

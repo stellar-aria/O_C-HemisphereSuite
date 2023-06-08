@@ -26,7 +26,7 @@
 #include "bjorklund.h"
 #include "oc/menus.h"
 
-namespace OC {
+namespace oc {
 
 class EuclideanMaskDraw {
 public:

@@ -24,7 +24,7 @@
 
 
 #include <Arduino.h>
-#include "SH1106_128x64_driver.h"
+#include "drivers/SH1106_128x64_driver.h"
 #include "oc/gpio.h"
 #include "oc/options.h"
 

@@ -3,9 +3,9 @@
 
 #include "oc/chords_presets.h"
 
-namespace OC {
+namespace oc {
 
-typedef OC::Chord Chord;
+typedef oc::Chord Chord;
 
 class Chords {
 public:
@@ -99,7 +99,7 @@ public:
 };
 
 
-extern Chord user_chords[OC::Chords::CHORDS_USER_LAST];
+extern Chord user_chords[oc::Chords::CHORDS_USER_LAST];
 };
 
 #endif // OC_CHORDS_H_

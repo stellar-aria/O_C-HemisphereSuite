@@ -1,7 +1,7 @@
 #include "oc/autotune.h"
 #include "oc/autotune_presets.h"
 
-namespace OC {
+namespace oc {
 
     Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
 
@@ -11,10 +11,10 @@ namespace OC {
     /*static*/
     void AUTOTUNE::Init() {
       for (size_t i = 0; i < DAC_CHANNEL_LAST; i++)
-        memcpy(&auto_calibration_data[i], &OC::autotune_data_default[0], sizeof(Autotune_data));
+        memcpy(&auto_calibration_data[i], &oc::autotune_data_default[0], sizeof(Autotune_data));
     }
     /*static*/
     const Autotune_data &AUTOTUNE::GetAutotune_data(int channel) {
         return auto_calibration_data[channel];
     }
-} // namespace OC
+} // namespace oc

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Based on Braids Quantizer, Copyright 2015 Émilie Gillet.
@@ -27,17 +26,19 @@
  * Thanks to Tom Whitwell for creating the concept, and for clarifying some things
  * Thanks to Jon Wheeler for the CV length and probability updates
  */
-
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "hemisphere/applet_base.hpp"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
 
-#define TM_MAX_SCALE OC::Scales::NUM_SCALES
+#define TM_MAX_SCALE oc::Scales::NUM_SCALES
 
 #define TM_MIN_LENGTH 2
 #define TM_MAX_LENGTH 16
 
-class TM : public HemisphereApplet {
+using namespace hemisphere;
+
+class TM : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -51,8 +52,8 @@ public:
         quant_range = 24;  //APD: Quantizer range
         cursor = 0;
         quantizer.Init();
-        scale = OC::Scales::SCALE_SEMI;
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff); // Semi-tone
+        scale = oc::Scales::SCALE_SEMI;
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff); // Semi-tone
     }
 
     void Controller() {
@@ -134,7 +135,7 @@ public:
                 scale += direction;
                 if (scale >= TM_MAX_SCALE) scale = 0;
                 if (scale < 0) scale = TM_MAX_SCALE - 1;
-                quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+                quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
                 break;
             case 3:
                 quant_range = constrain(quant_range + direction, 1, 32);
@@ -165,7 +166,7 @@ public:
         quant_range = Unpack(data, PackLocation{27,5}) + 1;
         cv2 = Unpack(data, PackLocation {32,4});
         scale = Unpack(data, PackLocation {36,8});
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
     }
 
 protected:
@@ -205,7 +206,7 @@ private:
             gfxBitmap(49, 14, 8, LOCK_ICON);
         }
         gfxBitmap(1, 24, 8, SCALE_ICON);
-        gfxPrint(12, 25, OC::scale_names_short[scale]);
+        gfxPrint(12, 25, oc::scale_names_short[scale]);
         gfxBitmap(41, 24, 8, NOTE4_ICON);
         gfxPrint(49, 25, quant_range); // APD
         gfxPrint(1, 35, "CV2:");

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-class ClockSetup : public HemisphereApplet {
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
+class ClockSetup : public AppletBase {
 public:
 
     enum ClockSetupCursor {
@@ -86,7 +88,7 @@ public:
         if (cursor == TEMPO) {
             // Tap Tempo detection
             if (last_tap_tick) {
-                tap_time[taps] = OC::CORE::ticks - last_tap_tick;
+                tap_time[taps] = oc::core::ticks - last_tap_tick;
 
                 if (tap_time[taps] > CLOCK_TICKS_MAX) {
                     taps = 0;
@@ -97,7 +99,7 @@ public:
 
                 taps %= NR_OF_TAPS;
             }
-            last_tap_tick = OC::CORE::ticks;
+            last_tap_tick = oc::core::ticks;
         }
     }
 
@@ -155,8 +157,8 @@ public:
         }
 
         // other config settings are kept here as well, it's convenient
-        Pack(data, PackLocation { 50, 2 }, HemisphereApplet::modal_edit_mode);
-        Pack(data, PackLocation { 52, 7 }, HemisphereApplet::trig_length);
+        Pack(data, PackLocation { 50, 2 }, AppletBase::modal_edit_mode);
+        Pack(data, PackLocation { 52, 7 }, AppletBase::trig_length);
 
         return data;
     }
@@ -176,8 +178,8 @@ public:
             clock_m->SetMultiply(Unpack(data, PackLocation { 16+i*6, 6 })-32, i);
         }
 
-        HemisphereApplet::modal_edit_mode = Unpack(data, PackLocation { 50, 2 });
-        HemisphereApplet::trig_length = constrain( Unpack(data, PackLocation { 52, 7 }), 1, 127);
+        AppletBase::modal_edit_mode = Unpack(data, PackLocation { 50, 2 });
+        AppletBase::trig_length = constrain( Unpack(data, PackLocation { 52, 7 }), 1, 127);
     }
 
 protected:

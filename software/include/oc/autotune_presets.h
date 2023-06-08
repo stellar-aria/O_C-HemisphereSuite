@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "oc/config.h"
 
-namespace OC {
+namespace oc {
 
   struct Autotune_data {
  

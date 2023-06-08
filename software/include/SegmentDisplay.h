@@ -8,6 +8,8 @@
 
 #ifndef SEGMENTDISPLAY_H
 #define SEGMENTDISPLAY_H
+#include <stdint.h>
+#include <drivers/display.h>
 
 enum SegmentSize {
     BIG_SEGMENTS,
@@ -41,21 +43,21 @@ public:
         size = segment_size;
 
         if (size == SegmentSize::BIG_SEGMENTS) {
-            segment[0] = {PixO{2,0}, PixO{3,0}, PixO{4,0}, PixO{5,0}, PixO{3,1}, PixO{4,1}, 6};
-            segment[1] = {PixO{6,2}, PixO{6,3}, PixO{7,1}, PixO{7,2}, PixO{7,3}, PixO{7,4}, 6};
-            segment[2] = {PixO{6,8}, PixO{6,9}, PixO{7,7}, PixO{7,8}, PixO{7,9}, PixO{7,10}, 6};
-            segment[3] = {PixO{3,10}, PixO{4,10}, PixO{2,11}, PixO{3,11}, PixO{4,11}, PixO{5,11}, 6};
-            segment[4] = {PixO{0,7}, PixO{0,8}, PixO{0,9}, PixO{0,10}, PixO{1,8}, PixO{1,9}, 6};
-            segment[5] = {PixO{0,1}, PixO{0,2}, PixO{0,3}, PixO{0,4}, PixO{1,2}, PixO{1,3}, 6};
-            segment[6] = {PixO{3,5}, PixO{4,5}, PixO{2,6}, PixO{3,6}, PixO{4,6}, PixO{5,6}, 6};
+            segment[0] = {{PixO{2,0}, PixO{3,0}, PixO{4,0}, PixO{5,0}, PixO{3,1}, PixO{4,1}}, 6};
+            segment[1] = {{PixO{6,2}, PixO{6,3}, PixO{7,1}, PixO{7,2}, PixO{7,3}, PixO{7,4}}, 6};
+            segment[2] = {{PixO{6,8}, PixO{6,9}, PixO{7,7}, PixO{7,8}, PixO{7,9}, PixO{7,10}}, 6};
+            segment[3] = {{PixO{3,10}, PixO{4,10}, PixO{2,11}, PixO{3,11}, PixO{4,11}, PixO{5,11}}, 6};
+            segment[4] = {{PixO{0,7}, PixO{0,8}, PixO{0,9}, PixO{0,10}, PixO{1,8}, PixO{1,9}}, 6};
+            segment[5] = {{PixO{0,1}, PixO{0,2}, PixO{0,3}, PixO{0,4}, PixO{1,2}, PixO{1,3}}, 6};
+            segment[6] = {{PixO{3,5}, PixO{4,5}, PixO{2,6}, PixO{3,6}, PixO{4,6}, PixO{5,6}}, 6};
         } else {
-            segment[0] = {PixO{1,0}, PixO{2,0}, PixO{3,0}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
-            segment[1] = {PixO{3,0}, PixO{3,1}, PixO{3,2}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
-            segment[2] = {PixO{3,2}, PixO{3,3}, PixO{3,4}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
-            segment[3] = {PixO{1,4}, PixO{2,4}, PixO{3,4}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
-            segment[4] = {PixO{1,2}, PixO{1,3}, PixO{1,4}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
-            segment[5] = {PixO{1,0}, PixO{1,1}, PixO{1,2}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
-            segment[6] = {PixO{1,2}, PixO{2,2}, PixO{3,2}, PixO{0,0}, PixO{0,0}, PixO{0,0}, 3};
+            segment[0] = {{PixO{1,0}, PixO{2,0}, PixO{3,0}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
+            segment[1] = {{PixO{3,0}, PixO{3,1}, PixO{3,2}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
+            segment[2] = {{PixO{3,2}, PixO{3,3}, PixO{3,4}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
+            segment[3] = {{PixO{1,4}, PixO{2,4}, PixO{3,4}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
+            segment[4] = {{PixO{1,2}, PixO{1,3}, PixO{1,4}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
+            segment[5] = {{PixO{1,0}, PixO{1,1}, PixO{1,2}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
+            segment[6] = {{PixO{1,2}, PixO{2,2}, PixO{3,2}, PixO{0,0}, PixO{0,0}, PixO{0,0}}, 3};
         }
 
         uint8_t digits[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x67};

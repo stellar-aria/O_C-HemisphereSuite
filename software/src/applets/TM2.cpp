@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 // Copyright (c) 2022, Nicholas J. Michalek
 //
@@ -30,19 +29,22 @@
  *
  * Heavily adapted as DualTM from ShiftReg/TM by djphazer (Nicholas J. Michalek)
  */
+#include "hemisphere/applet_base.hpp"
 
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
 #include "oc/strings.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/midi.hpp"
 
-#define TM2_MAX_SCALE OC::Scales::NUM_SCALES
+using namespace hemisphere;
 
-#define TM2_MIN_LENGTH 2
-#define TM2_MAX_LENGTH 32
+constexpr int TM2_MAX_SCALE = oc::Scales::NUM_SCALES;
 
-class DualTM : public HemisphereApplet {
+constexpr int TM2_MIN_LENGTH = 2;
+constexpr int TM2_MAX_LENGTH = 32;
+
+class DualTM : public AppletBase {
 public:
     
     enum TM2Cursor {
@@ -92,7 +94,7 @@ public:
         reg[1] = ~reg[0];
 
         quantizer.Init();
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff); // Semi-tone
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff); // Semi-tone
     }
 
     void Controller() {
@@ -246,7 +248,7 @@ public:
             scale += direction;
             if (scale >= TM2_MAX_SCALE) scale = 0;
             if (scale < 0) scale = TM2_MAX_SCALE - 1;
-            quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+            quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
             break;
         case RANGE:
             range = constrain(range + direction, 1, 32);
@@ -295,7 +297,7 @@ public:
         outmode[0] = (OutputMode) Unpack(data, PackLocation {17,4});
         outmode[1] = (OutputMode) Unpack(data, PackLocation {21,4});
         scale = Unpack(data, PackLocation {25,8});
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
         cvmode[0] = (InputMode) Unpack(data, PackLocation {33,4});
         cvmode[1] = (InputMode) Unpack(data, PackLocation {37,4});
         smoothing = Unpack(data, PackLocation {41,6}) + 1;
@@ -316,7 +318,7 @@ private:
     int cursor; // TM2Cursor
 
     braids::Quantizer quantizer;
-    int scale = OC::Scales::SCALE_SEMI; // Scale used for quantized output
+    int scale = oc::Scales::SCALE_SEMI; // Scale used for quantized output
     int root_note; // TODO
 
     // TODO: consider using the TuringMachine class or whatev
@@ -342,7 +344,7 @@ private:
 
     int slew(int old_val, const int new_val = 0) {
         // more smoothing causes more ticks to be skipped
-        if (OC::CORE::ticks % smooth_mod) return old_val;
+        if (oc::core::ticks % smooth_mod) return old_val;
 
         old_val = (old_val * (smooth_mod - 1) + new_val) / smooth_mod;
         return old_val; 
@@ -421,7 +423,7 @@ private:
             gfxBitmap(49, 14, 8, LOCK_ICON);
         }
         gfxBitmap(1, 25, 8, SCALE_ICON);
-        gfxPrint(12, 25, OC::scale_names_short[scale]);
+        gfxPrint(12, 25, oc::scale_names_short[scale]);
         gfxBitmap(41, 25, 8, UP_DOWN_ICON);
         gfxPrint(49, 25, range_mod); // APD
 

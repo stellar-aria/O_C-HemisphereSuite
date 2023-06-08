@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2019, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,9 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+
 #define ATTENOFF_INCREMENTS 128
 
-class AttenuateOffset : public HemisphereApplet {
+using namespace hemisphere;
+
+class AttenuateOffset : public AppletBase {
 public:
 
     const char* applet_name() {

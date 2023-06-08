@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2020, Logarhythm
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,17 +28,20 @@
 // Contributions:
 // Thanks to Github/Muffwiggler user Qiemem for adding reseed(), to break the small cycle of available seed values that was occurring in practice
 
+#include "hemisphere/applet_base.hpp"
 
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
 #include "oc/strings.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/midi.hpp"
+
+using namespace hemisphere;
 
 #define ACID_HALF_STEPS 16
 #define ACID_MAX_STEPS 32
 
-class TB_3PO : public HemisphereApplet 
+class TB_3PO : public AppletBase 
 {
   public:
 
@@ -57,13 +59,13 @@ class TB_3PO : public HemisphereApplet
       octave_offset = 0;
       
       // Init the quantizer for selecting pitches / CVs from
-      scale = 29;  // GUNA scale sounds cool   //OC::Scales::SCALE_SEMI; // semi sounds pretty bunk
+      scale = 29;  // GUNA scale sounds cool   //oc::Scales::SCALE_SEMI; // semi sounds pretty bunk
       quantizer.Init();
       set_quantizer_scale(scale);
 
       // This quantizer is for displaying a keyboard graphic, mapping the current scale to semitones
       display_semi_quantizer.Init();
-      display_semi_quantizer.Configure(OC::Scales::GetScale(OC::Scales::SCALE_SEMI), 0xffff);
+      display_semi_quantizer.Configure(oc::Scales::GetScale(oc::Scales::SCALE_SEMI), 0xffff);
       
       density = 12;
       density_encoder_display = 0;
@@ -90,7 +92,7 @@ class TB_3PO : public HemisphereApplet
     void Controller() 
     {
       // Track timing to set gate timing at ~32nd notes per recent clocks
-      int this_tick = OC::CORE::ticks;
+      int this_tick = oc::core::ticks;
       
       // Regenerate / Reset
       if (Clock(1) || manual_reset_flag) 
@@ -324,8 +326,8 @@ class TB_3PO : public HemisphereApplet
         break;
       case 6: { // Scale selection
         scale += direction;
-        if (scale >= OC::Scales::NUM_SCALES) scale = 0;
-        if (scale < 0) scale = OC::Scales::NUM_SCALES - 1;
+        if (scale >= oc::Scales::NUM_SCALES) scale = 0;
+        if (scale < 0) scale = oc::Scales::NUM_SCALES - 1;
         // Apply to the quantizer
         set_quantizer_scale(scale);
 
@@ -394,10 +396,10 @@ class TB_3PO : public HemisphereApplet
       octave_offset = Unpack(data, PackLocation {32,8});
       num_steps = Unpack(data, PackLocation {40,5}) + 1;
 
-      //const braids::Scale & quant_scale = OC::Scales::GetScale(scale);
+      //const braids::Scale & quant_scale = oc::Scales::GetScale(scale);
       set_quantizer_scale(scale);
       
-      //scale = constrain(0, OC::Scales::NUM_SCALES-1);
+      //scale = constrain(0, oc::Scales::NUM_SCALES-1);
       root = constrain(root, 0, 11);
       density_encoder = constrain(density_encoder, 0, 14); // Internally just positive
       density = density_encoder;
@@ -773,7 +775,7 @@ class TB_3PO : public HemisphereApplet
 
     void set_quantizer_scale(int new_scale)
     {
-      const braids::Scale & quant_scale = OC::Scales::GetScale(new_scale);
+      const braids::Scale & quant_scale = oc::Scales::GetScale(new_scale);
       quantizer.Configure(quant_scale, 0xffff);
       scale_size = quant_scale.num_notes;  // Track this scale size for octaves and display
     }
@@ -879,9 +881,9 @@ class TB_3PO : public HemisphereApplet
            
       // Scale and root note select
       // xd = (scale < 4) ? 32 : 39;  // Slide/crowd to the left a bit if showing the "USER1"-"USER4" scales, which are uniquely five instead of four characters
-      gfxPrint(39, 26, OC::scale_names_short[scale]);
+      gfxPrint(39, 26, oc::scale_names_short[scale]);
 
-      gfxPrint((octave_offset == 0 ? 45 : 39), 36, OC::Strings::note_names_unpadded[root]);
+      gfxPrint((octave_offset == 0 ? 45 : 39), 36, oc::Strings::note_names_unpadded[root]);
       if(octave_offset != 0)
       {
         gfxPrint(51, 36, octave_offset);

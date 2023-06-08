@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,29 +20,37 @@
 
 // See https://www.pjrc.com/teensy/td_midi.html
 
-#include "apps/HEMISPHERE.hpp"
-#include "hemisphere/MIDILogEntry.h"
+#include "hemisphere/applet_base.hpp"
+#include "HEMISPHERE.hpp"
 
-#define HEM_MIDI_CLOCK_DIVISOR 12
+using namespace hemisphere;
 
-class hMIDIIn : public HemisphereApplet {
+constexpr int MIDI_CLOCK_DIVISOR = 12;
+
+struct MIDILogEntry {
+    int message;
+    int data1;
+    int data2;
+};
+
+class hMIDIIn : public AppletBase {
 public:
 
     // The functions available for each output
     enum hMIDIFunctions {
-        HEM_MIDI_NOTE_OUT,
-        HEM_MIDI_TRIG_OUT,
-        HEM_MIDI_GATE_OUT,
-        HEM_MIDI_VEL_OUT,
-        HEM_MIDI_CC_OUT,
-        HEM_MIDI_AT_OUT,
-        HEM_MIDI_PB_OUT,
-        HEM_MIDI_CLOCK_OUT,
-        HEM_MIDI_START_OUT,
+        MIDI_NOTE_OUT,
+        MIDI_TRIG_OUT,
+        MIDI_GATE_OUT,
+        MIDI_VEL_OUT,
+        MIDI_CC_OUT,
+        MIDI_AT_OUT,
+        MIDI_PB_OUT,
+        MIDI_CLOCK_OUT,
+        MIDI_START_OUT,
 
-        HEM_MIDI_MAX_FUNCTION = HEM_MIDI_START_OUT
+        MIDI_MAX_FUNCTION = MIDI_START_OUT
     };
-    const char* fn_name[HEM_MIDI_MAX_FUNCTION + 1] = {"Note#", "Trig", "Gate", "Veloc", "Mod", "Aft", "Bend", "Clock", "Start"};
+    const char* fn_name[MIDI_MAX_FUNCTION + 1] = {"Note#", "Trig", "Gate", "Veloc", "Mod", "Aft", "Bend", "Clock", "Start"};
 
     const char* applet_name() {
         return "MIDIIn";
@@ -69,29 +76,29 @@ public:
             int data1 = usbMIDI.getData1();
             int data2 = usbMIDI.getData2();
 
-            if (message == HEM_MIDI_SYSEX) {
+            if (message == MIDI_SYSEX) {
                 ReceiveManagerSysEx();
                 continue;
             }
 
             // Listen for incoming clock
-            if (HEM_MIDI_CLOCK == message) {
+            if (MIDI_CLOCK == message) {
                 if (++clock_count == 1) {
                     ForEachChannel(ch) 
                     {
-                        if (function[ch] == HEM_MIDI_CLOCK_OUT) {
+                        if (function[ch] == MIDI_CLOCK_OUT) {
                             ClockOut(ch);
                         }
                     }
                 }
-                if (clock_count == HEM_MIDI_CLOCK_DIVISOR) clock_count = 0;
+                if (clock_count == MIDI_CLOCK_DIVISOR) clock_count = 0;
                 continue;
             }
 
-            if (HEM_MIDI_START == message) {
+            if (MIDI_START == message) {
                 ForEachChannel(ch) 
                 {
-                    if (function[ch] == HEM_MIDI_START_OUT) {
+                    if (function[ch] == MIDI_START_OUT) {
                         ClockOut(ch);
                     }
                 }
@@ -103,26 +110,26 @@ public:
             // all other messages are filtered by MIDI channel
             if (usbMIDI.getChannel() == (channel + 1))
             {
-                last_tick = OC::CORE::ticks;
+                last_tick = oc::core::ticks;
                 bool log_this = false;
 
-                if (message == HEM_MIDI_NOTE_ON) { // Note on
+                if (message == MIDI_NOTE_ON) { // Note on
                     // only track the most recent note
                     first_note = data1;
 
                     // Should this message go out on any channel?
                     ForEachChannel(ch)
                     {
-                        if (function[ch] == HEM_MIDI_NOTE_OUT)
+                        if (function[ch] == MIDI_NOTE_OUT)
                             Out(ch, MIDIQuantizer::CV(data1));
 
-                        if (function[ch] == HEM_MIDI_TRIG_OUT)
+                        if (function[ch] == MIDI_TRIG_OUT)
                             ClockOut(ch);
 
-                        if (function[ch] == HEM_MIDI_GATE_OUT)
+                        if (function[ch] == MIDI_GATE_OUT)
                             GateOut(ch, 1);
 
-                        if (function[ch] == HEM_MIDI_VEL_OUT)
+                        if (function[ch] == MIDI_VEL_OUT)
                             Out(ch, Proportion(data2, 127, HEMISPHERE_MAX_CV));
                     }
 
@@ -130,24 +137,24 @@ public:
                 }
 
                 // Note off - only for most recent note
-                if (message == HEM_MIDI_NOTE_OFF && data1 == first_note)
+                if (message == MIDI_NOTE_OFF && data1 == first_note)
                 {
                     first_note = -1;
 
                     // Should this message go out on any channel?
                     ForEachChannel(ch)
                     {
-                        if (function[ch] == HEM_MIDI_GATE_OUT) {
+                        if (function[ch] == MIDI_GATE_OUT) {
                             GateOut(ch, 0);
                             log_this = 1;
                         }
                     }
                 }
 
-                if (message == HEM_MIDI_CC) { // Modulation wheel
+                if (message == MIDI_CC) { // Modulation wheel
                     ForEachChannel(ch)
                     {
-                        if (function[ch] == HEM_MIDI_CC_OUT && data1 == 1) {
+                        if (function[ch] == MIDI_CC_OUT && data1 == 1) {
                             Out(ch, Proportion(data2, 127, HEMISPHERE_MAX_CV));
                             log_this = 1;
                         }
@@ -155,20 +162,20 @@ public:
 
                 }
 
-                if (message == HEM_MIDI_AFTERTOUCH) { // Aftertouch
+                if (message == MIDI_AFTERTOUCH) { // Aftertouch
                     ForEachChannel(ch)
                     {
-                        if (function[ch] == HEM_MIDI_AT_OUT) {
+                        if (function[ch] == MIDI_AT_OUT) {
                             Out(ch, Proportion(data1, 127, HEMISPHERE_MAX_CV));
                             log_this = 1;
                         }
                     }
                 }
 
-                if (message == HEM_MIDI_PITCHBEND) { // Pitch Bend
+                if (message == MIDI_PITCHBEND) { // Pitch Bend
                     ForEachChannel(ch)
                     {
-                        if (function[ch] == HEM_MIDI_PB_OUT) {
+                        if (function[ch] == MIDI_PB_OUT) {
                             int data = (data2 << 7) + data1 - 8192;
                             Out(ch, Proportion(data, 0x7fff, HEMISPHERE_3V_CV));
                             log_this = 1;
@@ -202,7 +209,7 @@ public:
         if (cursor == 0) channel = constrain(channel + direction, 0, 15);
         else {
             int ch = cursor - 1;
-            function[ch] = constrain(function[ch] + direction, 0, HEM_MIDI_MAX_FUNCTION);
+            function[ch] = constrain(function[ch] + direction, 0, MIDI_MAX_FUNCTION);
             clock_count = 0;
         }
         ResetCursor();
@@ -259,7 +266,7 @@ private:
     }
 
     void DrawMonitor() {
-        if (OC::CORE::ticks - last_tick < 4000) {
+        if (oc::core::ticks - last_tick < 4000) {
             gfxBitmap(46, 1, 8, MIDI_ICON);
         }
     }
@@ -300,28 +307,28 @@ private:
 
     void log_entry(int y, int index) {
         switch ( log[index].message ) {
-        case HEM_MIDI_NOTE_ON:
+        case MIDI_NOTE_ON:
             gfxBitmap(1, y, 8, NOTE_ICON);
             gfxPrint(10, y, midi_note_numbers[log[index].data1]);
             gfxPrint(40, y, log[index].data2);
             break;
 
-        case HEM_MIDI_NOTE_OFF:
+        case MIDI_NOTE_OFF:
             gfxPrint(1, y, "-");
             gfxPrint(10, y, midi_note_numbers[log[index].data1]);
             break;
 
-        case HEM_MIDI_CC:
+        case MIDI_CC:
             gfxBitmap(1, y, 8, MOD_ICON);
             gfxPrint(10, y, log[index].data2);
             break;
 
-        case HEM_MIDI_AFTERTOUCH:
+        case MIDI_AFTERTOUCH:
             gfxBitmap(1, y, 8, AFTERTOUCH_ICON);
             gfxPrint(10, y, log[index].data1);
             break;
 
-        case HEM_MIDI_PITCHBEND: {
+        case MIDI_PITCHBEND: {
             int data = (log[index].data2 << 7) + log[index].data1 - 8192;
             gfxBitmap(1, y, 8, BEND_ICON);
             gfxPrint(10, y, data);

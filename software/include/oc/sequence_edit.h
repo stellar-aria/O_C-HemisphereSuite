@@ -6,7 +6,7 @@
 #include "oc/patterns_presets.h"
 #include "oc/options.h"
 
-namespace OC {
+namespace oc {
 
 // Pattern editor
 // based on scale editor written by Patrick Dowling, adapted for TU, re-adapted for OC
@@ -31,11 +31,11 @@ public:
   }
 
   void Edit(Owner *owner, int pattern) {
-    if (OC::Patterns::PATTERN_NONE == pattern)
+    if (oc::Patterns::PATTERN_NONE == pattern)
       return;
 
-    pattern_ = mutable_pattern_ = &OC::user_patterns[pattern];
-    pattern_name_ = OC::pattern_names_short[pattern];
+    pattern_ = mutable_pattern_ = &oc::user_patterns[pattern];
+    pattern_name_ = oc::pattern_names_short[pattern];
     // Serial.print("Editing user pattern ");
     // Serial.println(pattern_name_);
     owner_ = owner;
@@ -54,7 +54,7 @@ private:
 
   Owner *owner_;
   const char * pattern_name_;
-  const OC::Pattern *pattern_;
+  const oc::Pattern *pattern_;
   Pattern *mutable_pattern_;
 
   uint16_t mask_;
@@ -109,7 +109,7 @@ void PatternEditor<Owner>::Draw() {
   if (edit_this_sequence_ == owner_->get_sequence())
     graphics.printf("#%d", id + 1);
   else {
-    graphics.drawBitmap8(x, y, 4, OC::bitmap_indicator_4x8);
+    graphics.drawBitmap8(x, y, 4, oc::bitmap_indicator_4x8);
     graphics.setPrintPos(x + 4, y);
     graphics.print(id + 1);
   }
@@ -136,9 +136,9 @@ void PatternEditor<Owner>::Draw() {
       if (frac < -127) {
         octave--;
       }
-      graphics.printf(": %s%d %dc (%d)", OC::Strings::note_names_unpadded[pClass], octave, cents, frac%128); //, (float)frac / 128.0f);
+      graphics.printf(": %s%d %dc (%d)", oc::Strings::note_names_unpadded[pClass], octave, cents, frac%128); //, (float)frac / 128.0f);
     } else {
-      graphics.printf(": %s%d +%dc (%d)", OC::Strings::note_names_unpadded[pClass], octave, cents, frac%128); //, (float)frac / 128.0f);
+      graphics.printf(": %s%d +%dc (%d)", oc::Strings::note_names_unpadded[pClass], octave, cents, frac%128); //, (float)frac / 128.0f);
     }
   }
 
@@ -185,7 +185,7 @@ void PatternEditor<Owner>::Draw() {
     }
 
     if (i == cursor_pos_) {
-      if (OC::ui.read_immediate(OC::CONTROL_BUTTON_L))
+      if (oc::ui.read_immediate(oc::CONTROL_BUTTON_L))
         graphics.drawFrame(x - 3, y - 5, 10, 10);
       else
         graphics.drawFrame(x - 2, y - 4, 8, 8);
@@ -207,16 +207,16 @@ void PatternEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
 
    if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         handleButtonUp(event);
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         handleButtonDown(event);
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         handleButtonLeft(event);
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         Close();
         break;
       default:
@@ -225,26 +225,26 @@ void PatternEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
   }
   else if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
      switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         // screensaver    // TODO: ideally, needs to be overridden ... invert_mask();
       break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
       {
-        if (OC::ui.read_immediate(OC::CONTROL_BUTTON_L))
+        if (oc::ui.read_immediate(oc::CONTROL_BUTTON_L))
           clear_mask();
         else
           paste_sequence();
       }
       break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
       {
-        if (OC::ui.read_immediate(OC::CONTROL_BUTTON_DOWN))
+        if (oc::ui.read_immediate(oc::CONTROL_BUTTON_DOWN))
           clear_mask();
         else
           copy_sequence();
       }
       break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
        // app menu
       break;
       default:
@@ -258,9 +258,9 @@ void PatternEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
 
   uint16_t mask = mask_;
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     move_cursor(event.value);
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     bool handled = false;
     if (mutable_pattern_) {
       if (cursor_pos_ >= num_slots_) {
@@ -273,7 +273,7 @@ void PatternEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
           num_slots_ = num_slots;
            if (event.value > 0) {
             // erase  slots when expanding?
-            if (OC::ui.read_immediate(OC::CONTROL_BUTTON_L)) {
+            if (oc::ui.read_immediate(oc::CONTROL_BUTTON_L)) {
                mask &= ~(~(0xffff << (num_slots_ - cursor_pos_)) << cursor_pos_);
                owner_->set_pitch_at_step(edit_this_sequence_, num_slots_, 0x0);
             }
@@ -292,7 +292,7 @@ void PatternEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
       // Q? might be better to actually add whatever is in the scale
       // or semitone/finetune?
       int16_t delta = event.value;
-      if (OC::ui.read_immediate(OC::CONTROL_BUTTON_L))
+      if (oc::ui.read_immediate(oc::CONTROL_BUTTON_L))
        pitch += delta; // fine
       else
         pitch += (delta << 7); // semitone
@@ -323,7 +323,7 @@ void PatternEditor<Owner>::handleButtonUp(const UI::Event &event) {
 
     // next pattern / edit 'offline':
     edit_this_sequence_++;
-    if (edit_this_sequence_ > OC::Patterns::PATTERN_USER_LAST-1)
+    if (edit_this_sequence_ > oc::Patterns::PATTERN_USER_LAST-1)
       edit_this_sequence_ = 0;
 
     cursor_pos_ = 0;
@@ -337,7 +337,7 @@ void PatternEditor<Owner>::handleButtonDown(const UI::Event &event) {
     // next pattern / edit 'offline':
     edit_this_sequence_--;
     if (edit_this_sequence_ < 0)
-      edit_this_sequence_ = OC::Patterns::PATTERN_USER_LAST-1;
+      edit_this_sequence_ = oc::Patterns::PATTERN_USER_LAST-1;
 
     cursor_pos_ = 0;
     num_slots_ = owner_->get_sequence_length(edit_this_sequence_);
@@ -417,6 +417,6 @@ void PatternEditor<Owner>::Close() {
   owner_ = nullptr;
 }
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_PATTERN_EDIT_H_

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2022, Benjamin Rosenbach
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,12 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "hemisphere/ProbLoopLinker.h" // singleton for linking ProbDiv and ProbMelo
+#include "hemisphere/applet_base.hpp"
+#include "hemisphere/prob_loop_linker.hpp" // singleton for linking ProbDiv and ProbMelo
 
-#define HEM_PROB_DIV_MAX_WEIGHT 15
-#define HEM_PROB_DIV_MAX_LOOP_LENGTH 32
+using namespace hemisphere;
 
-class ProbabilityDivider : public HemisphereApplet {
+constexpr int HEM_PROB_DIV_MAX_WEIGHT = 15;
+constexpr int HEM_PROB_DIV_MAX_LOOP_LENGTH = 32;
+
+class ProbabilityDivider : public AppletBase {
 public:
 
     enum ProbDivCursor {

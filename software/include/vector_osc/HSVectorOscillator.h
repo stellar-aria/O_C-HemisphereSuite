@@ -22,7 +22,7 @@
 #define HS_VECTOR_OSCILLATOR
 #include <Arduino.h>
 
-namespace HS {
+namespace hemisphere {
 
 const byte VO_SEGMENT_COUNT = 64; // The total number of segments in user memory
 const byte VO_MAX_SEGMENTS = 12; // The maximum number of segments in a waveform
@@ -51,7 +51,7 @@ struct VOSegment {
 
 static VOSegment user_waveforms[VO_SEGMENT_COUNT];
 
-}; // namespace HS
+}; // namespace hemisphere
 
 #define int2signal(x) (x << 10)
 #define signal2int(x) (x >> 10)
@@ -64,7 +64,7 @@ enum {
     VO_NUMBER_OF_WAVEFORMS
 };
 
-typedef HS::VOSegment VOSegment;
+typedef hemisphere::VOSegment VOSegment;
 
 class VectorOscillator {
 public:
@@ -86,8 +86,8 @@ public:
     void Offset(int32_t offset_) {offset = offset_;}
 
     /* Add a new segment to the end */
-    void SetSegment(HS::VOSegment segment) {
-        if (segment_count < HS::VO_MAX_SEGMENTS) {
+    void SetSegment(hemisphere::VOSegment segment) {
+        if (segment_count < hemisphere::VO_MAX_SEGMENTS) {
             memcpy(&segments[segment_count], &segment, sizeof(segments[segment_count]));
             total_time += segments[segment_count].time;
             segment_count++;
@@ -95,7 +95,7 @@ public:
     }
 
     /* Update an existing segment */
-    void SetSegment(byte ix, HS::VOSegment segment) {
+    void SetSegment(byte ix, hemisphere::VOSegment segment) {
         ix = constrain(ix, 0, segment_count - 1);
         total_time -= segments[ix].time;
         memcpy(&segments[ix], &segment, sizeof(segments[ix]));
@@ -103,7 +103,7 @@ public:
         if (ix == segment_count) segment_count++;
     }
 
-    HS::VOSegment GetSegment(byte ix) {
+    hemisphere::VOSegment GetSegment(byte ix) {
         ix = constrain(ix, 0, segment_count - 1);
         return segments[ix];
     }

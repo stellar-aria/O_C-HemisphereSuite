@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Hemisphere Applet Boilerplate. Follow these steps to add a Hemisphere app:
 //
 // (1) Save this file as HEM_ClassName.ino
@@ -29,8 +28,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
 
-class ICONS : public HemisphereApplet {
+class ICONS : public AppletBase {
 public:
 
     const char* applet_name() {

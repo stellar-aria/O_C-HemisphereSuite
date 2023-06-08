@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-namespace OC {
+namespace oc {
 
   struct Pattern {
     // length + mask is stored within app

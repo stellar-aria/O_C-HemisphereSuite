@@ -6,7 +6,7 @@
 #include "oc/DAC.h"
 #include "oc/options.h"
 
-namespace OC {
+namespace oc {
 
 static constexpr weegfx::coord_t note_circle_r = 28;
 
@@ -42,7 +42,7 @@ void visualize_pitch_classes(uint8_t *normalized, weegfx::coord_t centerx, weegf
   last_pos.x += centerx;
   last_pos.y += centery;
   for (size_t i = 1; i < 3; ++i) {
-    graphics.drawBitmap8(last_pos.x - 3, last_pos.y - 3, 8, OC::circle_disk_bitmap_8x8);
+    graphics.drawBitmap8(last_pos.x - 3, last_pos.y - 3, 8, oc::circle_disk_bitmap_8x8);
     coords current_pos = circle_pos_lut[normalized[i]];
     current_pos.x += centerx;
     current_pos.y += centery;
@@ -50,7 +50,7 @@ void visualize_pitch_classes(uint8_t *normalized, weegfx::coord_t centerx, weegf
     last_pos = current_pos;
   }
   graphics.drawLine(last_pos.x, last_pos.y, circle_pos_lut[normalized[0]].x + centerx, circle_pos_lut[normalized[0]].y + centery);
-  graphics.drawBitmap8(last_pos.x - 3, last_pos.y - 3, 8, OC::circle_disk_bitmap_8x8);
+  graphics.drawBitmap8(last_pos.x - 3, last_pos.y - 3, 8, oc::circle_disk_bitmap_8x8);
 }
 
 /* ----------- screensaver ----------------- */
@@ -137,4 +137,4 @@ void vectorscope_render() {
   }
 }
 
-}; // namespace OC
+}; // namespace oc

@@ -27,7 +27,7 @@
 #include "util/turing.h"
 #include "util/misc.h"
 
-namespace OC {
+namespace oc {
 
 enum AppEvent {
   APP_EVENT_SUSPEND,
@@ -84,6 +84,6 @@ namespace apps {
 
 }; // namespace apps
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_APP_H_

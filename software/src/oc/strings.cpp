@@ -1,6 +1,6 @@
 #include "oc/strings.h"
 
-namespace OC {
+namespace oc {
 
   namespace Strings {
 

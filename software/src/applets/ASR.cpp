@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Based on Braids Quantizer, Copyright 2015 Émilie Gillet.
@@ -21,10 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "hemisphere/RingBufferManager.h" // Singleton Ring Buffer manager
+#include "hemisphere/applet_base.hpp"
+#include "hemisphere/ring_buffer_manager.hpp" // Singleton Ring Buffer manager
 #include "oc/scales.h"
 
-class ASR : public HemisphereApplet {
+using namespace hemisphere;
+
+class ASR : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -32,9 +34,9 @@ public:
     }
 
     void Start() {
-        scale = OC::Scales::SCALE_SEMI;
+        scale = oc::Scales::SCALE_SEMI;
         buffer_m->SetIndex(1);
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff); // Semi-tone
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff); // Semi-tone
     }
 
     void Controller() {
@@ -80,9 +82,9 @@ public:
         }
         if (cursor == 1) { // Scale selection
             scale += direction;
-            if (scale >= OC::Scales::NUM_SCALES) scale = 0;
-            if (scale < 0) scale = OC::Scales::NUM_SCALES - 1;
-            quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+            if (scale >= oc::Scales::NUM_SCALES) scale = 0;
+            if (scale < 0) scale = oc::Scales::NUM_SCALES - 1;
+            quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
         }
     }
         
@@ -128,7 +130,7 @@ private:
 
         // Scale
         gfxBitmap(1, 24, 8, SCALE_ICON);
-        gfxPrint(12, 25, OC::scale_names_short[scale]);
+        gfxPrint(12, 25, oc::scale_names_short[scale]);
 
         // Cursor
         if (cursor == 0) gfxCursor(43, 23, 18); // Index Cursor

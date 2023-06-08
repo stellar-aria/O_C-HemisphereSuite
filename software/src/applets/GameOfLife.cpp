@@ -1,7 +1,9 @@
-#include "HemisphereApplet.h"
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 #define GOL_ABS(X) (X < 0 ? -X : X)
 
-class GameOfLife : public HemisphereApplet {
+class GameOfLife : public AppletBase {
 public:
 
     const char* applet_name() {

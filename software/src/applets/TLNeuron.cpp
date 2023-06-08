@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,10 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 // How fast the axon pulses when active
 #define HEM_TLN_ACTIVE_TICKS 1500
 
-class TLNeuron : public HemisphereApplet {
+class TLNeuron : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters

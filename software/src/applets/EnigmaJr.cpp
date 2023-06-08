@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Hemisphere Applet Boilerplate. Follow these steps to add a Hemisphere app:
 //
 // Copyright (c) 2018, Jason Justian
@@ -22,15 +21,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "hemisphere/applet_base.hpp"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
-#include "enigma/TuringMachine.h"
-#include "enigma/TuringMachineState.h"
-#include "enigma/EnigmaOutput.h"
+#include "apps/enigma/TuringMachine.h"
+#include "apps/enigma/TuringMachineState.h"
+#include "apps/enigma/EnigmaOutput.h"
+using namespace hemisphere;
 
-class EnigmaJr : public HemisphereApplet {
+class EnigmaJr : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -86,7 +86,7 @@ public:
 
         if (cursor == 0) { // Switch TM
             byte prev_tm = tm_state.GetTMIndex();
-            byte new_tm = constrain(prev_tm + direction, 0, HS::TURING_MACHINE_COUNT - 1);
+            byte new_tm = constrain(prev_tm + direction, 0, hemisphere::TuringMachine::COUNT - 1);
             if (prev_tm != new_tm) SwitchTuringMachine(new_tm);
         } else if (cursor ==1) { // Probability
             p = constrain(p + direction, 0, 100);
@@ -135,7 +135,7 @@ private:
     void DrawInterface() {
         // First line: TM and Probability
         char name[4];
-        HS::TuringMachine::SetName(name, tm_state.GetTMIndex());
+        hemisphere::TuringMachine::SetName(name, tm_state.GetTMIndex());
         gfxPrint(1, 15, name);
         if (tm_state.IsFavorite()) gfxIcon(20, 15, FAVORITE_ICON);
         if (cursor == 0) {
@@ -180,19 +180,19 @@ private:
 
     void Organize(int cv) {
         if (cv > HEMISPHERE_MAX_CV) cv = HEMISPHERE_MAX_CV;
-        byte next_tm = Proportion(cv, HEMISPHERE_MAX_CV, HS::TURING_MACHINE_COUNT - 1);
+        byte next_tm = Proportion(cv, HEMISPHERE_MAX_CV, hemisphere::TuringMachine::COUNT - 1);
 
         // Number of favorites
         byte favorites = 0;
-        for (byte i = 0; i < HS::TURING_MACHINE_COUNT; i++) favorites += HS::user_turing_machines[i].favorite;
+        for (byte i = 0; i < hemisphere::TuringMachine::COUNT; i++) favorites += hemisphere::user_turing_machines[i].favorite;
 
         if (favorites > 0) {
             byte pick = Proportion(cv, HEMISPHERE_MAX_CV, favorites) + 1;
             pick = constrain(pick, 1, favorites);
             favorites = 0;
-            for (int i = 0; i < HS::TURING_MACHINE_COUNT; i++)
+            for (int i = 0; i < hemisphere::TuringMachine::COUNT; i++)
             {
-                if (HS::user_turing_machines[i].favorite) {
+                if (hemisphere::user_turing_machines[i].favorite) {
                     if (++favorites == pick) {
                         next_tm = i;
                         break;

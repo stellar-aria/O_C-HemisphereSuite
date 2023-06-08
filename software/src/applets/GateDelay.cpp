@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-class GateDelay : public HemisphereApplet {
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
+class GateDelay : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -47,7 +49,7 @@ public:
                 mod_time = constrain(mod_time, 0, 2000);
 
                 bool p = play(ch, mod_time);
-                if (p) last_gate[ch] = OC::CORE::ticks;
+                if (p) last_gate[ch] = oc::core::ticks;
                 GateOut(ch, p);
 
                 if (++location[ch] > 2047) location[ch] = 0;
@@ -115,7 +117,7 @@ private:
             gfxPrint(1, y, time[ch]);
             gfxPrint("ms");
 
-            if (OC::CORE::ticks - last_gate[ch] < 1667) gfxBitmap(54, y, 8, CLOCK_ICON);
+            if (oc::core::ticks - last_gate[ch] < 1667) gfxBitmap(54, y, 8, CLOCK_ICON);
         }
         gfxCursor(0, 23 + (cursor * 25), 63);
     }

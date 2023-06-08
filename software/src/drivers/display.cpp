@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 #include <Arduino.h>
-#include "display.h"
+#include "drivers/display.h"
 
 weegfx::Graphics graphics;
 

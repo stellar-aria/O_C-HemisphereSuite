@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Based on Braids Quantizer, Copyright 2015 Émilie Gillet.
@@ -21,12 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
 #include "oc/strings.h"
 
-class DualQuant : public HemisphereApplet {
+class DualQuant : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters
@@ -39,7 +41,7 @@ public:
         {
             quantizer[ch].Init();
             scale[ch] = ch + 5;
-            quantizer[ch].Configure(OC::Scales::GetScale(scale[ch]), 0xffff);
+            quantizer[ch].Configure(oc::Scales::GetScale(scale[ch]), 0xffff);
             last_note[ch] = 0;
             continuous[ch] = 1;
         }
@@ -81,9 +83,9 @@ public:
         if (cursor == 0 || cursor == 2) {
             // Scale selection
             scale[ch] += direction;
-            if (scale[ch] >= OC::Scales::NUM_SCALES) scale[ch] = 0;
-            if (scale[ch] < 0) scale[ch] = OC::Scales::NUM_SCALES - 1;
-            quantizer[ch].Configure(OC::Scales::GetScale(scale[ch]), 0xffff);
+            if (scale[ch] >= oc::Scales::NUM_SCALES) scale[ch] = 0;
+            if (scale[ch] < 0) scale[ch] = oc::Scales::NUM_SCALES - 1;
+            quantizer[ch].Configure(oc::Scales::GetScale(scale[ch]), 0xffff);
             continuous[ch] = 1; // Re-enable continuous mode when scale is changed
         } else {
             // Root selection
@@ -109,7 +111,7 @@ public:
         ForEachChannel(ch)
         {
             root[0] = constrain(root[0], 0, 11);
-            quantizer[ch].Configure(OC::Scales::GetScale(scale[ch]), 0xffff);
+            quantizer[ch].Configure(oc::Scales::GetScale(scale[ch]), 0xffff);
         }
     }
 
@@ -139,9 +141,9 @@ private:
         ForEachChannel(ch)
         {
             // Draw settings
-            gfxPrint((31 * ch), 15, OC::scale_names_short[scale[ch]]);
+            gfxPrint((31 * ch), 15, oc::scale_names_short[scale[ch]]);
             gfxBitmap(0 + (31 * ch), 25, 8, notes[ch]);
-            gfxPrint(10 + (31 * ch), 25, OC::Strings::note_names_unpadded[root[ch]]);
+            gfxPrint(10 + (31 * ch), 25, oc::Strings::note_names_unpadded[root[ch]]);
 
             // Draw cursor
             int y = cursor % 2; // 0=top line, 1=bottom

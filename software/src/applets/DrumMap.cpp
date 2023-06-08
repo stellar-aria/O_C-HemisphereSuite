@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2021, Benjamin Rosenbach
 //
 // Based on Grids pattern generator, Copyright 2011 Émilie Gillet.
@@ -21,6 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 #ifdef DRUMMAP_GRIDS2
 #include "grids2_resources.h"
 #else
@@ -31,7 +33,7 @@
 #define HEM_DRUMMAP_VALUE_ANIMATION_TICKS 16000
 #define HEM_DRUMMAP_AUTO_RESET_TICKS 30000
 
-class DrumMap : public HemisphereApplet {
+class DrumMap : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -40,7 +42,7 @@ public:
 
     void Start() {
         step = 0;
-        last_clock = OC::CORE::ticks;
+        last_clock = oc::core::ticks;
     }
 
     void Controller() {
@@ -98,7 +100,7 @@ public:
             }
 
             // keep track of last clock for auto-reset
-            last_clock = OC::CORE::ticks;
+            last_clock = oc::core::ticks;
             // loop back to first step
             if (++step > 31) step = 0;
         }
@@ -121,7 +123,7 @@ public:
         }
 
         // auto-reset after ~2 seconds of no clock
-        if (OC::CORE::ticks - last_clock > HEM_DRUMMAP_AUTO_RESET_TICKS && step != 0) {
+        if (oc::core::ticks - last_clock > HEM_DRUMMAP_AUTO_RESET_TICKS && step != 0) {
             Reset();
         }
         

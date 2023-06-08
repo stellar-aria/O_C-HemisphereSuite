@@ -24,7 +24,7 @@
 #define OC_PROFILING_H_
 
 #include "util/macros.h"
-#include "extern/dspinst.h"
+#include "util/math.h"
 
 namespace debug {
 

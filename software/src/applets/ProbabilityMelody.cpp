@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2022, Benjamin Rosenbach
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,14 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "hemisphere/ProbLoopLinker.h" // singleton for linking ProbDiv and ProbMelo
-#include "hemisphere/MIDI.h"
+#include "hemisphere/applet_base.hpp"
+#include "hemisphere/prob_loop_linker.hpp" // singleton for linking ProbDiv and ProbMelo
+#include "hemisphere/midi.hpp"
 
-#define HEM_PROB_MEL_MAX_WEIGHT 10
-#define HEM_PROB_MEL_MAX_RANGE 60
-#define HEM_PROB_MEL_MAX_LOOP_LENGTH 32
+using namespace hemisphere;
 
-class ProbabilityMelody : public HemisphereApplet {
+constexpr auto HEM_PROB_MEL_MAX_WEIGHT = 10;
+constexpr auto HEM_PROB_MEL_MAX_RANGE = 60;
+constexpr auto HEM_PROB_MEL_MAX_LOOP_LENGTH = 32;
+
+class ProbabilityMelody : public AppletBase {
 public:
 
     enum ProbMeloCursor {

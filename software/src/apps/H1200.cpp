@@ -29,7 +29,7 @@
 #include "oc/bitmaps.h"
 #include "oc/strings.h"
 #include "oc/trigger_delays.h"
-#include "tonnetz/tonnetz_state.h"
+#include "apps/tonnetz/tonnetz_state.h"
 #include "util/settings.h"
 #include "util/ringbuffer.h"
 #include "bjorklund.h"
@@ -38,7 +38,7 @@
 #include "oc/apps.h"
 #include "oc/ui.h"
 
-namespace menu = OC::menu;
+namespace menu = oc::menu;
 extern uint_fast8_t MENU_REDRAW;
 
 // NOTE: H1200 state is updated in the ISR, and we're accessing shared state
@@ -443,23 +443,23 @@ const char* const h1200_eucl_cv_mappings[] = {
 // TOTAL EEPROM SIZE: 37 bytes
 SETTINGS_DECLARE(H1200Settings, H1200_SETTING_LAST) {
   {0, -11, 11, "Transpose", NULL, settings::STORAGE_TYPE_I8},
-  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "Transpose CV", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
+  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "Transpose CV", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
   #ifdef BUCHLA_4U
   {0, 0, 7, "Octave", NULL, settings::STORAGE_TYPE_I8},
   #else
   {0, -3, 3, "Octave", NULL, settings::STORAGE_TYPE_I8},
   #endif
-  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "Octave CV", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
+  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "Octave CV", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
   {MODE_MAJOR, 0, MODE_LAST-1, "Root mode", mode_names, settings::STORAGE_TYPE_U8},
   {0, -3, 3, "Inversion", NULL, settings::STORAGE_TYPE_I8},
-  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "Inversion CV", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
+  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "Inversion CV", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
   {TRANSFORM_PRIO_XPLR, 0, TRANSFORM_PRIO_PLR_LAST-1, "PLR Priority", plr_trigger_mode_names, settings::STORAGE_TYPE_U8},
-  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "PLR Prior CV", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
+  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "PLR Prior CV", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
   {TRANSFORM_PRIO_XNSH, 0, TRANSFORM_PRIO_NSH_LAST-1, "NSH Priority", nsh_trigger_mode_names, settings::STORAGE_TYPE_U8},
-  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "NSH Prior CV", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
+  {H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_NONE, H1200_CV_SOURCE_LAST-1, "NSH Prior CV", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8},
   {H1200_CV_SAMPLING_CONT, H1200_CV_SAMPLING_CONT, H1200_CV_SAMPLING_LAST-1, "CV sampling", h1200_cv_sampling, settings::STORAGE_TYPE_U8},
   {OUTPUT_CHORD_VOICING, 0, OUTPUT_MODE_LAST-1, "Output mode", output_mode_names, settings::STORAGE_TYPE_U8},
-  { 0, 0, OC::kNumDelayTimes - 1, "Trigger delay", OC::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
+  { 0, 0, oc::kNumDelayTimes - 1, "Trigger delay", oc::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
   {H1200_TRIGGER_TYPE_PLR, 0, H1200_TRIGGER_TYPE_LAST-1, "Trigger type", trigger_type_names, settings::STORAGE_TYPE_U8},
   {H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_LAST-1, "Eucl CV1 map", h1200_eucl_cv_mappings, settings::STORAGE_TYPE_U8},
   {H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_NONE, H1200_EUCL_CV_MAPPING_LAST-1, "Eucl CV2 map", h1200_eucl_cv_mappings, settings::STORAGE_TYPE_U8},
@@ -485,13 +485,13 @@ SETTINGS_DECLARE(H1200Settings, H1200_SETTING_LAST) {
   { 0, 0, 31,  " H EuOffs", NULL, settings::STORAGE_TYPE_U8 },
 };
 
-static constexpr uint32_t TRIGGER_MASK_TR1 = OC::DIGITAL_INPUT_1_MASK;
-static constexpr uint32_t TRIGGER_MASK_P = OC::DIGITAL_INPUT_2_MASK;
-static constexpr uint32_t TRIGGER_MASK_L = OC::DIGITAL_INPUT_3_MASK;
-static constexpr uint32_t TRIGGER_MASK_R = OC::DIGITAL_INPUT_4_MASK;
-static constexpr uint32_t TRIGGER_MASK_N = OC::DIGITAL_INPUT_2_MASK;
-static constexpr uint32_t TRIGGER_MASK_S = OC::DIGITAL_INPUT_3_MASK;
-static constexpr uint32_t TRIGGER_MASK_H = OC::DIGITAL_INPUT_4_MASK;
+static constexpr uint32_t TRIGGER_MASK_TR1 = oc::DIGITAL_INPUT_1_MASK;
+static constexpr uint32_t TRIGGER_MASK_P = oc::DIGITAL_INPUT_2_MASK;
+static constexpr uint32_t TRIGGER_MASK_L = oc::DIGITAL_INPUT_3_MASK;
+static constexpr uint32_t TRIGGER_MASK_R = oc::DIGITAL_INPUT_4_MASK;
+static constexpr uint32_t TRIGGER_MASK_N = oc::DIGITAL_INPUT_2_MASK;
+static constexpr uint32_t TRIGGER_MASK_S = oc::DIGITAL_INPUT_3_MASK;
+static constexpr uint32_t TRIGGER_MASK_H = oc::DIGITAL_INPUT_4_MASK;
 static constexpr uint32_t TRIGGER_MASK_DIRTY = 0x10;
 static constexpr uint32_t TRIGGER_MASK_RESET = TRIGGER_MASK_TR1 | TRIGGER_MASK_DIRTY;
 
@@ -634,17 +634,17 @@ public:
 
     switch (output_mode) {
     case OUTPUT_CHORD_VOICING: {
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_A));
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(1), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_B));
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(2), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_C));
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(3), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_D));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(1), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_B));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(2), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_C));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(3), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_D));
     }
     break;
     case OUTPUT_TUNE: {
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_A));
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(0), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_B));
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(0), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_C));
-      OC::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(0), 0, OC::DAC::get_voltage_scaling(DAC_CHANNEL_D));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_B));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_C));
+      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_D));
     }
     break;
     default: break;
@@ -659,10 +659,10 @@ public:
     return cursor.cursor_pos();
   }
   
-  OC::SemitoneQuantizer quantizer;
+  oc::SemitoneQuantizer quantizer;
   TonnetzState tonnetz_state;
   util::RingBuffer<H1200::UiAction, 4> ui_actions;
-  OC::TriggerDelays<OC::kMaxTriggerDelayTicks> trigger_delays_;  
+  oc::TriggerDelays<oc::kMaxTriggerDelayTicks> trigger_delays_;  
   uint32_t euclidean_counter_;
   bool root_sample_ ;
   int32_t root_ ;
@@ -691,7 +691,7 @@ H1200State h1200_state;
 
 void FASTRUN H1200_clock(uint32_t triggers) {
 
-  triggers = h1200_state.trigger_delays_.Process(triggers, OC::trigger_delay_ticks[h1200_settings.get_trigger_delay()]);
+  triggers = h1200_state.trigger_delays_.Process(triggers, oc::trigger_delay_ticks[h1200_settings.get_trigger_delay()]);
   
   // Reset has priority
   if (triggers & TRIGGER_MASK_TR1) {
@@ -702,7 +702,7 @@ void FASTRUN H1200_clock(uint32_t triggers) {
   // Reset on next trigger = manual change min/maj
   if (h1200_settings.mode_manual_change()) {
     
-      if ((triggers & OC::DIGITAL_INPUT_2_MASK) || (triggers & OC::DIGITAL_INPUT_3_MASK) || (triggers & OC::DIGITAL_INPUT_4_MASK)) {
+      if ((triggers & oc::DIGITAL_INPUT_2_MASK) || (triggers & oc::DIGITAL_INPUT_3_MASK) || (triggers & oc::DIGITAL_INPUT_4_MASK)) {
         h1200_settings.mode_change(false);
         h1200_state.tonnetz_state.reset(h1200_settings.mode());
       }
@@ -717,16 +717,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
   if (triggers || (h1200_settings.get_cv_sampling() == H1200_CV_SAMPLING_CONT)) {
         switch (h1200_settings.get_root_offset_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            root_ += h1200_state.quantizer.Process(OC::ADC::raw_pitch_value(ADC_CHANNEL_1));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_1));
             break ;
           case H1200_CV_SOURCE_CV2:
-            root_ += h1200_state.quantizer.Process(OC::ADC::raw_pitch_value(ADC_CHANNEL_2));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_2));
             break ;
           case H1200_CV_SOURCE_CV3:
-            root_ += h1200_state.quantizer.Process(OC::ADC::raw_pitch_value(ADC_CHANNEL_3));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_3));
             break ;
           case H1200_CV_SOURCE_CV4:
-            root_ += h1200_state.quantizer.Process(OC::ADC::raw_pitch_value(ADC_CHANNEL_4));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_4));
             break ;
           default:
             break; 
@@ -734,16 +734,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       
         switch (h1200_settings.get_octave_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            octave_ += ((OC::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            octave_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            octave_ += ((OC::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            octave_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            octave_ += ((OC::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            octave_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            octave_ += ((OC::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            octave_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
             break ;
           default:
             break; 
@@ -756,16 +756,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       
         switch (h1200_settings.get_inversion_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            inversion_ += ((OC::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            inversion_ += ((OC::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            inversion_ += ((OC::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            inversion_ += ((OC::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
             break ;
           default:
             break; 
@@ -774,16 +774,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       
         switch (h1200_settings.get_transform_priority_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            plr_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            plr_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            plr_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            plr_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
             break ;
           default:
             break; 
@@ -793,16 +793,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
         
         switch (h1200_settings.get_nsh_transform_priority_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            nsh_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            nsh_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            nsh_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            nsh_transform_priority_ += ((OC::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
             break ;
           default:
             break; 
@@ -922,10 +922,10 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       h1200_state.h_euclidean_fill_ = h1200_settings.get_h_euclidean_fill() ;
       h1200_state.h_euclidean_offset_ = h1200_settings.get_h_euclidean_offset() ;
 
-      int channel_1_cv_ = ((OC::ADC::value<ADC_CHANNEL_1>() + 127) >> 8);
-      int channel_2_cv_ = ((OC::ADC::value<ADC_CHANNEL_2>() + 127) >> 8);
-      int channel_3_cv_ = ((OC::ADC::value<ADC_CHANNEL_3>() + 127) >> 8);
-      int channel_4_cv_ = ((OC::ADC::value<ADC_CHANNEL_4>() + 127) >> 8);
+      int channel_1_cv_ = ((oc::ADC::value<ADC_CHANNEL_1>() + 127) >> 8);
+      int channel_2_cv_ = ((oc::ADC::value<ADC_CHANNEL_2>() + 127) >> 8);
+      int channel_3_cv_ = ((oc::ADC::value<ADC_CHANNEL_3>() + 127) >> 8);
+      int channel_4_cv_ = ((oc::ADC::value<ADC_CHANNEL_4>() + 127) >> 8);
 
  
       h1200_state.map_euclidean_cv(h1200_settings.get_euclidean_cv1_mapping(), channel_1_cv_) ;
@@ -1036,15 +1036,15 @@ size_t H1200_restore(const void *storage) {
   return h1200_settings.Restore(storage);
 }
 
-void H1200_handleAppEvent(OC::AppEvent event) {
+void H1200_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       h1200_state.cursor.set_editing(false);
       h1200_state.tonnetz_state.reset(h1200_settings.mode());
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       h1200_settings.update_enabled_settings();
       h1200_state.cursor.AdjustEnd(h1200_settings.num_enabled_settings() - 1);
       break;
@@ -1052,7 +1052,7 @@ void H1200_handleAppEvent(OC::AppEvent event) {
 }
 
 void H1200_isr() {
-  uint32_t triggers = OC::DigitalInputs::clocked();
+  uint32_t triggers = oc::DigitalInputs::clocked();
 
   while (h1200_state.ui_actions.readable()) {
     switch (h1200_state.ui_actions.Read()) {
@@ -1076,22 +1076,22 @@ void H1200_loop() {
 void H1200_handleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         if (h1200_settings.change_value(H1200_SETTING_OCTAVE, 1))
           h1200_state.force_update();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         if (h1200_settings.change_value(H1200_SETTING_OCTAVE, -1))
           h1200_state.force_update();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         h1200_state.display_notes = !h1200_state.display_notes;
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         h1200_state.cursor.toggle_editing();
         break;
     }
-  } else if (UI::EVENT_BUTTON_LONG_PRESS == event.type && OC::CONTROL_BUTTON_L == event.control) {
+  } else if (UI::EVENT_BUTTON_LONG_PRESS == event.type && oc::CONTROL_BUTTON_L == event.control) {
       h1200_settings.InitDefaults();
       h1200_state.manual_reset();
   }
@@ -1099,10 +1099,10 @@ void H1200_handleButtonEvent(const UI::Event &event) {
 
 void H1200_handleEncoderEvent(const UI::Event &event) {
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     if (h1200_settings.change_value(H1200_SETTING_INVERSION, event.value))
       h1200_state.force_update();
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     if (h1200_state.cursor.editing()) {
       H1200Setting setting = h1200_settings.enabled_setting_at(h1200_state.cursor_pos());
       
@@ -1194,7 +1194,7 @@ void H1200_screensaver() {
     normalized[i] = note;
 
     graphics.setPrintPos(x_col_1, y);
-    graphics.print(OC::Strings::note_names_unpadded[note]);
+    graphics.print(oc::Strings::note_names_unpadded[note]);
     graphics.print(octave + 1);
   }
   y = 0;
@@ -1208,13 +1208,13 @@ void H1200_screensaver() {
     history >>= 8;
   }
 
-  OC::visualize_pitch_classes(normalized, note_circle_x, note_circle_y);
+  oc::visualize_pitch_classes(normalized, note_circle_x, note_circle_y);
 }
 
 #ifdef H1200_DEBUG  
 void H1200_debug() {
-  int cv = OC::ADC::value<ADC_CHANNEL_4>();
-  int scaled = ((OC::ADC::value<ADC_CHANNEL_4>() + 127) >> 8);
+  int cv = oc::ADC::value<ADC_CHANNEL_4>();
+  int scaled = ((oc::ADC::value<ADC_CHANNEL_4>() + 127) >> 8);
 
   graphics.setPrintPos(2, 12);
   graphics.printf("I: %4d %4d", cv, scaled);

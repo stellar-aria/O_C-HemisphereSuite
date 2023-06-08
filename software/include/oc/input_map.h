@@ -32,7 +32,7 @@
 
 #include "util/macros.h"
 
-namespace OC {
+namespace oc {
   
 struct Map {
   int8_t num_slots;
@@ -70,6 +70,6 @@ class Input_Map {
   DISALLOW_COPY_AND_ASSIGN(Input_Map);
 };
 
-}  // namespace OC
+}  // namespace oc
 
 #endif 

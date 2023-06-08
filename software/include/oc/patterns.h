@@ -4,9 +4,9 @@
 #include "oc/patterns_presets.h"
 
 
-namespace OC {
+namespace oc {
 
-typedef OC::Pattern Pattern;
+typedef oc::Pattern Pattern;
 
 static constexpr int kMaxPatternLength = 16;
 static constexpr int kMinPatternLength = 2;
@@ -38,7 +38,7 @@ public:
 
 extern const char *const pattern_names[];
 extern const char *const pattern_names_short[];
-extern Pattern user_patterns[OC::Patterns::PATTERN_USER_ALL];
+extern Pattern user_patterns[oc::Patterns::PATTERN_USER_ALL];
 extern Pattern dummy_pattern;
 
 };

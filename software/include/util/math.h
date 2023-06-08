@@ -23,6 +23,8 @@
 #ifndef UTIL_MATH_H_
 #define UTIL_MATH_H_
 
+#include <stdint.h>
+
 // Woo. Funky macro magic to avoid dividing by non-power-of-two.
 // Essentially a quick fixed-point calculation, but only valid up to 2^exp
 
@@ -50,6 +52,15 @@ inline uint32_t USAT16(int32_t value) {
   uint32_t result;
   __asm("usat %0, %1, %2" : "=r" (result) : "I" (16), "r" (value));
   return result;
+}
+
+// computes (((uint64_t)a[31:0] * (uint64_t)b[31:0]) >> 32)
+static inline uint32_t multiply_u32xu32_rshift32(uint32_t a, uint32_t b) __attribute__((always_inline));
+static inline uint32_t multiply_u32xu32_rshift32(uint32_t a, uint32_t b)
+{
+  uint32_t out, tmp;
+  asm volatile("umull %0, %1, %2, %3" : "=r" (tmp), "=r" (out) : "r" (a), "r" (b));
+  return out;
 }
 
 static inline uint32_t multiply_u32xu32_rshift24(uint32_t a, uint32_t b) __attribute__((always_inline));

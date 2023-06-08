@@ -21,9 +21,9 @@
 
 #ifdef ENABLE_APP_NEURAL_NETWORK
 
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
-#include "neuralnet/LogicGate.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
+#include "apps/neuralnet/LogicGate.h"
 #include "util/settings.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
@@ -32,7 +32,9 @@
 // 9 sets of 24 bytes allocated for storage
 #define NN_SETTING_LAST 216
 
-class NeuralNetwork : public HSApplication, public SystemExclusiveHandler,
+using namespace hemisphere;
+
+class NeuralNetwork : public ApplicationBase, public SystemExclusiveHandler,
     public settings::SettingsBase<NeuralNetwork, NN_SETTING_LAST> {
 public:
     void Start() {
@@ -50,7 +52,7 @@ public:
         // Check inputs
         for (byte i = 0; i < 8; i++)
         {
-            bool set = (i < 4) ? Gate(i) : (In(i - 4) > HSAPPLICATION_3V);
+            bool set = (i < 4) ? Gate(i) : (In(i - 4) > THREE_VOLTS);
             tmp_source_state = SetSource(tmp_source_state, i, set);
             input_state[i] = set; // For display
         }
@@ -69,7 +71,7 @@ public:
             byte ix = (setup * 4) + o;
             byte n = output_neuron[ix] + (setup * 6);
             bool set = neuron[n].state;
-            Out(o, set * HSAPPLICATION_5V);
+            Out(o, set * FIVE_VOLTS);
         }
 
         source_state = tmp_source_state;
@@ -611,11 +613,11 @@ void NeuralNetwork_isr() {
     return NeuralNetwork_instance.BaseController();
 }
 
-void NeuralNetwork_handleAppEvent(OC::AppEvent event) {
-    if (event ==  OC::APP_EVENT_RESUME) {
+void NeuralNetwork_handleAppEvent(oc::AppEvent event) {
+    if (event ==  oc::APP_EVENT_RESUME) {
         NeuralNetwork_instance.Resume();
     }
-    if (event == OC::APP_EVENT_SUSPEND) {
+    if (event == oc::APP_EVENT_SUSPEND) {
         NeuralNetwork_instance.OnSaveSettings();
         NeuralNetwork_instance.OnSendSysEx();
     }
@@ -631,19 +633,19 @@ void NeuralNetwork_screensaver() {} // Deprecated
 
 void NeuralNetwork_handleButtonEvent(const UI::Event &event) {
     // For left encoder, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) NeuralNetwork_instance.OnLeftButtonLongPress();
         if (event.type == UI::EVENT_BUTTON_PRESS) NeuralNetwork_instance.OnLeftButtonPress();
     }
 
     // For right encoder, only handle press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) NeuralNetwork_instance.OnRightButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) NeuralNetwork_instance.OnRightButtonPress();
 
     // For up button, handle only press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) NeuralNetwork_instance.OnUpButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) NeuralNetwork_instance.OnUpButtonPress();
 
     // For down button, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) NeuralNetwork_instance.OnDownButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) NeuralNetwork_instance.OnDownButtonLongPress();
     }
@@ -651,10 +653,10 @@ void NeuralNetwork_handleButtonEvent(const UI::Event &event) {
 
 void NeuralNetwork_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) NeuralNetwork_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) NeuralNetwork_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) NeuralNetwork_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) NeuralNetwork_instance.OnRightEncoderMove(event.value);
 }
 
 #endif

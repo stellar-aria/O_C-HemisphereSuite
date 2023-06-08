@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Port of subset of Low Rents Copyright (c) 2016 Patrick Dowling,
@@ -22,11 +21,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "streams_lorenz_generator.h"
-#include "util/math.h"
-#include "hemisphere/LorenzGeneratorManager.h" // Singleton Lorenz manager
+#include "hemisphere/applet_base.hpp"
 
-class LowerRenz : public HemisphereApplet {
+#include "streams/lorenz_generator.h"
+#include "util/math.h"
+#include "hemisphere/lorenz_generator_manager.hpp" // Singleton Lorenz manager
+
+using namespace hemisphere;
+
+LorenzGeneratorManager *LorenzGeneratorManager::instance = 0;
+
+class LowerRenz : public AppletBase {
 public:
 
     const char* applet_name() {

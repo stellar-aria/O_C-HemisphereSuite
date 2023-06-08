@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,24 +17,29 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "hemisphere/applet_base.hpp"
 
-#define HEM_EG_ATTACK 0
-#define HEM_EG_DECAY 1
-#define HEM_EG_SUSTAIN 2
-#define HEM_EG_RELEASE 3
-#define HEM_EG_NO_STAGE -1
-#define HEM_EG_MAX_VALUE 255
+namespace eg {
+constexpr int ATTACK = 0;
+constexpr int DECAY = 1;
+constexpr int SUSTAIN = 2;
+constexpr int RELEASE = 3;
+constexpr int NO_STAGE = -1;
+constexpr int MAX_VALUE = 255;
 
-#define HEM_SUSTAIN_CONST 35
-#define HEM_EG_DISPLAY_HEIGHT 30
+constexpr int DISPLAY_HEIGHT = 30;
 
 // About four seconds
-#define HEM_EG_MAX_TICKS_AD 33333
+constexpr int MAX_TICKS_AD = 33333;
 
 // About eight seconds
-#define HEM_EG_MAX_TICKS_R 133333
+constexpr int MAX_TICKS_R = 133333;
+}
+constexpr int SUSTAIN_CONST = 35;
 
-class ADSREG : public HemisphereApplet {
+using namespace hemisphere;
+
+class ADSREG : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters
@@ -52,7 +56,7 @@ public:
         {
             stage_ticks[ch] = 0;
             gated[ch] = 0;
-            stage[ch] = HEM_EG_NO_STAGE;
+            stage[ch] = eg::NO_STAGE;
         }
     }
 
@@ -66,23 +70,23 @@ public:
             if (Gate(ch)) {
                 if (!gated[ch]) { // The gate wasn't on last time, so this is a newly-gated EG
                     stage_ticks[ch] = 0;
-                    if (stage[ch] != HEM_EG_RELEASE) amplitude[ch] = 0;
-                    stage[ch] = HEM_EG_ATTACK;
+                    if (stage[ch] != eg::RELEASE) amplitude[ch] = 0;
+                    stage[ch] = eg::ATTACK;
                     AttackAmplitude(ch);
                 } else { // The gate is STILL on, so process the appopriate stage
                     stage_ticks[ch]++;
-                    if (stage[ch] == HEM_EG_ATTACK) AttackAmplitude(ch);
-                    if (stage[ch] == HEM_EG_DECAY) DecayAmplitude(ch);
-                    if (stage[ch] == HEM_EG_SUSTAIN) SustainAmplitude(ch);
+                    if (stage[ch] == eg::ATTACK) AttackAmplitude(ch);
+                    if (stage[ch] == eg::DECAY) DecayAmplitude(ch);
+                    if (stage[ch] == eg::SUSTAIN) SustainAmplitude(ch);
                 }
                 gated[ch] = 1;
             } else {
                 if (gated[ch]) { // The gate was on last time, so this is a newly-released EG
-                    stage[ch] = HEM_EG_RELEASE;
+                    stage[ch] = eg::RELEASE;
                     stage_ticks[ch] = 0;
                 }
 
-                if (stage[ch] == HEM_EG_RELEASE) { // Process the release stage, if necessary
+                if (stage[ch] == eg::RELEASE) { // Process the release stage, if necessary
                     stage_ticks[ch]++;
                     ReleaseAmplitude(ch);
                 }
@@ -100,16 +104,16 @@ public:
     }
 
     void OnButtonPress() {
-        if (++edit_stage > HEM_EG_RELEASE) {edit_stage = HEM_EG_ATTACK;}
+        if (++edit_stage > eg::RELEASE) {edit_stage = eg::ATTACK;}
     }
 
     void OnEncoderMove(int direction) {
         int adsr[4] = {attack, decay, sustain, release};
-        adsr[edit_stage] = constrain(adsr[edit_stage] + direction, 1, HEM_EG_MAX_VALUE);
-        attack = adsr[HEM_EG_ATTACK];
-        decay = adsr[HEM_EG_DECAY];
-        sustain = adsr[HEM_EG_SUSTAIN];
-        release = adsr[HEM_EG_RELEASE];
+        adsr[edit_stage] = constrain(adsr[edit_stage] + direction, 1, eg::MAX_VALUE);
+        attack = adsr[eg::ATTACK];
+        decay = adsr[eg::DECAY];
+        sustain = adsr[eg::SUSTAIN];
+        release = adsr[eg::RELEASE];
     }
 
     uint64_t OnDataRequest() {
@@ -167,7 +171,7 @@ private:
     }
 
     void DrawADSR() {
-        int length = attack + decay + release + HEM_SUSTAIN_CONST; // Sustain is constant because it's a level
+        int length = attack + decay + release + SUSTAIN_CONST; // Sustain is constant because it's a level
         int x = 0;
         x = DrawAttack(x, length);
         x = DrawDecay(x, length);
@@ -177,41 +181,41 @@ private:
 
     int DrawAttack(int x, int length) {
         int xA = x + Proportion(attack, length, 62);
-        gfxLine(x, BottomAlign(0), xA, BottomAlign(HEM_EG_DISPLAY_HEIGHT), edit_stage != HEM_EG_ATTACK);
+        gfxLine(x, BottomAlign(0), xA, BottomAlign(eg::DISPLAY_HEIGHT), edit_stage != eg::ATTACK);
         return xA;
     }
 
     int DrawDecay(int x, int length) {
         int xD = x + Proportion(decay, length, 62);
         if (xD < 0) xD = 0;
-        int yS = Proportion(sustain, HEM_EG_MAX_VALUE, HEM_EG_DISPLAY_HEIGHT);
-        gfxLine(x, BottomAlign(HEM_EG_DISPLAY_HEIGHT), xD, BottomAlign(yS), edit_stage != HEM_EG_DECAY);
+        int yS = Proportion(sustain, eg::MAX_VALUE, eg::DISPLAY_HEIGHT);
+        gfxLine(x, BottomAlign(eg::DISPLAY_HEIGHT), xD, BottomAlign(yS), edit_stage != eg::DECAY);
         return xD;
     }
 
     int DrawSustain(int x, int length) {
-        int xS = x + Proportion(HEM_SUSTAIN_CONST, length, 62);
-        int yS = Proportion(sustain, HEM_EG_MAX_VALUE, HEM_EG_DISPLAY_HEIGHT);
+        int xS = x + Proportion(SUSTAIN_CONST, length, 62);
+        int yS = Proportion(sustain, eg::MAX_VALUE, eg::DISPLAY_HEIGHT);
         if (yS < 0) yS = 0;
         if (xS < 0) xS = 0;
-        gfxLine(x, BottomAlign(yS), xS, BottomAlign(yS), edit_stage != HEM_EG_SUSTAIN);
+        gfxLine(x, BottomAlign(yS), xS, BottomAlign(yS), edit_stage != eg::SUSTAIN);
         return xS;
     }
 
     int DrawRelease(int x, int length) {
         int xR = x + Proportion(release, length, 62);
-        int yS = Proportion(sustain, HEM_EG_MAX_VALUE, HEM_EG_DISPLAY_HEIGHT);
-        gfxLine(x, BottomAlign(yS), xR, BottomAlign(0), edit_stage != HEM_EG_RELEASE);
+        int yS = Proportion(sustain, eg::MAX_VALUE, eg::DISPLAY_HEIGHT);
+        gfxLine(x, BottomAlign(yS), xR, BottomAlign(0), edit_stage != eg::RELEASE);
         return xR;
     }
 
     void AttackAmplitude(int ch) {
-        int effective_attack = constrain(attack + attack_mod, 1, HEM_EG_MAX_VALUE);
-        int total_stage_ticks = Proportion(effective_attack, HEM_EG_MAX_VALUE, HEM_EG_MAX_TICKS_AD);
+        int effective_attack = constrain(attack + attack_mod, 1, eg::MAX_VALUE);
+        int total_stage_ticks = Proportion(effective_attack, eg::MAX_VALUE, eg::MAX_TICKS_AD);
         int ticks_remaining = total_stage_ticks - stage_ticks[ch];
         if (effective_attack == 1) ticks_remaining = 0;
         if (ticks_remaining <= 0) { // End of attack; move to decay
-            stage[ch] = HEM_EG_DECAY;
+            stage[ch] = eg::DECAY;
             stage_ticks[ch] = 0;
             amplitude[ch] = int2simfloat(HEMISPHERE_MAX_CV);
         } else {
@@ -222,14 +226,14 @@ private:
     }
 
     void DecayAmplitude(int ch) {
-        int total_stage_ticks = Proportion(decay, HEM_EG_MAX_VALUE, HEM_EG_MAX_TICKS_AD);
+        int total_stage_ticks = Proportion(decay, eg::MAX_VALUE, eg::MAX_TICKS_AD);
         int ticks_remaining = total_stage_ticks - stage_ticks[ch];
-        simfloat amplitude_remaining = amplitude[ch] - int2simfloat(Proportion(sustain, HEM_EG_MAX_VALUE, HEMISPHERE_MAX_CV));
+        simfloat amplitude_remaining = amplitude[ch] - int2simfloat(Proportion(sustain, eg::MAX_VALUE, HEMISPHERE_MAX_CV));
         if (sustain == 1) ticks_remaining = 0;
         if (ticks_remaining <= 0) { // End of decay; move to sustain
-            stage[ch] = HEM_EG_SUSTAIN;
+            stage[ch] = eg::SUSTAIN;
             stage_ticks[ch] = 0;
-            amplitude[ch] = int2simfloat(Proportion(sustain, HEM_EG_MAX_VALUE, HEMISPHERE_MAX_CV));
+            amplitude[ch] = int2simfloat(Proportion(sustain, eg::MAX_VALUE, HEMISPHERE_MAX_CV));
         } else {
             simfloat decrease = amplitude_remaining / ticks_remaining;
             amplitude[ch] -= decrease;
@@ -237,16 +241,16 @@ private:
     }
 
     void SustainAmplitude(int ch) {
-        amplitude[ch] = int2simfloat(Proportion(sustain - 1, HEM_EG_MAX_VALUE, HEMISPHERE_MAX_CV));
+        amplitude[ch] = int2simfloat(Proportion(sustain - 1, eg::MAX_VALUE, HEMISPHERE_MAX_CV));
     }
 
     void ReleaseAmplitude(int ch) {
-        int effective_release = constrain(release + release_mod, 1, HEM_EG_MAX_VALUE) - 1;
-        int total_stage_ticks = Proportion(effective_release, HEM_EG_MAX_VALUE, HEM_EG_MAX_TICKS_R);
+        int effective_release = constrain(release + release_mod, 1, eg::MAX_VALUE) - 1;
+        int total_stage_ticks = Proportion(effective_release, eg::MAX_VALUE, eg::MAX_TICKS_R);
         int ticks_remaining = total_stage_ticks - stage_ticks[ch];
         if (effective_release == 0) ticks_remaining = 0;
         if (ticks_remaining <= 0 || amplitude[ch] <= 0) { // End of release; turn off envelope
-            stage[ch] = HEM_EG_NO_STAGE;
+            stage[ch] = eg::NO_STAGE;
             stage_ticks[ch] = 0;
             amplitude[ch] = 0;
         } else {
@@ -257,7 +261,7 @@ private:
 
     int get_modification_with_input(int in) {
         int mod = 0;
-        mod = Proportion(DetentedIn(in), HEMISPHERE_MAX_INPUT_CV, HEM_EG_MAX_VALUE / 2);
+        mod = Proportion(DetentedIn(in), HEMISPHERE_MAX_INPUT_CV, eg::MAX_VALUE / 2);
         return mod;
     }
 };

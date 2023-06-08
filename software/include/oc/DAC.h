@@ -32,7 +32,7 @@ enum OutputVoltageScaling {
   VOLTAGE_SCALING_LAST  
 } ;
 
-namespace OC {
+namespace oc {
 
 class DAC {
 public:
@@ -251,6 +251,6 @@ private:
   static uint8_t DAC_scaling[DAC_CHANNEL_LAST];
 };
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_DAC_H_

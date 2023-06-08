@@ -37,7 +37,7 @@
 
 #define BIAS_EDITOR_TIMEOUT 20000
 
-namespace HS {
+namespace hemisphere {
 extern int octave_max;
 }
 
@@ -69,19 +69,19 @@ public:
     void AdvanceBias() {
         // Only advance the bias if it's been less than a second since the last button press.
         // This is so that the first button press shows the popup without changing anything.
-        if (OC::CORE::ticks - last_advance_tick < BIAS_EDITOR_TIMEOUT) {
+        if (oc::core::ticks - last_advance_tick < BIAS_EDITOR_TIMEOUT) {
             if (++bias_state > 2) bias_state = 0;
             instance->ChangeBiasToState(bias_state);
         }
-        last_advance_tick = OC::CORE::ticks;
+        last_advance_tick = oc::core::ticks;
     }
 
     int IsEditing() {
-        return (OC::CORE::ticks - last_advance_tick < BIAS_EDITOR_TIMEOUT);
+        return (oc::core::ticks - last_advance_tick < BIAS_EDITOR_TIMEOUT);
     }
 
     /*
-     * Change to a specific state. This should replace a direct call to OC::DAC::set_Vbias(), because it
+     * Change to a specific state. This should replace a direct call to oc::DAC::set_Vbias(), because it
      * allows VBiasManager to keep track of the current state so that the button advances the state as
      * expected. For example:
      *
@@ -92,14 +92,14 @@ public:
      *
      */
     void ChangeBiasToState(int new_bias_state) {
-        int new_bias_value = OC::calibration_data.v_bias & 0xFFFF; // Bipolar = lower 2 bytes
-        if (new_bias_state == VBiasManager::UNI) new_bias_value = OC::DAC::VBiasUnipolar;
-        if (new_bias_state == VBiasManager::ASYM) new_bias_value = (OC::calibration_data.v_bias >> 16); // asym. = upper 2 bytes
-        OC::DAC::set_Vbias(new_bias_value);
+        int new_bias_value = oc::calibration_data.v_bias & 0xFFFF; // Bipolar = lower 2 bytes
+        if (new_bias_state == VBiasManager::UNI) new_bias_value = oc::DAC::VBiasUnipolar;
+        if (new_bias_state == VBiasManager::ASYM) new_bias_value = (oc::calibration_data.v_bias >> 16); // asym. = upper 2 bytes
+        oc::DAC::set_Vbias(new_bias_value);
         bias_state = new_bias_state;
 
-        OC::DAC::kOctaveZero = OCTAVE_BIAS[bias_state];
-        HS::octave_max = OCTAVE_MAX[bias_state];
+        oc::DAC::kOctaveZero = OCTAVE_BIAS[bias_state];
+        hemisphere::octave_max = OCTAVE_MAX[bias_state];
     }
     int GetState() {
         return bias_state;
@@ -132,7 +132,7 @@ public:
      * If the last state advance (with the button) was less than a second ago, draw the popup indicator
      */
     void DrawPopupPerhaps() {
-        if (OC::CORE::ticks - last_advance_tick < BIAS_EDITOR_TIMEOUT) {
+        if (oc::core::ticks - last_advance_tick < BIAS_EDITOR_TIMEOUT) {
             graphics.clearRect(17, 7, 82, 43);
             graphics.drawFrame(18, 8, 80, 42);
 

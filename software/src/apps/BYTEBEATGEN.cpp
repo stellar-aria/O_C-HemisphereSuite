@@ -35,7 +35,7 @@
 #include "util/math.h"
 #include "util/settings.h"
 #include "oc/menus.h"
-#include "peaks_bytebeat.h"
+#include "peaks/bytebeat.h"
 #include "oc/ADC.h"
 #include "oc/ui.h"
 
@@ -82,7 +82,7 @@ enum ByteBeatCVMapping {
 
 };
 
-namespace menu = OC::menu;
+namespace menu = oc::menu;
 
 class ByteBeat : public settings::SettingsBase<ByteBeat, BYTEBEAT_SETTING_LAST> {
 public:
@@ -90,10 +90,10 @@ public:
   static constexpr size_t kHistoryDepth = 64;
   static constexpr int kMaxByteBeatParameters = 12;
 
-  void Init(OC::DigitalInput default_trigger);
+  void Init(oc::DigitalInput default_trigger);
 
-  OC::DigitalInput get_trigger_input() const {
-    return static_cast<OC::DigitalInput>(values_[BYTEBEAT_SETTING_TRIGGER_INPUT]);
+  oc::DigitalInput get_trigger_input() const {
+    return static_cast<oc::DigitalInput>(values_[BYTEBEAT_SETTING_TRIGGER_INPUT]);
   }
 
   ByteBeatCVMapping get_cv1_mapping() const {
@@ -306,12 +306,12 @@ public:
 
     bytebeat_.Configure(s, get_step_mode(), get_loop_mode()) ;
 
-    OC::DigitalInput trigger_input = get_trigger_input();
+    oc::DigitalInput trigger_input = get_trigger_input();
     uint8_t gate_state = 0;
     if (triggers & DIGITAL_INPUT_MASK(trigger_input))
       gate_state |= peaks::CONTROL_GATE_RISING;
 
-    bool gate_raised = OC::DigitalInputs::read_immediate(trigger_input);
+    bool gate_raised = oc::DigitalInputs::read_immediate(trigger_input);
     if (gate_raised)
       gate_state |= peaks::CONTROL_GATE;
     else if (gate_raised_)
@@ -321,11 +321,11 @@ public:
     // TODO Scale range or offset?
     uint16_t b = bytebeat_.ProcessSingleSample(gate_state);
     #ifdef BUCHLA_4U
-      uint32_t value = OC::DAC::get_zero_offset(dac_channel) + b;
+      uint32_t value = oc::DAC::get_zero_offset(dac_channel) + b;
     #else
-      uint32_t value = OC::DAC::get_zero_offset(dac_channel) + (int16_t)b;
+      uint32_t value = oc::DAC::get_zero_offset(dac_channel) + (int16_t)b;
     #endif
-    OC::DAC::set<dac_channel>(value);
+    oc::DAC::set<dac_channel>(value);
 
 
     b >>= 8;
@@ -348,7 +348,7 @@ private:
   util::History<uint8_t, kHistoryDepth> history_;
 };
 
-void ByteBeat::Init(OC::DigitalInput default_trigger) {
+void ByteBeat::Init(oc::DigitalInput default_trigger) {
   InitDefaults();
   apply_value(BYTEBEAT_SETTING_TRIGGER_INPUT, default_trigger);
   bytebeat_.Init();
@@ -363,21 +363,21 @@ const char* const bytebeat_cv_mapping_names[BYTEBEAT_CV_MAPPING_LAST] = {
 
 // TOTAL EEPROM SIZE: 4 * 16 bytes
 SETTINGS_DECLARE(ByteBeat, BYTEBEAT_SETTING_LAST) {
-  { 0, 0, 15, "Equation", OC::Strings::bytebeat_equation_names, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 15, "Equation", oc::Strings::bytebeat_equation_names, settings::STORAGE_TYPE_U8 },
   { 255, 0, 255, "Speed", NULL, settings::STORAGE_TYPE_U8 },
   { 1, 1, 255, "Pitch", NULL, settings::STORAGE_TYPE_U8 },
   { 126, 0, 255, "Parameter 0", NULL, settings::STORAGE_TYPE_U8 },
   { 126, 0, 255, "Parameter 1", NULL, settings::STORAGE_TYPE_U8 },
   { 127, 0, 255, "Parameter 2", NULL, settings::STORAGE_TYPE_U8 },
-  { 0, 0, 1, "Loop mode", OC::Strings::no_yes, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 1, "Loop mode", oc::Strings::no_yes, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Loop begin ++", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Loop begin +", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Loop begin", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Loop end ++", NULL, settings::STORAGE_TYPE_U8 },
   { 1, 0, 255, "Loop end +", NULL, settings::STORAGE_TYPE_U8 },
   { 255, 0, 255, "Loop end", NULL, settings::STORAGE_TYPE_U8 },
-  { OC::DIGITAL_INPUT_1, OC::DIGITAL_INPUT_1, OC::DIGITAL_INPUT_4, "Trigger input", OC::Strings::trigger_input_names, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 1, "Step mode", OC::Strings::no_yes, settings::STORAGE_TYPE_U4 },
+  { oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_4, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 1, "Step mode", oc::Strings::no_yes, settings::STORAGE_TYPE_U4 },
   { BYTEBEAT_CV_MAPPING_NONE, BYTEBEAT_CV_MAPPING_NONE, BYTEBEAT_CV_MAPPING_LAST - 1, "CV1 -> ", bytebeat_cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { BYTEBEAT_CV_MAPPING_NONE, BYTEBEAT_CV_MAPPING_NONE, BYTEBEAT_CV_MAPPING_LAST - 1, "CV2 -> ", bytebeat_cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { BYTEBEAT_CV_MAPPING_NONE, BYTEBEAT_CV_MAPPING_NONE, BYTEBEAT_CV_MAPPING_LAST - 1, "CV3 -> ", bytebeat_cv_mapping_names, settings::STORAGE_TYPE_U4 },
@@ -392,9 +392,9 @@ public:
   // QuadBouncingBalls = QuadByteBeats, bbgen = bytebeatgen, BBGEN = BYTEBEATGEN
 
   void Init() {
-    int input = OC::DIGITAL_INPUT_1;
+    int input = oc::DIGITAL_INPUT_1;
     for (auto &bytebeat : bytebeats_) {
-      bytebeat.Init(static_cast<OC::DigitalInput>(input));
+      bytebeat.Init(static_cast<oc::DigitalInput>(input));
       ++input;
     }
 
@@ -408,13 +408,13 @@ public:
   }
 
   void ISR() {
-    cv1.push(OC::ADC::value<ADC_CHANNEL_1>());
-    cv2.push(OC::ADC::value<ADC_CHANNEL_2>());
-    cv3.push(OC::ADC::value<ADC_CHANNEL_3>());
-    cv4.push(OC::ADC::value<ADC_CHANNEL_4>());
+    cv1.push(oc::ADC::value<ADC_CHANNEL_1>());
+    cv2.push(oc::ADC::value<ADC_CHANNEL_2>());
+    cv3.push(oc::ADC::value<ADC_CHANNEL_3>());
+    cv4.push(oc::ADC::value<ADC_CHANNEL_4>());
 
     const int32_t cvs[ADC_CHANNEL_LAST] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
-    uint32_t triggers = OC::DigitalInputs::clocked();
+    uint32_t triggers = oc::DigitalInputs::clocked();
 
     bytebeats_[0].Update<DAC_CHANNEL_A>(triggers, cvs);
     bytebeats_[1].Update<DAC_CHANNEL_B>(triggers, cvs);
@@ -477,14 +477,14 @@ size_t BYTEBEATGEN_restore(const void *storage) {
 }
 
 
-void BYTEBEATGEN_handleAppEvent(OC::AppEvent event) {
+void BYTEBEATGEN_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       bytebeatgen.ui.cursor.set_editing(false);
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       break;
   }
 }
@@ -527,15 +527,15 @@ void BYTEBEATGEN_lowerButton() {
 void BYTEBEATGEN_handleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         BYTEBEATGEN_topButton();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         BYTEBEATGEN_lowerButton();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         bytebeatgen.ui.cursor.toggle_editing();
         break;
     }
@@ -544,13 +544,13 @@ void BYTEBEATGEN_handleButtonEvent(const UI::Event &event) {
 
 void BYTEBEATGEN_handleEncoderEvent(const UI::Event &event) {
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     int left_value = bytebeatgen.ui.selected_channel + event.value;
     CONSTRAIN(left_value, 0, 3);
     bytebeatgen.ui.selected_channel = left_value;
     auto &selected = bytebeatgen.selected();
     bytebeatgen.ui.cursor.AdjustEnd(selected.num_enabled_settings() - 1);
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     if (bytebeatgen.ui.cursor.editing()) {
       auto &selected = bytebeatgen.selected();
       ByteBeatSettings setting = selected.enabled_setting_at(bytebeatgen.ui.cursor.cursor_pos());

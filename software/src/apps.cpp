@@ -29,11 +29,11 @@
 #include "oc/calibration.h"
 #include "oc/ui.h"
 #include "oc/menus.h"
-#include "enigma/TuringMachine.h"
+#include "apps/enigma/TuringMachine.h"
 #include "FreqMeasure.h"
 #include "ui/events.h"
 #include "vector_osc/HSVectorOscillator.h"
-#include "hemisphere/icons.h"
+#include "hemisphere/icons.hpp"
 #include "VBiasManager.h"
 
 #define EXTERN_APP(prefix) \
@@ -41,7 +41,7 @@
   extern size_t prefix ## _storageSize(); \
   extern size_t prefix ## _save(void*); \
   extern size_t prefix ## _restore(const void*); \
-  extern void prefix ## _handleAppEvent(OC::AppEvent); \
+  extern void prefix ## _handleAppEvent(oc::AppEvent); \
   extern void prefix ## _loop(); \
   extern void prefix ## _menu(); \
   extern void prefix ## _screensaver(); \
@@ -84,7 +84,7 @@ EXTERN_APP(Settings);
   prefix ## _isr \
 }
 
-OC::App available_apps[] = {
+oc::App available_apps[] = {
 
   #ifdef ENABLE_APP_CALIBR8OR
   DECLARE_APP('C','8', "Calibr8or", Calibr8or),
@@ -149,7 +149,7 @@ OC::App available_apps[] = {
 
 static constexpr int NUM_AVAILABLE_APPS = ARRAY_SIZE(available_apps);
 
-namespace OC {
+namespace oc {
 
 // Global settings are stored separately to actual app setings.
 // The theory is that they might not change as often.
@@ -162,11 +162,11 @@ struct GlobalSettings {
   uint32_t DAC_scaling;
   uint16_t current_app_id;
 
-  OC::Scale user_scales[OC::Scales::SCALE_USER_LAST];
-  OC::Pattern user_patterns[OC::Patterns::PATTERN_USER_ALL];
-  HS::TuringMachine user_turing_machines[HS::TURING_MACHINE_COUNT];
-  HS::VOSegment user_waveforms[HS::VO_SEGMENT_COUNT];
-  OC::Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
+  oc::Scale user_scales[oc::Scales::SCALE_USER_LAST];
+  oc::Pattern user_patterns[oc::Patterns::PATTERN_USER_ALL];
+  hemisphere::TuringMachine user_turing_machines[hemisphere::TuringMachine::COUNT];
+  hemisphere::VOSegment user_waveforms[hemisphere::VO_SEGMENT_COUNT];
+  oc::Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
 };
 
 // App settings are packed into a single blob of binary data; each app's chunk
@@ -202,24 +202,24 @@ static const uint16_t DEFAULT_APP_ID = available_apps[DEFAULT_APP_INDEX].id;
 void save_global_settings() {
   SERIAL_PRINTLN("Save global settings");
 
-  memcpy(global_settings.user_scales, OC::user_scales, sizeof(OC::user_scales));
-  memcpy(global_settings.user_patterns, OC::user_patterns, sizeof(OC::user_patterns));
-  memcpy(global_settings.user_turing_machines, HS::user_turing_machines, sizeof(HS::user_turing_machines));
-  memcpy(global_settings.user_waveforms, HS::user_waveforms, sizeof(HS::user_waveforms));
-  memcpy(global_settings.auto_calibration_data, OC::auto_calibration_data, sizeof(OC::auto_calibration_data));
+  memcpy(global_settings.user_scales, oc::user_scales, sizeof(oc::user_scales));
+  memcpy(global_settings.user_patterns, oc::user_patterns, sizeof(oc::user_patterns));
+  memcpy(global_settings.user_turing_machines, hemisphere::user_turing_machines, sizeof(hemisphere::user_turing_machines));
+  memcpy(global_settings.user_waveforms, hemisphere::user_waveforms, sizeof(hemisphere::user_waveforms));
+  memcpy(global_settings.auto_calibration_data, oc::auto_calibration_data, sizeof(oc::auto_calibration_data));
   // scaling settings:
-  global_settings.DAC_scaling = OC::DAC::store_scaling();
+  global_settings.DAC_scaling = oc::DAC::store_scaling();
 
   global_settings_storage.Save(global_settings);
   SERIAL_PRINTLN("Saved global settings: page_index %d", global_settings_storage.page_index());
 }
 
 void save_app_data() {
-  SERIAL_PRINTLN("Save app data... (%u bytes available)", OC::AppData::kAppDataSize);
+  SERIAL_PRINTLN("Save app data... (%u bytes available)", oc::AppData::kAppDataSize);
 
   app_settings.used = 0;
   char *data = app_settings.data;
-  char *data_end = data + OC::AppData::kAppDataSize;
+  char *data_end = data + oc::AppData::kAppDataSize;
 
   size_t start_app = random(NUM_AVAILABLE_APPS);
   for (size_t i = 0; i < NUM_AVAILABLE_APPS; ++i) {
@@ -360,8 +360,8 @@ void Init(bool reset_settings) {
                     global_settings_storage.page_index(),global_settings.current_app_id);
       memcpy(user_scales, global_settings.user_scales, sizeof(user_scales));
       memcpy(user_patterns, global_settings.user_patterns, sizeof(user_patterns));
-      memcpy(HS::user_turing_machines, global_settings.user_turing_machines, sizeof(HS::user_turing_machines));
-      memcpy(HS::user_waveforms, global_settings.user_waveforms, sizeof(HS::user_waveforms));
+      memcpy(hemisphere::user_turing_machines, global_settings.user_turing_machines, sizeof(hemisphere::user_turing_machines));
+      memcpy(hemisphere::user_waveforms, global_settings.user_waveforms, sizeof(hemisphere::user_waveforms));
       memcpy(auto_calibration_data, global_settings.auto_calibration_data, sizeof(auto_calibration_data));
       DAC::choose_calibration_data(); // either use default data, or auto_calibration_data
       DAC::restore_scaling(global_settings.DAC_scaling); // recover output scaling settings
@@ -498,13 +498,13 @@ void Ui::AppSettings() {
   event_queue_.Flush();
   event_queue_.Poke();
 
-  CORE::app_isr_enabled = false;
+  core::app_isr_enabled = false;
   delay(1);
 
   if (change_app) {
     apps::set_current_app(cursor.cursor_pos());
     FreqMeasure.end();
-    OC::DigitalInputs::reInit();
+    oc::DigitalInputs::reInit();
     if (save) {
       save_global_settings();
       save_app_data();
@@ -515,11 +515,11 @@ void Ui::AppSettings() {
     }
   }
 
-  OC::ui.encoders_enable_acceleration(global_settings.encoders_enable_acceleration);
+  oc::ui.encoders_enable_acceleration(global_settings.encoders_enable_acceleration);
 
   // Restore state
   apps::current_app->HandleAppEvent(APP_EVENT_RESUME);
-  CORE::app_isr_enabled = true;
+  core::app_isr_enabled = true;
 }
 
 bool Ui::ConfirmReset() {
@@ -564,4 +564,4 @@ bool Ui::ConfirmReset() {
   return confirm;
 }
 
-}; // namespace OC
+}; // namespace oc

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Based on Braids Quantizer, Copyright 2015 Émilie Gillet.
@@ -21,13 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "hemisphere/applet_base.hpp"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
 #include "oc/strings.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/midi.hpp"
 
-class Squanch : public HemisphereApplet {
+using namespace hemisphere;
+
+class Squanch : public AppletBase {
 public:
     enum SquanchCursor {
         SHIFT1, SHIFT2,
@@ -44,7 +46,7 @@ public:
         scale = 5;
         ForEachChannel(ch) {
             quantizer[ch].Init();
-            quantizer[ch].Configure(OC::Scales::GetScale(scale), 0xffff);
+            quantizer[ch].Configure(oc::Scales::GetScale(scale), 0xffff);
         }
     }
 
@@ -94,10 +96,10 @@ public:
 
         case SCALE:
             scale += direction;
-            if (scale >= OC::Scales::NUM_SCALES) scale = 0;
-            if (scale < 0) scale = OC::Scales::NUM_SCALES - 1;
+            if (scale >= oc::Scales::NUM_SCALES) scale = 0;
+            if (scale < 0) scale = oc::Scales::NUM_SCALES - 1;
             ForEachChannel(ch)
-                quantizer[ch].Configure(OC::Scales::GetScale(scale), 0xffff);
+                quantizer[ch].Configure(oc::Scales::GetScale(scale), 0xffff);
             continuous = 1; // Re-enable continuous mode when scale is changed
             break;
 
@@ -123,7 +125,7 @@ public:
         root = Unpack(data, PackLocation {24,4});
         root = constrain(root, 0, 11);
         ForEachChannel(ch)
-            quantizer[ch].Configure(OC::Scales::GetScale(scale), 0xffff);
+            quantizer[ch].Configure(oc::Scales::GetScale(scale), 0xffff);
     }
 
 protected:
@@ -162,8 +164,8 @@ private:
 
         // Scale & Root Note
         gfxIcon(1, 24, SCALE_ICON);
-        gfxPrint(10, 25, OC::scale_names_short[scale]);
-        gfxPrint(40, 25, OC::Strings::note_names_unpadded[root]);
+        gfxPrint(10, 25, oc::scale_names_short[scale]);
+        gfxPrint(40, 25, oc::Strings::note_names_unpadded[root]);
 
         // Display icon if clocked
         if (!continuous) gfxIcon(56, 25, CLOCK_ICON);

@@ -7,6 +7,6 @@ if [ -z "$1" ]; then
 fi
 
 cat > OC_version.h <<EOF
-// NOTE: DO NOT INCLUDE DIRECTLY, USE OC::Strings::VERSION
+// NOTE: DO NOT INCLUDE DIRECTLY, USE oc::Strings::VERSION
 "$1"
 EOF

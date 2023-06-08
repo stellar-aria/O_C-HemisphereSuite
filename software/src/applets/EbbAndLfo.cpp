@@ -1,7 +1,8 @@
-#include "HemisphereApplet.h"
+#include "hemisphere/applet_base.hpp"
 #include "tideslite.h"
+using namespace hemisphere;
 
-class EbbAndLfo : public HemisphereApplet {
+class EbbAndLfo : public AppletBase {
 public:
   const char *applet_name() { return "Ebb & LFO"; }
 

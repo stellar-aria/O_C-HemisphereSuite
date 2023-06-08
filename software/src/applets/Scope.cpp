@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,9 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 #define SCOPE_CURRENT_SETTING_TIMEOUT 50001
 
-class Scope : public HemisphereApplet {
+class Scope : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -29,7 +31,7 @@ public:
     }
 
     void Start() {
-        last_bpm_tick = OC::CORE::ticks;
+        last_bpm_tick = oc::core::ticks;
         bpm = 0;
         sample_ticks = 320;
         freeze = 0;
@@ -40,7 +42,7 @@ public:
 
     void Controller() {
         if (Clock(0)) {
-            int this_tick = OC::CORE::ticks;
+            int this_tick = oc::core::ticks;
             int time = this_tick - last_bpm_tick;
             last_bpm_tick = this_tick;
             bpm = 1000000 / time;
@@ -49,11 +51,11 @@ public:
 
         if (Clock(1)) {
             if (last_scope_tick) {
-                int cycle_ticks = OC::CORE::ticks - last_scope_tick;
+                int cycle_ticks = oc::core::ticks - last_scope_tick;
                 sample_ticks = cycle_ticks / 64;
                 sample_ticks = constrain(sample_ticks, 2, 64000);
             }
-            last_scope_tick = OC::CORE::ticks;
+            last_scope_tick = oc::core::ticks;
         }
 
         if (!freeze) {
@@ -94,10 +96,10 @@ public:
     void OnButtonPress() {
         if (current_setting == 2 && !EditMode()) // FREEZE button
             freeze = !freeze;
-        else if (OC::CORE::ticks - last_encoder_move < SCOPE_CURRENT_SETTING_TIMEOUT) // params visible? toggle edit
+        else if (oc::core::ticks - last_encoder_move < SCOPE_CURRENT_SETTING_TIMEOUT) // params visible? toggle edit
             CursorAction(current_setting, 2);
         else // show params
-            last_encoder_move = OC::CORE::ticks;
+            last_encoder_move = oc::core::ticks;
     }
 
     void OnEncoderMove(int direction) {
@@ -112,7 +114,7 @@ public:
                 current_display = constrain(current_display + direction, 0, 4);
             }
         }
-        last_encoder_move = OC::CORE::ticks;
+        last_encoder_move = oc::core::ticks;
     }
         
     uint64_t OnDataRequest() {
@@ -165,11 +167,11 @@ private:
         gfxPrint(bpm / 4);
         gfxLine(0, 24, 63, 24);
 
-        if (OC::CORE::ticks - last_bpm_tick < 1666) gfxBitmap(1, 15, 8, CLOCK_ICON);
+        if (oc::core::ticks - last_bpm_tick < 1666) gfxBitmap(1, 15, 8, CLOCK_ICON);
     }
 
     void DrawCurrentSetting() {
-        if (OC::CORE::ticks - last_encoder_move < SCOPE_CURRENT_SETTING_TIMEOUT) {
+        if (oc::core::ticks - last_encoder_move < SCOPE_CURRENT_SETTING_TIMEOUT) {
             if(current_setting == 0) {
                 gfxPrint(1, 26, "Rate");
                 gfxPrint(32, 26, sample_ticks);

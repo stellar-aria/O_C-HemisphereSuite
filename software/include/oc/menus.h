@@ -33,7 +33,7 @@
 #include "oc/DAC.h"
 #include "oc/chords.h"
 
-namespace OC {
+namespace oc {
 
 void visualize_pitch_classes(uint8_t *normalized, weegfx::coord_t centerx, weegfx::coord_t centery);
 
@@ -146,28 +146,28 @@ private:
 };
 
 inline void DrawEditIcon(weegfx::coord_t x, weegfx::coord_t y, int value, int min_value, int max_value) {
-  const uint8_t *src = OC::bitmap_edit_indicators_8;
+  const uint8_t *src = oc::bitmap_edit_indicators_8;
   if (value == max_value)
-    src += OC::kBitmapEditIndicatorW * 2;
+    src += oc::kBitmapEditIndicatorW * 2;
   else if (value == min_value)
-    src += OC::kBitmapEditIndicatorW;
+    src += oc::kBitmapEditIndicatorW;
 
-  graphics.drawBitmap8(x - 5, y + 1, OC::kBitmapEditIndicatorW, src);
+  graphics.drawBitmap8(x - 5, y + 1, oc::kBitmapEditIndicatorW, src);
 }
 
 inline void DrawEditIcon(weegfx::coord_t x, weegfx::coord_t y, int value, const settings::value_attr &attr) {
-  const uint8_t *src = OC::bitmap_edit_indicators_8;
+  const uint8_t *src = oc::bitmap_edit_indicators_8;
   if (value == attr.max_)
-    src += OC::kBitmapEditIndicatorW * 2;
+    src += oc::kBitmapEditIndicatorW * 2;
   else if (value == attr.min_)
-    src += OC::kBitmapEditIndicatorW;
+    src += oc::kBitmapEditIndicatorW;
 
-  graphics.drawBitmap8(x - 5, y + 1, OC::kBitmapEditIndicatorW, src);
+  graphics.drawBitmap8(x - 5, y + 1, oc::kBitmapEditIndicatorW, src);
 }
 
 inline void DrawChord(weegfx::coord_t x, weegfx::coord_t y, int width, int value, int mem_offset) {
   
-   OC::Chord *active_chord = &OC::user_chords[value + mem_offset * OC::Chords::NUM_CHORDS];
+   oc::Chord *active_chord = &oc::user_chords[value + mem_offset * oc::Chords::NUM_CHORDS];
    int8_t _quality = active_chord->quality;
    int8_t _voicing = active_chord->voicing;
    int y_pos;
@@ -176,18 +176,18 @@ inline void DrawChord(weegfx::coord_t x, weegfx::coord_t y, int width, int value
    y -= active_chord->base_note * 2;
    graphics.drawRect(x, y, width, width);
    // draw #B:
-   y -= OC::qualities[_quality][1] * 3;
-   y_pos = y + OC::voicing[_voicing][1] * 16;
+   y -= oc::qualities[_quality][1] * 3;
+   y_pos = y + oc::voicing[_voicing][1] * 16;
    CONSTRAIN(y_pos, 8, 64);
    graphics.drawFrame(x, y_pos, width, width);
    // draw #C:
-   y -= OC::qualities[_quality][2] * 3;
-   y_pos = y + OC::voicing[_voicing][2] * 16;
+   y -= oc::qualities[_quality][2] * 3;
+   y_pos = y + oc::voicing[_voicing][2] * 16;
    CONSTRAIN(y_pos, 8, 64);
    graphics.drawFrame(x, y_pos, width, width);
    // draw #D:
-   y -= OC::qualities[_quality][3] * 3;
-   y_pos = y + OC::voicing[_voicing][3] * 16;
+   y -= oc::qualities[_quality][3] * 3;
+   y_pos = y + oc::voicing[_voicing][3] * 16;
    CONSTRAIN(y_pos, 8, 64);
    graphics.drawFrame(x, y_pos, width, width);
 }
@@ -249,7 +249,7 @@ void DrawMask(weegfx::coord_t x, weegfx::coord_t y, uint32_t mask, size_t count,
 inline static void DrawGateIndicator(weegfx::coord_t x, weegfx::coord_t y, uint8_t state) {
   state = (state + 3) >> 2;
   if (state)
-    graphics.drawBitmap8(x, y, 4, OC::bitmap_gate_indicators_8 + (state << 2));
+    graphics.drawBitmap8(x, y, 4, oc::bitmap_gate_indicators_8 + (state << 2));
 }
 
 // Templated title bar that can have multiple columns
@@ -266,7 +266,7 @@ public:
 
   inline static void Draw() {
     
-    if (OC::DAC::get_voltage_scaling(DAC_CHANNEL_A) || OC::DAC::get_voltage_scaling(DAC_CHANNEL_B) || OC::DAC::get_voltage_scaling(DAC_CHANNEL_C) || OC::DAC::get_voltage_scaling(DAC_CHANNEL_D))
+    if (oc::DAC::get_voltage_scaling(DAC_CHANNEL_A) || oc::DAC::get_voltage_scaling(DAC_CHANNEL_B) || oc::DAC::get_voltage_scaling(DAC_CHANNEL_C) || oc::DAC::get_voltage_scaling(DAC_CHANNEL_D))
       graphics.drawHLineDots(start_x, kMenuLineH, kDisplayWidth - start_x);
     else
       graphics.drawHLine(start_x, kMenuLineH, kDisplayWidth - start_x);
@@ -466,6 +466,6 @@ private:
 
 }; // namespace menu
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_MENUS_H

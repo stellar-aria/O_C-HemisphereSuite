@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,9 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 // Logarhythm: Added triplets output (3 triggers per 4 input clocks) to the unused 2nd output
 
-class Shuffle : public HemisphereApplet {
+class Shuffle : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -41,7 +43,7 @@ public:
     }
 
     void Controller() {
-        uint32_t tick = OC::CORE::ticks;
+        uint32_t tick = oc::core::ticks;
         if (Clock(1)) {
             which = 0; // Reset (next trigger will be even clock)
             last_tick = tick;
@@ -179,7 +181,7 @@ private:
             gfxBitmap(x, 48 - (which == n ? 3 : 0), 8, which == n ? NOTE_ICON : X_NOTE_ICON);
         }
 
-        int lx = Proportion(OC::CORE::ticks - last_tick, tempo, 20) + (which * 20) + 4;
+        int lx = Proportion(oc::core::ticks - last_tick, tempo, 20) + (which * 20) + 4;
         lx = constrain(lx, 1, 54);
         gfxDottedLine(lx, 42, lx, 60, 2);
     }

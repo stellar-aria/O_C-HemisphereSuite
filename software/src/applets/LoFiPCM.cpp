@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 #define HEM_LOFI_PCM_BUFFER_SIZE 2048
 #define HEM_LOFI_PCM_SPEED 4
 
@@ -30,7 +32,7 @@
 
 uint8_t lofi_pcm_buffer[HEM_LOFI_PCM_BUFFER_SIZE];
 
-class LoFiPCM : public HemisphereApplet {
+class LoFiPCM : public AppletBase {
 public:
     // TODO: consider making a singleton class to manage/share buffers
     const int length = HEM_LOFI_PCM_BUFFER_SIZE;

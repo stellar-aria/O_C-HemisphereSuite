@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 #define HEM_BURST_NUMBER_MAX 12
 #define HEM_BURST_SPACING_MAX 500
 #define HEM_BURST_SPACING_MIN 8
@@ -26,7 +28,7 @@
 #define HEM_BURST_ACCEL_MAX 50
 #define HEM_BURST_JITTER_MAX 50
 
-class Burst : public HemisphereApplet {
+class Burst : public AppletBase {
 public:
     enum BurstCursor {
 
@@ -53,7 +55,7 @@ public:
         if (DetentedIn(0) > 0) {
             number = ProportionCV(In(0), HEM_BURST_NUMBER_MAX + 1);
             number = constrain(number, 1, HEM_BURST_NUMBER_MAX);
-            last_number_cv_tick = OC::CORE::ticks;
+            last_number_cv_tick = oc::core::ticks;
         }
         int spacing_mod = clocked ? 0 : Proportion(DetentedIn(1), HEMISPHERE_MAX_INPUT_CV, 500);
 
@@ -107,7 +109,7 @@ public:
         // Number is not being changed via CV, fire the set of bursts right away. This is done so that
         // the applet can adapt to contexts that involve (1) the need to accurately interpret rapidly-
         // changing CV values or (2) the need for tight timing when Number is static-ish.
-        bool number_is_changing = (OC::CORE::ticks - last_number_cv_tick < 80000);
+        bool number_is_changing = (oc::core::ticks - last_number_cv_tick < 80000);
         if (Clock(1) && number_is_changing) StartADCLag();
 
         if (EndOfADCLag() || (Clock(1) && !number_is_changing)) {

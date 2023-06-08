@@ -27,16 +27,16 @@
 
 #include "util/settings.h"
 #include "oc/DAC.h"
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
 #include "oc/strings.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
 #include "oc/patterns.h"
-#include "HemisphereApplet.h" // for HEMISPHERE_CLOCK_TICKS
+#include "hemisphere/applet_base.hpp" // for HEMISPHERE_CLOCK_TICKS
 
 #define DT_CV_TIMELINE 0
 #define DT_PROBABILITY_TIMELINE 1
@@ -54,12 +54,14 @@ enum {
     DT_SETTING_LAST
 };
 
-class TheDarkestTimeline : public HSApplication, public SystemExclusiveHandler,
+using namespace hemisphere;
+
+class TheDarkestTimeline : public ApplicationBase, public SystemExclusiveHandler,
     public settings::SettingsBase<TheDarkestTimeline, DT_SETTING_LAST> {
 public:
 	void Start() {
         quantizer.Init();
-        quantizer.Configure(OC::Scales::GetScale(5), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(5), 0xffff);
         Resume();
 	}
 
@@ -87,9 +89,9 @@ public:
             int data2 = usbMIDI.getData2();
 
             // Handle system exclusive dump for Setup data
-            if (message == HEM_MIDI_SYSEX) OnReceiveSysEx();
+            if (message == MIDI_SYSEX) OnReceiveSysEx();
 
-            if (message == HEM_MIDI_NOTE_ON && channel == midi_channel_in()) {
+            if (message == MIDI_NOTE_ON && channel == midi_channel_in()) {
                 note_on = 1;
                 in_note_number = data1;
                 in_velocity = data2;
@@ -99,8 +101,8 @@ public:
         // Step forward with Digital 1
         int gate_ticks = HEMISPHERE_CLOCK_TICKS;
         if (Clock(0)) {
-            last_tempo = OC::CORE::ticks - last_clock_event;
-            last_clock_event = OC::CORE::ticks;
+            last_tempo = oc::core::ticks - last_clock_event;
+            last_clock_event = oc::core::ticks;
             if (gate_time() > 0) {
                 gate_ticks = Proportion(gate_time(), 100, last_tempo);
             }
@@ -112,8 +114,8 @@ public:
 
         // Reset sequencer with Digital 3
         if (Clock(2)) {
-            last_tempo = OC::CORE::ticks - last_clock_event;
-            last_clock_event = OC::CORE::ticks;
+            last_tempo = oc::core::ticks - last_clock_event;
+            last_clock_event = oc::core::ticks;
             cursor = 0;
             clocked = 1;
         }
@@ -122,7 +124,7 @@ public:
         if (!index_edit_enabled) {
             int cv = DetentedIn(2);
             if (cv > 0) {
-                int cv_index = cv / (HSAPPLICATION_5V / 32);
+                int cv_index = cv / (FIVE_VOLTS / 32);
                 apply_value(DT_INDEX, cv_index);
             }
         }
@@ -142,13 +144,13 @@ public:
                         if (tl == 0) { // Write to CV Timeline based on note number
                             write_cv = MIDIQuantizer::CV(in_note_number);
                         } else { // Write to Probability Timeline based on velocity
-                            write_cv = Proportion(in_velocity, 127, HSAPPLICATION_5V);
+                            write_cv = Proportion(in_velocity, 127, FIVE_VOLTS);
                         }
                         write_data_at(idx, tl, write_cv);
                     }
                 } else {
                     cv = In(tl);
-                    cv = constrain(cv, 0, HSAPPLICATION_5V);
+                    cv = constrain(cv, 0, FIVE_VOLTS);
                     write_data_at(idx, tl, cv);
                 }
             }
@@ -181,7 +183,7 @@ public:
                 clocked = 0; // Reset the clock
 
                 // Calculate normal probability for Output 3
-                int prob = random(0, HSAPPLICATION_5V);
+                int prob = random(0, FIVE_VOLTS);
                 if (prob < cv || Gate(3)) { // Gate at digital 4 makes all probabilities certainties
                     ClockOut(2, gate_ticks);
 
@@ -190,16 +192,16 @@ public:
                     if (midi_channel()) {
                         last_midi_channel[0] = midi_channel();
                         last_midi_note[0] = MIDIQuantizer::NoteNumber(get_data_at(idx, DT_CV_TIMELINE), transpose);
-                        vel = Proportion(cv, HSAPPLICATION_5V, 127);
+                        vel = Proportion(cv, FIVE_VOLTS, 127);
                         usbMIDI.sendNoteOn(last_midi_note[0], vel, last_midi_channel[0]);
-                        last_length[0] = OC::CORE::ticks - last_clock[0];
-                        last_clock[0] = OC::CORE::ticks;
+                        last_length[0] = oc::core::ticks - last_clock[0];
+                        last_clock[0] = oc::core::ticks;
                     }
                 }
 
                 // Calculate complementary probability for Output 4
-                prob = random(0, HSAPPLICATION_5V);
-                if (prob < (HSAPPLICATION_5V - cv) || Gate(3)) {
+                prob = random(0, FIVE_VOLTS);
+                if (prob < (FIVE_VOLTS - cv) || Gate(3)) {
                     ClockOut(3, gate_ticks);
 
                     // Send the MIDI Note On for Alternate Universe
@@ -208,10 +210,10 @@ public:
                         last_midi_channel[1] = midi_channel_alt();
                         uint8_t alt_idx = (idx + length()) % 32;
                         last_midi_note[1] = MIDIQuantizer::NoteNumber(get_data_at(alt_idx, DT_CV_TIMELINE));
-                        vel = Proportion(get_data_at(alt_idx, DT_PROBABILITY_TIMELINE), HSAPPLICATION_5V, 127);
+                        vel = Proportion(get_data_at(alt_idx, DT_PROBABILITY_TIMELINE), FIVE_VOLTS, 127);
                         usbMIDI.sendNoteOn(last_midi_note[1], vel, last_midi_channel[1]);
-                        last_length[1] = OC::CORE::ticks - last_clock[1];
-                        last_clock[1] = OC::CORE::ticks;
+                        last_length[1] = oc::core::ticks - last_clock[1];
+                        last_clock[1] = oc::core::ticks;
                     }
                 }
             } // Thus ends the processing of the Probability Timeline
@@ -220,7 +222,7 @@ public:
         // Turn off notes that have been on for too long
         for (uint8_t ch = 0; ch < 2; ch++)
         {
-            if (last_midi_note[ch] > -1 && (OC::CORE::ticks - last_clock[ch]) > (last_length[ch]) * 2) {
+            if (last_midi_note[ch] > -1 && (oc::core::ticks - last_clock[ch]) > (last_length[ch]) * 2) {
                 usbMIDI.sendNoteOff(last_midi_note[ch], 0, last_midi_channel[ch]);
                 last_midi_note[ch] = -1;
             }
@@ -251,7 +253,7 @@ public:
             V[ix++] = (uint8_t)values_[DT_INDEX];
             for (int b = 0; b < 16; b++)
             {
-                uint16_t cv = OC::user_patterns[page].notes[b];
+                uint16_t cv = oc::user_patterns[page].notes[b];
                 V[ix++] = cv & 0xff; // Low byte
                 V[ix++] = (cv >> 8) & 0xff; // High byte
             }
@@ -288,7 +290,7 @@ public:
                     uint8_t low = V[ix++];
                     uint8_t high = V[ix++];
                     uint16_t cv = (uint16_t)(high << 8) | low;
-                    OC::user_patterns[page].notes[b] = constrain(cv, 0, HSAPPLICATION_5V);
+                    oc::user_patterns[page].notes[b] = constrain(cv, 0, FIVE_VOLTS);
                 }
             } else if (page == 4) {
                 // Metadata page 4
@@ -325,7 +327,7 @@ public:
         {
             for (uint8_t s = 0; s < 32; s++)
             {
-                write_data_at(s, tl, random(0, HSAPPLICATION_5V));
+                write_data_at(s, tl, random(0, FIVE_VOLTS));
             }
         }
     }
@@ -358,7 +360,7 @@ public:
         if (setup_screen == 0) change_value(DT_LENGTH, -direction);
         else change_value(setup_screen + 1, direction);
 
-        quantizer.Configure(OC::Scales::GetScale(scale()), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(scale()), 0xffff);
         if (setup_screen > 0) setup_screen_timeout_countdown = DT_SETUP_SCREEN_TIMEOUT;
     }
 
@@ -368,7 +370,7 @@ public:
 
         // If a clock pulse seems to be ongoing, don't interfere with that pulse. Otherwise,
         // set the clocked flag to force a Probability Timeline calculation
-        if (OC::CORE::ticks - last_clock_event > last_tempo) clocked = 1;
+        if (oc::core::ticks - last_clock_event > last_tempo) clocked = 1;
     }
 
 private:
@@ -413,7 +415,7 @@ private:
     }
 
     void DrawColumn(int pos, int y_offset, int cv, bool is_recording, bool is_index) {
-        uint8_t height = Proportion(cv, HSAPPLICATION_5V, 22);
+        uint8_t height = Proportion(cv, FIVE_VOLTS, 22);
         uint8_t width = (128 / length()) / 2;
         uint8_t x_pos = (128 / length()) * pos;
         uint8_t x_offset = width / 2;
@@ -446,8 +448,8 @@ private:
 
     void DrawSetupScreen() {
         gfxPrint(1, 15, "Scale   : ");
-        gfxPrint(OC::scale_names_short[scale()]);
-        gfxPrint(102, 15, OC::Strings::note_names_unpadded[root()]);
+        gfxPrint(oc::scale_names_short[scale()]);
+        gfxPrint(102, 15, oc::Strings::note_names_unpadded[root()]);
 
         gfxPrint(1, 25, "MIDI Out: ");
         gfxPrint(midi_channels[midi_channel()]);
@@ -503,7 +505,7 @@ private:
         if (step >= 0 && step <= 64) {
             int pattern = step / 16;
             int num = step % 16;
-            note = OC::user_patterns[pattern].notes[num];
+            note = oc::user_patterns[pattern].notes[num];
         }
         return note;
     }
@@ -513,7 +515,7 @@ private:
         if (step >= 0 && step <= 64) {
             int pattern = step / 16;
             int num = step % 16;
-            OC::user_patterns[pattern].notes[num] = note;
+            oc::user_patterns[pattern].notes[num] = note;
         }
     }
 };
@@ -523,7 +525,7 @@ private:
 SETTINGS_DECLARE(TheDarkestTimeline, DT_SETTING_LAST) {
     {16, 1, 32, "Length", NULL, settings::STORAGE_TYPE_U8},
     {0, 0, 31, "Index", NULL, settings::STORAGE_TYPE_U8},
-    {5, 0, OC::Scales::NUM_SCALES - 1, "Scale", NULL, settings::STORAGE_TYPE_U8},
+    {5, 0, oc::Scales::NUM_SCALES - 1, "Scale", NULL, settings::STORAGE_TYPE_U8},
     {0, 0, 11, "Root", NULL, settings::STORAGE_TYPE_U8},
     {0, 0, 16, "MIDI Channel", NULL, settings::STORAGE_TYPE_U8},
     {0, 0, 16, "MIDI Channel Alt", NULL, settings::STORAGE_TYPE_U8},
@@ -554,11 +556,11 @@ void TheDarkestTimeline_isr() {
 	return TheDarkestTimeline_instance.BaseController();
 }
 
-void TheDarkestTimeline_handleAppEvent(OC::AppEvent event) {
-    if (event ==  OC::APP_EVENT_RESUME) {
+void TheDarkestTimeline_handleAppEvent(oc::AppEvent event) {
+    if (event ==  oc::APP_EVENT_RESUME) {
         TheDarkestTimeline_instance.Resume();
     }
-    if (event == OC::APP_EVENT_SUSPEND) {
+    if (event == oc::APP_EVENT_SUSPEND) {
         TheDarkestTimeline_instance.OnSendSysEx();
     }
 }
@@ -573,19 +575,19 @@ void TheDarkestTimeline_screensaver() {}
 
 void TheDarkestTimeline_handleButtonEvent(const UI::Event &event) {
     // For left encoder, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) TheDarkestTimeline_instance.OnLeftButtonLongPress();
         if (event.type == UI::EVENT_BUTTON_PRESS) TheDarkestTimeline_instance.OnLeftButtonPress();
     }
 
     // For right encoder, only handle press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) TheDarkestTimeline_instance.OnRightButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) TheDarkestTimeline_instance.OnRightButtonPress();
 
     // For up button, handle only press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) TheDarkestTimeline_instance.OnUpButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) TheDarkestTimeline_instance.OnUpButtonPress();
 
     // For down button, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) TheDarkestTimeline_instance.OnDownButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) TheDarkestTimeline_instance.OnDownButtonLongPress();
     }
@@ -593,10 +595,10 @@ void TheDarkestTimeline_handleButtonEvent(const UI::Event &event) {
 
 void TheDarkestTimeline_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) TheDarkestTimeline_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) TheDarkestTimeline_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) TheDarkestTimeline_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) TheDarkestTimeline_instance.OnRightEncoderMove(event.value);
 }
 
 #endif

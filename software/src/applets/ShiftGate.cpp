@@ -1,5 +1,8 @@
-#include "HemisphereApplet.h"
-class ShiftGate : public HemisphereApplet {
+#include "hemisphere/applet_base.hpp"
+
+using namespace hemisphere;
+
+class ShiftGate : public AppletBase {
 public:
 
     const char* applet_name() {

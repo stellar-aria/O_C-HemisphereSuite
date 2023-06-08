@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2022, Alessio Degani
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,8 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
+#include "hemisphere/applet_base.hpp"
 #include "oc/core.h"
+using namespace hemisphere;
 
 #define PROB_UP 500
 #define PROB_DN 500
@@ -32,7 +32,7 @@
 #define HEM_1ST 128 //ADC value for 1 semitone
 #define HEM_HST 64 //ADC value for half semitone
 
-class RndWalk : public HemisphereApplet {
+class RndWalk : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters

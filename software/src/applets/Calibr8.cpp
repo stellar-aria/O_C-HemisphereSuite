@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2023, Nicholas J. Michalek
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,12 +17,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#include "hemisphere/applet_base.hpp"
+#include "hemisphere/midi.hpp"
 
-#include "hemisphere/MIDI.h"
+using namespace hemisphere;
 
 #define CAL8_PRECISION 10000
 
-class Calibr8 : public HemisphereApplet {
+class Calibr8 : public AppletBase {
 public:
     enum CalCursor {
         SCALEFACTOR_A,

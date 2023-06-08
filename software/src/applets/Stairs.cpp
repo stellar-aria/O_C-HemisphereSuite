@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2020, Logarhythm
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,10 +26,12 @@
 // keeping the direction of change but avoiding precise repetition.
 // This version provides unipolar 0-5v output, divided into n steps (O&C hardware can only output -3v to +6v so this seemed sensible.)
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
 
 #define HEM_STAIRS_MAX_STEPS 32
 //#define HEM_STAIRS_GRAPH_SIZE 16
-class Stairs : public HemisphereApplet {
+class Stairs : public AppletBase {
 public:
 
     enum StairsCursor {

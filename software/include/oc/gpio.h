@@ -1,6 +1,6 @@
 #ifndef OC_GPIO_H_
 #define OC_GPIO_H_
-
+#include <Arduino.h>
 #include "oc/options.h"
 
 #ifdef FLIP_180
@@ -76,7 +76,7 @@ constexpr auto but_bot = 4;
 
 /* local copy of pinMode (cf. cores/pins_teensy.c), using faster slew rate */
 
-namespace OC { 
+namespace oc { 
   
 void inline pinMode(uint8_t pin, uint8_t mode) {
   

@@ -119,7 +119,7 @@ public:
     		 * the game.
     		 */
 	    int32_t current_value;
-	    current_value = OC::ADC::raw_pitch_value(ADC_CHANNEL_1);
+	    current_value = oc::ADC::raw_pitch_value(ADC_CHANNEL_1);
 	    if (current_value < -CENTER_DETENT) MovePaddleUp();
 	    if (current_value > CENTER_DETENT) MovePaddleDown();
 
@@ -145,10 +145,10 @@ public:
     		// Player paddle position CV (0 to 4-ish volts), based on the center of the paddle
     		uint32_t out_D = ((paddle_y + (paddle_h / 2)) - BOUNDARY_TOP) * Y_POSITION_COEFF;
 
-	    OC::DAC::set_pitch(DAC_CHANNEL_A, 1, out_A);
-	    OC::DAC::set_pitch(DAC_CHANNEL_B, 1, out_B);
-	    OC::DAC::set_pitch(DAC_CHANNEL_C, out_C, 0);
-	    OC::DAC::set_pitch(DAC_CHANNEL_D, out_D, 0);
+	    oc::DAC::set_pitch(DAC_CHANNEL_A, 1, out_A);
+	    oc::DAC::set_pitch(DAC_CHANNEL_B, 1, out_B);
+	    oc::DAC::set_pitch(DAC_CHANNEL_C, out_C, 0);
+	    oc::DAC::set_pitch(DAC_CHANNEL_D, out_D, 0);
     }
 
     int get_score() {return score;}
@@ -313,7 +313,7 @@ void PONGGAME_isr() {
 	pong_instance.ISR();
 }
 
-void PONGGAME_handleAppEvent(OC::AppEvent event) {
+void PONGGAME_handleAppEvent(oc::AppEvent event) {
 
 }
 
@@ -353,12 +353,12 @@ void PONGGAME_screensaver() {}
 void PONGGAME_handleButtonEvent(const UI::Event &event) {
 	if (UI::EVENT_BUTTON_PRESS == event.type) {
 	    switch (event.control) {
-	      case OC::CONTROL_BUTTON_UP:
+	      case oc::CONTROL_BUTTON_UP:
 	    	    pong_instance.MovePaddleUp();
 	    		pong_instance.ResetPaddle();
 	        break;
 
-	      case OC::CONTROL_BUTTON_DOWN:
+	      case oc::CONTROL_BUTTON_DOWN:
 	    	    pong_instance.MovePaddleDown();
 	    		pong_instance.ResetPaddle();
 	        break;

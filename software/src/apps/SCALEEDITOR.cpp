@@ -19,25 +19,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
 #include "SegmentDisplay.h"
 #include "util/settings.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
 #include "oc/menus.h"
 
-class ScaleEditor : public HSApplication, public SystemExclusiveHandler {
+using namespace hemisphere;
+
+class ScaleEditor : public ApplicationBase, public SystemExclusiveHandler {
 public:
 	void Start() {
 	    current_scale = 0;
 	    current_note = 0;
-        quantizer.Configure(OC::Scales::GetScale(current_scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(current_scale), 0xffff);
         current_import_scale = 5;
-        undo_value = OC::user_scales[current_scale].notes[0];
+        undo_value = oc::user_scales[current_scale].notes[0];
         octave = 1;
         QuantizeCurrent();
         segment.Init(SegmentSize::BIG_SEGMENTS);
@@ -62,7 +64,7 @@ public:
 
     void View() {
         gfxHeader("Scale Editor    ");
-        gfxPrint(OC::scale_names_short[current_scale]);
+        gfxPrint(oc::scale_names_short[current_scale]);
         if (import_mode) DrawImportScreen();
         else DrawInterface();
     }
@@ -73,17 +75,17 @@ public:
         int ix = 0;
 
         // Encode span
-        uint16_t span = static_cast<uint16_t>(OC::user_scales[current_scale].span);
+        uint16_t span = static_cast<uint16_t>(oc::user_scales[current_scale].span);
         V[ix++] = span & 0xff; // Low byte
         V[ix++] = (span >> 8) & 0xff; // High byte
 
         // Encode length
-        V[ix++] = static_cast<uint8_t>(OC::user_scales[current_scale].num_notes);
+        V[ix++] = static_cast<uint8_t>(oc::user_scales[current_scale].num_notes);
 
         // Encode values
         for (int i = 0; i < 16; i++)
         {
-            uint16_t note = static_cast<uint16_t>(OC::user_scales[current_scale].notes[i]);
+            uint16_t note = static_cast<uint16_t>(oc::user_scales[current_scale].notes[i]);
             V[ix++] = note & 0xff; // Low
             V[ix++] = (note >> 8) & 0xff; // High
         }
@@ -103,25 +105,25 @@ public:
             // Decode span
             uint8_t low = V[ix++];
             uint8_t high = V[ix++];
-            OC::user_scales[current_scale].span = (int16_t)(high << 8) | low;
+            oc::user_scales[current_scale].span = (int16_t)(high << 8) | low;
 
             // Decode length
             uint8_t num_notes = V[ix++];
-            OC::user_scales[current_scale].num_notes = constrain(num_notes, 4, 16);
+            oc::user_scales[current_scale].num_notes = constrain(num_notes, 4, 16);
 
             // Decode values
             for (int i = 0; i < 16; i++)
             {
                 uint8_t low = V[ix++];
                 uint8_t high = V[ix++];
-                OC::user_scales[current_scale].notes[i] = (uint16_t)(high << 8) | low;
+                oc::user_scales[current_scale].notes[i] = (uint16_t)(high << 8) | low;
             }
 
             // Reset
             current_note = 0;
-            undo_value = OC::user_scales[current_scale].notes[current_note];
+            undo_value = oc::user_scales[current_scale].notes[current_note];
             // Configure and force requantize for real-time monitoring purposes
-            quantizer.Configure(OC::Scales::GetScale(current_scale), 0xffff);
+            quantizer.Configure(oc::Scales::GetScale(current_scale), 0xffff);
             QuantizeCurrent();
         }
     }
@@ -193,9 +195,9 @@ private:
                 uint8_t ix = (cy * 4) + cx; // index within the scale
                 uint8_t x = cx * 32;
                 uint8_t y = cy * 9 + 15;
-                if (ix < OC::user_scales[current_scale].num_notes) {
+                if (ix < oc::user_scales[current_scale].num_notes) {
 
-                    uint32_t note_value = OC::user_scales[current_scale].notes[ix];
+                    uint32_t note_value = oc::user_scales[current_scale].notes[ix];
                     uint32_t cents = (note_value * 100) >> 7;
                     uint32_t frac_cents = ((note_value * 100000) >> 7) - cents * 1000;
 
@@ -204,7 +206,7 @@ private:
 
                     // If this is the current note, highlight it
                     if (ix == current_note && !length_set_mode) gfxInvert(x, y, 32, 9);
-                    if (length_set_mode && ix == OC::user_scales[current_scale].num_notes - 1)
+                    if (length_set_mode && ix == oc::user_scales[current_scale].num_notes - 1)
                         gfxCursor(x, y + 9, 32);
                 }
             }
@@ -212,10 +214,10 @@ private:
 
         // Now the editing area:
         if (length_set_mode) {
-            segment.PrintWhole(22, 52, OC::user_scales[current_scale].num_notes);
+            segment.PrintWhole(22, 52, oc::user_scales[current_scale].num_notes);
         } else {
             // Show the value
-            uint32_t note_value = OC::user_scales[current_scale].notes[current_note];
+            uint32_t note_value = oc::user_scales[current_scale].notes[current_note];
             uint32_t cents = (note_value * 100) >> 7;
             uint32_t frac_cents = ((note_value * 100000) >> 7) - cents * 1000;
 
@@ -226,7 +228,7 @@ private:
 
     void DrawImportScreen() {
         gfxPrint(0, 15, "Import");
-        gfxPrint(0, 35, OC::scale_names[current_import_scale]);
+        gfxPrint(0, 35, oc::scale_names[current_import_scale]);
         gfxCursor(0, 43, 127);
 
         gfxPrint(0, 55, "[CANCEL]");
@@ -237,15 +239,15 @@ private:
     // Control handler activities
     /////////////////////////////////////////////////////////////////
     void SwitchScale(int direction) { // Up/Down buttons
-        current_scale = constrain(current_scale + direction, 0, OC::Scales::SCALE_USER_LAST - 1);
+        current_scale = constrain(current_scale + direction, 0, oc::Scales::SCALE_USER_LAST - 1);
 
         // Configure and force requantize for real-time monitoring purposes
-        quantizer.Configure(OC::Scales::GetScale(current_scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(current_scale), 0xffff);
         QuantizeCurrent();
 
-        uint8_t length = static_cast<uint8_t>(OC::user_scales[current_scale].num_notes);
-        if (current_note > length - 1) current_note = OC::user_scales[current_scale].num_notes - 1;
-        undo_value = OC::user_scales[current_scale].notes[current_note];
+        uint8_t length = static_cast<uint8_t>(oc::user_scales[current_scale].num_notes);
+        if (current_note > length - 1) current_note = oc::user_scales[current_scale].num_notes - 1;
+        undo_value = oc::user_scales[current_scale].notes[current_note];
     }
 
     /* Switch length set mode on and off when the right encoder is pressed */
@@ -259,7 +261,7 @@ private:
     }
 
     void ChangeNote(int direction) {
-        int length = OC::user_scales[current_scale].num_notes;
+        int length = oc::user_scales[current_scale].num_notes;
         current_note += direction;
         if (current_note < 0) {
             if (octave > -1) current_note = length - 1;
@@ -271,77 +273,77 @@ private:
             else current_note -= 1;
             octave = constrain(octave + 1, -1, 4);
         }
-        undo_value = OC::user_scales[current_scale].notes[current_note];
+        undo_value = oc::user_scales[current_scale].notes[current_note];
         QuantizeCurrent();
     }
 
     void ChangeImport(int direction) {
         current_import_scale += direction;
-        if (current_import_scale == OC::Scales::NUM_SCALES) current_import_scale = 0;
-        if (current_import_scale < 0) current_import_scale = OC::Scales::NUM_SCALES - 1;
+        if (current_import_scale == oc::Scales::NUM_SCALES) current_import_scale = 0;
+        if (current_import_scale < 0) current_import_scale = oc::Scales::NUM_SCALES - 1;
     }
 
     void ChangeLength(int direction) {
-        int length = OC::user_scales[current_scale].num_notes;
-        if (direction > 0 && OC::user_scales[current_scale].notes[length - 1] + 1 >= (12 <<7)) {
+        int length = oc::user_scales[current_scale].num_notes;
+        if (direction > 0 && oc::user_scales[current_scale].notes[length - 1] + 1 >= (12 <<7)) {
             // Cannot add a new note because the current top can't be exceeded
             return;
         }
 
         length = constrain(length + direction, 4, 16);
-        OC::user_scales[current_scale].num_notes = length;
+        oc::user_scales[current_scale].num_notes = length;
         if (current_note > (length - 1)) current_note = length - 1;
 
         // Make sure added notes follow the range rules
-        if (direction > 0 && OC::user_scales[current_scale].notes[length - 1] < OC::user_scales[current_scale].notes[length - 2]) {
-            OC::user_scales[current_scale].notes[length - 1] = OC::user_scales[current_scale].notes[length - 2] + 1;
+        if (direction > 0 && oc::user_scales[current_scale].notes[length - 1] < oc::user_scales[current_scale].notes[length - 2]) {
+            oc::user_scales[current_scale].notes[length - 1] = oc::user_scales[current_scale].notes[length - 2] + 1;
         }
 
         // Configure and force requantize for real-time monitoring purposes
-        quantizer.Configure(OC::Scales::GetScale(current_scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(current_scale), 0xffff);
         QuantizeCurrent();
 
         ResetCursor();
     }
 
     void ChangeValue(int direction) {
-        int16_t new_value = OC::user_scales[current_scale].notes[current_note] + direction;
+        int16_t new_value = oc::user_scales[current_scale].notes[current_note] + direction;
 
         // Is this constraint necessary? What if you want the scale to go in reverse, or want it to be
         // otherwise out-of-order? Heck with this, I say, let the user decide.
         //
         // But, yeah, this is necessary, it turns out. The note stops working right if the one above it is
         // at a higher pitch. I haven't looked into why, but it's probably in the Braids quantizer code somewhere
-        int length = OC::user_scales[current_scale].num_notes;
-        const int32_t min = current_note > 0 ? OC::user_scales[current_scale].notes[current_note - 1] : 0;
-        const int32_t max = current_note < length - 1 ? OC::user_scales[current_scale].notes[current_note + 1] : OC::user_scales[current_scale].span;
+        int length = oc::user_scales[current_scale].num_notes;
+        const int32_t min = current_note > 0 ? oc::user_scales[current_scale].notes[current_note - 1] : 0;
+        const int32_t max = current_note < length - 1 ? oc::user_scales[current_scale].notes[current_note + 1] : oc::user_scales[current_scale].span;
         if (new_value <= min) new_value = current_note > 0 ? min + 1 : 0;
         if (new_value >= max) new_value = max - 1;
-        OC::user_scales[current_scale].notes[current_note] = new_value;
+        oc::user_scales[current_scale].notes[current_note] = new_value;
 
         // Configure and force requantize for real-time monitoring purposes
-        quantizer.Configure(OC::Scales::GetScale(current_scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(current_scale), 0xffff);
         QuantizeCurrent();
     }
 
     void ImportScale() {
-        OC::Scale source = OC::Scales::GetScale(current_import_scale);
-        memcpy(&OC::user_scales[current_scale], &source, sizeof(source));
-        quantizer.Configure(OC::Scales::GetScale(current_scale), 0xffff);
+        oc::Scale source = oc::Scales::GetScale(current_import_scale);
+        memcpy(&oc::user_scales[current_scale], &source, sizeof(source));
+        quantizer.Configure(oc::Scales::GetScale(current_scale), 0xffff);
         QuantizeCurrent();
         import_mode = 0;
-        undo_value = OC::user_scales[current_scale].notes[current_note];
+        undo_value = oc::user_scales[current_scale].notes[current_note];
     }
 
     void Undo() {
-        OC::user_scales[current_scale].notes[current_note] = static_cast<int16_t>(undo_value);
+        oc::user_scales[current_scale].notes[current_note] = static_cast<int16_t>(undo_value);
         QuantizeCurrent();
     }
 
     void QuantizeCurrent() {
-        int transpose = OC::user_scales[current_scale].span * octave;
+        int transpose = oc::user_scales[current_scale].span * octave;
         quantizer.Requantize();
-        current_quantized = quantizer.Process(OC::user_scales[current_scale].notes[current_note] + transpose, 0, 0);
+        current_quantized = quantizer.Process(oc::user_scales[current_scale].notes[current_note] + transpose, 0, 0);
         quantizer.Requantize(); // This is for the next one in the Controller
     }
 };
@@ -362,8 +364,8 @@ void SCALEEDITOR_isr() {
 	return scale_editor_instance.BaseController();
 }
 
-void SCALEEDITOR_handleAppEvent(OC::AppEvent event) {
-    if (event == OC::APP_EVENT_SUSPEND) {
+void SCALEEDITOR_handleAppEvent(oc::AppEvent event) {
+    if (event == oc::APP_EVENT_SUSPEND) {
         scale_editor_instance.OnSendSysEx();
     }
 }
@@ -378,19 +380,19 @@ void SCALEEDITOR_screensaver() {}
 
 void SCALEEDITOR_handleButtonEvent(const UI::Event &event) {
     // For left encoder, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_PRESS) scale_editor_instance.OnLeftButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) scale_editor_instance.OnLeftButtonLongPress();
     }
 
     // For right encoder, only handle press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) scale_editor_instance.OnRightButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) scale_editor_instance.OnRightButtonPress();
 
     // For up button, handle only press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) scale_editor_instance.OnUpButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) scale_editor_instance.OnUpButtonPress();
 
     // For down button, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) scale_editor_instance.OnDownButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) scale_editor_instance.OnDownButtonLongPress();
     }
@@ -398,8 +400,8 @@ void SCALEEDITOR_handleButtonEvent(const UI::Event &event) {
 
 void SCALEEDITOR_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) scale_editor_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) scale_editor_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) scale_editor_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) scale_editor_instance.OnRightEncoderMove(event.value);
 }

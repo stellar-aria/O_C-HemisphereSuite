@@ -28,7 +28,7 @@
 // weegfx::Graphics only supports drawing of 8px high bitmaps right now...
 // TODO Embed width in first byte?
 
-namespace OC {
+namespace oc {
 
 extern const uint8_t bitmap_empty_frame4x8[];
 extern const uint8_t bitmap_end_marker4x8[];

@@ -1,19 +1,19 @@
 #include "oc/patterns.h"
 #include "oc/patterns_presets.h"
 
-namespace OC {
+namespace oc {
 
     Pattern user_patterns[Patterns::PATTERN_USER_ALL];
     Pattern dummy_pattern;
 
     /*static*/
-    const int Patterns::NUM_PATTERNS = OC::Patterns::PATTERN_USER_LAST; // = 4
+    const int Patterns::NUM_PATTERNS = oc::Patterns::PATTERN_USER_LAST; // = 4
 
     /*static*/
     // 
     void Patterns::Init() {
-      for (size_t i = 0; i < OC::Patterns::PATTERN_USER_ALL ; ++i)
-        memcpy(&user_patterns[i], &OC::patterns[0], sizeof(Pattern));
+      for (size_t i = 0; i < oc::Patterns::PATTERN_USER_ALL ; ++i)
+        memcpy(&user_patterns[i], &oc::patterns[0], sizeof(Pattern));
     }
     
     const char* const pattern_names_short[] = {
@@ -31,4 +31,4 @@ namespace OC {
         "User-sequence 4",
         "DEFAULT"
     }; 
-} // namespace OC
+} // namespace oc

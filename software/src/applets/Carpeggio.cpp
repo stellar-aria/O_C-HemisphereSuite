@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Chord library (c) 2018, Roel Das
@@ -21,11 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
 #include "hem_arp_chord.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/midi.hpp"
 #define HEM_CARPEGGIO_ANIMATION_SPEED 500
 
-class Carpeggio : public HemisphereApplet {
+using namespace hemisphere;
+
+class Carpeggio : public AppletBase {
 public:
 
     enum CarpeggioCursor {

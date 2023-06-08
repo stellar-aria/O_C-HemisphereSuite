@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-namespace OC {
+namespace oc {
 
 
 void Input_Map::Init() {
@@ -105,4 +105,4 @@ int8_t Input_Map::Process(int32_t input) {
 }
 
 
-}  // namespace OC
+}  // namespace oc

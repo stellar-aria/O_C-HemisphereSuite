@@ -19,14 +19,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
 #include "vector_osc/HSVectorOscillator.h"
 #include "vector_osc/WaveformManager.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
+#include "hemisphere/icons.hpp"
 
-class WaveformEditor : public HSApplication, public SystemExclusiveHandler {
+using namespace hemisphere;
+
+class WaveformEditor : public ApplicationBase, public SystemExclusiveHandler {
 public:
     void Start() {
         if (!WaveformManager::Validate()) {
@@ -61,8 +64,8 @@ public:
         {
             if (DetentedIn(ch) && Changed(ch)) {
             		int cv = In(ch);
-            		cv = constrain(cv, 0, HSAPPLICATION_5V);
-                int freq = Proportion(In(ch), HSAPPLICATION_5V, mod_range_high[ch] - mod_range_low[ch]) + mod_range_low[ch];
+            		cv = constrain(cv, 0, FIVE_VOLTS);
+                int freq = Proportion(In(ch), FIVE_VOLTS, mod_range_high[ch] - mod_range_low[ch]) + mod_range_low[ch];
                 freq = constrain(freq, mod_range_low[ch], mod_range_high[ch]);
                 test[ch].SetFrequency(freq);
                 test_freq[ch] = freq;
@@ -106,8 +109,8 @@ public:
             for (byte s = 0; s < 16; s++)
             {
                 byte seg_ix = (gr * 4) + s; // Segment index
-                V[ix++] = HS::user_waveforms[seg_ix].level;
-                V[ix++] = HS::user_waveforms[seg_ix].time;
+                V[ix++] = hemisphere::user_waveforms[seg_ix].level;
+                V[ix++] = hemisphere::user_waveforms[seg_ix].time;
             }
 
             UnpackedData unpacked;
@@ -125,8 +128,8 @@ public:
             for (byte s = 0; s < 16; s++)
             {
                 byte seg_ix = (gr * 4) + s;
-                HS::user_waveforms[seg_ix].level = V[ix++];
-                HS::user_waveforms[seg_ix].time = V[ix++];
+                hemisphere::user_waveforms[seg_ix].level = V[ix++];
+                hemisphere::user_waveforms[seg_ix].time = V[ix++];
             }
 
             waveform_number = 0;
@@ -324,7 +327,7 @@ private:
 
     void AddSegment() {
         // If there are any segments left, and there are fewer than VO_MAX_SEGMENTS in this waveform, add a segment
-        if (segments_remaining < HS::VO_SEGMENT_COUNT && osc.SegmentCount() < HS::VO_MAX_SEGMENTS) {
+        if (segments_remaining < hemisphere::VO_SEGMENT_COUNT && osc.SegmentCount() < hemisphere::VO_MAX_SEGMENTS) {
             WaveformManager::AddSegmentToWaveformAtSegmentIndex(waveform_number, segment_number);
             byte prev_segment_number = segment_number;
             SwitchWaveform(waveform_number);
@@ -382,11 +385,11 @@ void WaveformEditor_isr() {
     return WaveformEditor_instance.BaseController();
 }
 
-void WaveformEditor_handleAppEvent(OC::AppEvent event) {
-    if (event ==  OC::APP_EVENT_RESUME) {
+void WaveformEditor_handleAppEvent(oc::AppEvent event) {
+    if (event ==  oc::APP_EVENT_RESUME) {
         WaveformEditor_instance.Resume();
     }
-    if (event == OC::APP_EVENT_SUSPEND) {
+    if (event == oc::APP_EVENT_SUSPEND) {
         WaveformEditor_instance.OnSendSysEx();
     }
 }
@@ -401,19 +404,19 @@ void WaveformEditor_screensaver() {} // Deprecated
 
 void WaveformEditor_handleButtonEvent(const UI::Event &event) {
     // For left encoder, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) WaveformEditor_instance.OnLeftButtonLongPress();
         if (event.type == UI::EVENT_BUTTON_PRESS) WaveformEditor_instance.OnLeftButtonPress();
     }
 
     // For right encoder, only handle press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) WaveformEditor_instance.OnRightButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) WaveformEditor_instance.OnRightButtonPress();
 
     // For up button, handle only press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) WaveformEditor_instance.OnUpButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) WaveformEditor_instance.OnUpButtonPress();
 
     // For down button, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) WaveformEditor_instance.OnDownButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) WaveformEditor_instance.OnDownButtonLongPress();
     }
@@ -421,8 +424,8 @@ void WaveformEditor_handleButtonEvent(const UI::Event &event) {
 
 void WaveformEditor_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) WaveformEditor_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) WaveformEditor_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) WaveformEditor_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) WaveformEditor_instance.OnRightEncoderMove(event.value);
 }

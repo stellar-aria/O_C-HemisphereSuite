@@ -22,7 +22,7 @@
 // SOFTWARE.
 //
 // Quad enevelope generator app, based on the multistage envelope implementation
-// from Peaks by Emilie Gillet (see peaks_multistage_envelope.h/cpp)
+// from Peaks by Emilie Gillet (see peaks/multistage_envelope.h/cpp)
 
 #ifdef ENABLE_APP_PIQUED
 
@@ -33,7 +33,7 @@
 #include "oc/strings.h"
 #include "util/math.h"
 #include "util/settings.h"
-#include "peaks_multistage_envelope.h"
+#include "peaks/multistage_envelope.h"
 #include "bjorklund.h"
 #include "oc/euclidean_mask_draw.h"
 #include "ui/events.h"
@@ -132,15 +132,15 @@ enum IntTriggerType {
 
 inline int TriggerSettingToChannel(int setting_value) __attribute__((always_inline));
 inline int TriggerSettingToChannel(int setting_value) {
-  return (setting_value - OC::DIGITAL_INPUT_LAST) / INT_TRIGGER_LAST;
+  return (setting_value - oc::DIGITAL_INPUT_LAST) / INT_TRIGGER_LAST;
 }
 
 static inline IntTriggerType TriggerSettingToType(int setting_value, int channel) __attribute__((always_inline));
 static inline IntTriggerType TriggerSettingToType(int setting_value, int channel) {
-  return static_cast<IntTriggerType>((setting_value - OC::DIGITAL_INPUT_LAST) - channel * INT_TRIGGER_LAST);
+  return static_cast<IntTriggerType>((setting_value - oc::DIGITAL_INPUT_LAST) - channel * INT_TRIGGER_LAST);
 }
 
-namespace menu = OC::menu;
+namespace menu = oc::menu;
 
 class EnvelopeGenerator : public settings::SettingsBase<EnvelopeGenerator, ENV_SETTING_LAST> {
 public:
@@ -164,7 +164,7 @@ public:
     }
   };
 
-  void Init(OC::DigitalInput default_trigger);
+  void Init(oc::DigitalInput default_trigger);
 
   EnvelopeType get_type() const {
     return static_cast<EnvelopeType>(values_[ENV_SETTING_TYPE]);
@@ -503,9 +503,9 @@ public:
     int trigger_input = get_trigger_input();
     bool triggered = false;
     bool gate_raised = false;
-    if (trigger_input < OC::DIGITAL_INPUT_LAST) {
+    if (trigger_input < oc::DIGITAL_INPUT_LAST) {
       triggered = triggers & DIGITAL_INPUT_MASK(trigger_input);
-      gate_raised = OC::DigitalInputs::read_immediate(static_cast<OC::DigitalInput>(trigger_input));
+      gate_raised = oc::DigitalInputs::read_immediate(static_cast<oc::DigitalInput>(trigger_input));
     } else {
       const int trigger_channel = TriggerSettingToChannel(trigger_input);
       const IntTriggerType trigger_type = TriggerSettingToType(trigger_input, trigger_channel);
@@ -524,7 +524,7 @@ public:
     // Process Euclidean pattern reset
     uint8_t euclidean_reset_trigger_input = get_euclidean_reset_trigger_input();
     if (euclidean_reset_trigger_input) {
-      if (triggers & DIGITAL_INPUT_MASK(static_cast<OC::DigitalInput>(euclidean_reset_trigger_input - 1))) {
+      if (triggers & DIGITAL_INPUT_MASK(static_cast<oc::DigitalInput>(euclidean_reset_trigger_input - 1))) {
         ++euclidean_reset_counter_;
         if (euclidean_reset_counter_ >= get_euclidean_reset_clock_div()) {
           euclidean_counter_ = 0;
@@ -575,16 +575,16 @@ public:
 
     // Scale range and offset
     uint32_t value = env_.ProcessSingleSample(gate_state); // 0 to 32767
-    uint32_t max_val = OC::DAC::get_octave_offset(dac_channel, OCTAVES - OC::DAC::kOctaveZero);
-    uint32_t range = max_val - OC::DAC::get_zero_offset(dac_channel);
+    uint32_t max_val = oc::DAC::get_octave_offset(dac_channel, OCTAVES - oc::DAC::kOctaveZero);
+    uint32_t range = max_val - oc::DAC::get_zero_offset(dac_channel);
     value = value * range / 32767;
 
     if (!is_inverted()) 
-      value += OC::DAC::get_zero_offset(dac_channel);
+      value += oc::DAC::get_zero_offset(dac_channel);
     else
       value = max_val - value;
 
-      OC::DAC::set<dac_channel>(value);   
+      oc::DAC::set<dac_channel>(value);   
   }
 
   uint16_t RenderPreview(int16_t *values, uint16_t *segment_start_points, uint16_t *loop_points, uint16_t &current_phase) const {
@@ -647,7 +647,7 @@ private:
   int num_enabled_settings_;
   EnvelopeSettings enabled_settings_[ENV_SETTING_LAST];
 
-  OC::DigitalInputDisplay trigger_display_;
+  oc::DigitalInputDisplay trigger_display_;
 
   bool DelayedTriggers() {
     bool triggered = false;
@@ -682,7 +682,7 @@ private:
   }
 };
 
-void EnvelopeGenerator::Init(OC::DigitalInput default_trigger) {
+void EnvelopeGenerator::Init(oc::DigitalInput default_trigger) {
   InitDefaults();
   apply_value(ENV_SETTING_TRIGGER_INPUT, default_trigger);
   env_.Init();
@@ -738,7 +738,7 @@ SETTINGS_DECLARE(EnvelopeGenerator, ENV_SETTING_LAST) {
   { 128, 0, 255, "S2", NULL, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "S3", NULL, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "S4", NULL, settings::STORAGE_TYPE_U16 },
-  { OC::DIGITAL_INPUT_1, OC::DIGITAL_INPUT_1, OC::DIGITAL_INPUT_4 + 3 * INT_TRIGGER_LAST, "Trigger input", OC::Strings::trigger_input_names, settings::STORAGE_TYPE_U4 },
+  { oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_4 + 3 * INT_TRIGGER_LAST, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U4 },
   { TRIGGER_DELAY_OFF, TRIGGER_DELAY_OFF, TRIGGER_DELAY_LAST - 1, "Tr delay mode", trigger_delay_modes, settings::STORAGE_TYPE_U4 },
   { 1, 1, EnvelopeGenerator::kMaxDelayedTriggers, "Tr delay count", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 999, "Tr delay msecs", NULL, settings::STORAGE_TYPE_U16 },
@@ -746,26 +746,26 @@ SETTINGS_DECLARE(EnvelopeGenerator, ENV_SETTING_LAST) {
   { 0, 0, 31, "Eucl length", euclidean_lengths, settings::STORAGE_TYPE_U8 },
   { 1, 0, 32, "Fill", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 32, "Offset", NULL, settings::STORAGE_TYPE_U8 },
-  { 0, 0, 4, "Eucl reset", OC::Strings::trigger_input_names_none, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 4, "Eucl reset", oc::Strings::trigger_input_names_none, settings::STORAGE_TYPE_U8 },
   { 1, 1, 255, "Eucl reset div", NULL, settings::STORAGE_TYPE_U8 },
   { CV_MAPPING_NONE, CV_MAPPING_NONE, CV_MAPPING_LAST - 1, "CV1 -> ", cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { CV_MAPPING_NONE, CV_MAPPING_NONE, CV_MAPPING_LAST - 1, "CV2 -> ", cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { CV_MAPPING_NONE, CV_MAPPING_NONE, CV_MAPPING_LAST - 1, "CV3 -> ", cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { CV_MAPPING_NONE, CV_MAPPING_NONE, CV_MAPPING_LAST - 1, "CV4 -> ", cv_mapping_names, settings::STORAGE_TYPE_U4 },
-  { peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "Attack reset", OC::Strings::reset_behaviours, settings::STORAGE_TYPE_U4 },
-  { peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_LAST - 1, "Att fall gt", OC::Strings::falling_gate_behaviours, settings::STORAGE_TYPE_U8 },
-  { peaks::RESET_BEHAVIOUR_SEGMENT_PHASE, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "DecRel reset", OC::Strings::reset_behaviours, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 1, "Gate high", OC::Strings::no_yes, settings::STORAGE_TYPE_U4 },
-  { peaks::ENV_SHAPE_QUARTIC, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "Attack shape", OC::Strings::envelope_shapes, settings::STORAGE_TYPE_U4 },
-  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "Decay shape", OC::Strings::envelope_shapes, settings::STORAGE_TYPE_U4 },
-  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "Release shape", OC::Strings::envelope_shapes, settings::STORAGE_TYPE_U4 },
+  { peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "Attack reset", oc::Strings::reset_behaviours, settings::STORAGE_TYPE_U4 },
+  { peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_LAST - 1, "Att fall gt", oc::Strings::falling_gate_behaviours, settings::STORAGE_TYPE_U8 },
+  { peaks::RESET_BEHAVIOUR_SEGMENT_PHASE, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "DecRel reset", oc::Strings::reset_behaviours, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 1, "Gate high", oc::Strings::no_yes, settings::STORAGE_TYPE_U4 },
+  { peaks::ENV_SHAPE_QUARTIC, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "Attack shape", oc::Strings::envelope_shapes, settings::STORAGE_TYPE_U4 },
+  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "Decay shape", oc::Strings::envelope_shapes, settings::STORAGE_TYPE_U4 },
+  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "Release shape", oc::Strings::envelope_shapes, settings::STORAGE_TYPE_U4 },
   { 0, 0, 13, "Attack mult", time_multipliers, settings::STORAGE_TYPE_U4 },
   { 0, 0, 13, "Decay mult", time_multipliers, settings::STORAGE_TYPE_U4 },
   {0, 0, 13, "Release mult", time_multipliers, settings::STORAGE_TYPE_U4 },
   {127, 0, 127, "Amplitude", NULL, settings::STORAGE_TYPE_U8 },
-  {0, 0, 1, "Sampled Ampl", OC::Strings::no_yes, settings::STORAGE_TYPE_U4 },
+  {0, 0, 1, "Sampled Ampl", oc::Strings::no_yes, settings::STORAGE_TYPE_U4 },
   {0, 0, 127, "Max loops", NULL, settings::STORAGE_TYPE_U8 },
-  {0, 0, 1, "Inverted", OC::Strings::no_yes, settings::STORAGE_TYPE_U8 },
+  {0, 0, 1, "Inverted", oc::Strings::no_yes, settings::STORAGE_TYPE_U8 },
 };
 
 class QuadEnvelopeGenerator {
@@ -773,9 +773,9 @@ public:
   static constexpr int32_t kCvSmoothing = 16;
 
   void Init() {
-    int input = OC::DIGITAL_INPUT_1;
+    int input = oc::DIGITAL_INPUT_1;
     for (auto &env : envelopes_) {
-      env.Init(static_cast<OC::DigitalInput>(input));
+      env.Init(static_cast<oc::DigitalInput>(input));
       ++input;
     }
 
@@ -789,13 +789,13 @@ public:
   }
 
   void ISR() {
-    cv1.push(OC::ADC::value<ADC_CHANNEL_1>());
-    cv2.push(OC::ADC::value<ADC_CHANNEL_2>());
-    cv3.push(OC::ADC::value<ADC_CHANNEL_3>());
-    cv4.push(OC::ADC::value<ADC_CHANNEL_4>());
+    cv1.push(oc::ADC::value<ADC_CHANNEL_1>());
+    cv2.push(oc::ADC::value<ADC_CHANNEL_2>());
+    cv3.push(oc::ADC::value<ADC_CHANNEL_3>());
+    cv4.push(oc::ADC::value<ADC_CHANNEL_4>());
 
     const int32_t cvs[ADC_CHANNEL_LAST] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
-    uint32_t triggers = OC::DigitalInputs::clocked();
+    uint32_t triggers = oc::DigitalInputs::clocked();
 
     uint32_t internal_trigger_mask =
         envelopes_[0].internal_trigger_mask() |
@@ -828,7 +828,7 @@ public:
     bool segment_editing;
 
     menu::ScreenCursor<menu::kScreenLines> cursor;
-    OC::EuclideanMaskDraw euclidean_mask_draw;
+    oc::EuclideanMaskDraw euclidean_mask_draw;
     bool euclidean_edit_length;
   } ui;
 
@@ -876,13 +876,13 @@ size_t ENVGEN_restore(const void *storage) {
   return s;
 }
 
-void ENVGEN_handleAppEvent(OC::AppEvent event) {
+void ENVGEN_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       break;
   }
 }
@@ -947,9 +947,9 @@ void ENVGEN_menu_preview() {
   while (*loop_points != kPreviewTerminator) {
     // odd: end marker, even: start marker
     if (i++ & 1)
-      graphics.drawBitmap8(*loop_points++ - 1, kLoopMarkerY, OC::kBitmapLoopMarkerW, OC::bitmap_loop_markers_8 + OC::kBitmapLoopMarkerW);
+      graphics.drawBitmap8(*loop_points++ - 1, kLoopMarkerY, oc::kBitmapLoopMarkerW, oc::bitmap_loop_markers_8 + oc::kBitmapLoopMarkerW);
     else
-      graphics.drawBitmap8(*loop_points++, kLoopMarkerY, OC::kBitmapLoopMarkerW, OC::bitmap_loop_markers_8);
+      graphics.drawBitmap8(*loop_points++, kLoopMarkerY, oc::kBitmapLoopMarkerW, oc::bitmap_loop_markers_8);
   }
 
   // Brute-force way of handling "pathological" cases where A/D has no visible
@@ -989,7 +989,7 @@ void ENVGEN_menu_settings() {
       case ENV_SETTING_TRIGGER_INPUT:
         if (EnvelopeGenerator::indentSetting(static_cast<EnvelopeSettings>(setting)))
           list_item.x += menu::kIndentDx;
-        if (value < OC::DIGITAL_INPUT_LAST) {
+        if (value < oc::DIGITAL_INPUT_LAST) {
           list_item.DrawDefault(value, attr);
         } else {
           const int trigger_channel = TriggerSettingToChannel(value);
@@ -1122,16 +1122,16 @@ void ENVGEN_leftButton() {
 void ENVGEN_handleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         ENVGEN_topButton();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         ENVGEN_lowerButton();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         ENVGEN_leftButton();
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         ENVGEN_rightButton();
         break;
     }
@@ -1140,7 +1140,7 @@ void ENVGEN_handleButtonEvent(const UI::Event &event) {
 
 void ENVGEN_handleEncoderEvent(const UI::Event &event) {
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     if (envgen.euclidean_edit_active()) {
       if (envgen.ui.euclidean_edit_length) {
         // Artificially constrain length here
@@ -1168,7 +1168,7 @@ void ENVGEN_handleEncoderEvent(const UI::Event &event) {
       CONSTRAIN(envgen.ui.selected_segment, 0, selected_env.num_editable_segments() - 1);
       envgen.ui.cursor.AdjustEnd(selected_env.num_enabled_settings() - 1);
     }
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     if (QuadEnvelopeGenerator::MODE_EDIT_SEGMENTS == envgen.ui.edit_mode) {
       auto &selected_env = envgen.selected();
       if (envgen.ui.segment_editing) {
@@ -1234,7 +1234,7 @@ void ENVGEN_screensaver() {
     RenderFastPreview<2, 0, 32>();
     RenderFastPreview<3, 64, 32>();
   #endif
-  OC::scope_render();
+  oc::scope_render();
 
 #ifdef ENVGEN_DEBUG_SCREENSAVER
   uint32_t us = debug::cycles_to_us(render_cycles.read());

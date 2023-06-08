@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,10 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
 #define HEM_ADEG_MAX_VALUE 255
 #define HEM_ADEG_MAX_TICKS 33333
 
-class ADEG : public HemisphereApplet {
+using namespace hemisphere;
+
+class ADEG : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters
@@ -106,7 +108,7 @@ public:
             decay = constrain(decay + direction, 0, HEM_ADEG_MAX_VALUE);
             last_ms_value = Proportion(decay, HEM_ADEG_MAX_VALUE, HEM_ADEG_MAX_TICKS) / 17;
         }
-        last_change_ticks = OC::CORE::ticks;
+        last_change_ticks = oc::core::ticks;
     }
         
     uint64_t OnDataRequest() {
@@ -160,7 +162,7 @@ private:
         gfxRect(1, 15, ProportionCV(ViewOut(0), 62), 6);
 
         // Change indicator, if necessary
-        if (OC::CORE::ticks - last_change_ticks < 20000) {
+        if (oc::core::ticks - last_change_ticks < 20000) {
             gfxPrint(15, 43, last_ms_value);
             gfxPrint("ms");
         }

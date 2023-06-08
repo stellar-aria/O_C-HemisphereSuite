@@ -25,7 +25,7 @@
 
 #include "util/history.h"
 
-namespace OC {
+namespace oc {
 
 namespace vfx {
 
@@ -76,6 +76,6 @@ private:
 };
 
 }; // namespace vfx
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_VISUALFX_H_

@@ -6,7 +6,7 @@
 #include "util/macros.h"
 #include "util/profiling.h"
 
-namespace OC {
+namespace oc {
 
 namespace DEBUG {
 
@@ -31,7 +31,7 @@ public:
   }
 };
 
-}; // namespace OC
+}; // namespace oc
 
 
 #define OC_DEBUG_PROFILE_SCOPE(var) \

@@ -18,13 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "hemisphere/MIDI.h"
+#include "hemisphere/midi.hpp"
 #include <Arduino.h>
 #include <EEPROM.h>
 #include "oc/config.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
 #include "drivers/display.h"
+
+using namespace hemisphere;
 
 class Backup: public SystemExclusiveHandler {
 public:
@@ -94,7 +96,7 @@ public:
             // Reset on last packet
             if (p == ((EEPROM_CALIBRATIONDATA_END / 32) - 1) || p == 63) {
                 receiving = 0;
-                OC::apps::Init(0);
+                oc::apps::Init(0);
             }
         }
     }
@@ -149,8 +151,8 @@ size_t Backup_storageSize() {return 0;}
 size_t Backup_save(void *storage) {return 0;}
 size_t Backup_restore(const void *storage) {return 0;}
 
-void Backup_handleAppEvent(OC::AppEvent event) {
-    if (event == OC::APP_EVENT_RESUME) Backup_instance.Resume();
+void Backup_handleAppEvent(oc::AppEvent event) {
+    if (event == oc::APP_EVENT_RESUME) Backup_instance.Resume();
 }
 void Backup_loop() {} // Deprecated
 void Backup_screensaver() {Backup_instance.View();}
@@ -159,7 +161,7 @@ void Backup_handleEncoderEvent(const UI::Event &event) {
 }
 void Backup_handleButtonEvent(const UI::Event &event) {
     if (event.type == UI::EVENT_BUTTON_PRESS) {
-        if (event.control == OC::CONTROL_BUTTON_L) Backup_instance.ToggleReceiveMode();
-        if (event.control == OC::CONTROL_BUTTON_R) Backup_instance.OnSendSysEx();
+        if (event.control == oc::CONTROL_BUTTON_L) Backup_instance.ToggleReceiveMode();
+        if (event.control == oc::CONTROL_BUTTON_R) Backup_instance.OnSendSysEx();
     }
 }

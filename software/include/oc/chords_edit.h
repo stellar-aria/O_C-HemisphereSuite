@@ -29,7 +29,7 @@
 #include "oc/chords.h"
 #include "oc/chords_presets.h"
 
-namespace OC {
+namespace oc {
 
 template <typename Owner>
 class ChordEditor {
@@ -54,7 +54,7 @@ public:
     chord_inversion_ = 0;
     chord_base_note_ = 0;
     chord_octave_ = 0;
-    max_chords_ = OC::Chords::NUM_CHORDS - 1;
+    max_chords_ = oc::Chords::NUM_CHORDS - 1;
   }
 
   bool active() const {
@@ -63,11 +63,11 @@ public:
 
   void Edit(Owner *owner, int chord, int num_chords, int num_progression) {
 
-    if (chord > OC::Chords::CHORDS_USER_LAST - 1)
+    if (chord > oc::Chords::CHORDS_USER_LAST - 1)
       return;
     
     edit_this_progression_ = num_progression;
-    chord_ = &OC::user_chords[chord + edit_this_progression_ * OC::Chords::NUM_CHORDS];
+    chord_ = &oc::user_chords[chord + edit_this_progression_ * oc::Chords::NUM_CHORDS];
     max_chords_ = num_chords;
     owner_ = owner;
     BeginEditing();
@@ -81,7 +81,7 @@ public:
 private:
 
   Owner *owner_;
-  const OC::Chord *chord_;
+  const oc::Chord *chord_;
   int8_t edit_this_chord_;
   int8_t edit_this_progression_;
   size_t cursor_pos_;
@@ -181,7 +181,7 @@ void ChordEditor<Owner>::Draw() {
         
           case 0: // quality
           graphics.setPrintPos(x + 1, y + 7);
-          graphics.print(OC::quality_very_short_names[chord_quality_]);
+          graphics.print(oc::quality_very_short_names[chord_quality_]);
           break;
           case 1: // voicing
           graphics.setPrintPos(x + 1, y + 7);
@@ -199,9 +199,9 @@ void ChordEditor<Owner>::Draw() {
               graphics.setPrintPos(x + 4, y + 7);
             graphics.print(base_note_names[chord_base_note_]);
             // indicate if note is out-of-range:
-            if (chord_base_note_ > (uint8_t)OC::Scales::GetScale(owner_->get_scale(DUMMY)).num_notes) {
-              graphics.drawBitmap8(x + 3, y + 25, 4, OC::bitmap_indicator_4x8);
-              graphics.drawBitmap8(x + 14, y + 25, 4, OC::bitmap_indicator_4x8);
+            if (chord_base_note_ > (uint8_t)oc::Scales::GetScale(owner_->get_scale(DUMMY)).num_notes) {
+              graphics.drawBitmap8(x + 3, y + 25, 4, oc::bitmap_indicator_4x8);
+              graphics.drawBitmap8(x + 14, y + 25, 4, oc::bitmap_indicator_4x8);
             }
           }
           break;
@@ -219,7 +219,7 @@ void ChordEditor<Owner>::Draw() {
       }
       // draw property name
       graphics.setPrintPos(x + 7, y + 26);
-      graphics.print(OC::Strings::chord_property_names[i]);
+      graphics.print(oc::Strings::chord_property_names[i]);
     
       // cursor:  
       if (i == cursor_quality_pos_) {
@@ -241,16 +241,16 @@ void ChordEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
 
    if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         handleButtonUp(event);
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         handleButtonDown(event);
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         handleButtonLeft(event);
         break;    
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         Close();
         break;
       default:
@@ -259,14 +259,14 @@ void ChordEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
   }
   else if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
      switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         // screensaver    // TODO: ideally, needs to be overridden ... invert_mask();
       break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
       break;
-      case OC::CONTROL_BUTTON_L: 
+      case oc::CONTROL_BUTTON_L: 
       break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
        // app menu
       break;  
       default:
@@ -278,43 +278,43 @@ void ChordEditor<Owner>::HandleButtonEvent(const UI::Event &event) {
 template <typename Owner>
 void ChordEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
  
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     move_cursor(event.value, edit_page_);
   } 
-  else if (OC::CONTROL_ENCODER_R == event.control) {
+  else if (oc::CONTROL_ENCODER_R == event.control) {
 
   	if (cursor_pos_ < (uint8_t)(max_chords_ + 1)) {
       
       // write to the right slot, at the right index/offset (a nicer struct would be nicer, but well)
-      OC::Chord *edit_user_chord_ = &OC::user_chords[edit_this_chord_ + edit_this_progression_ * OC::Chords::NUM_CHORDS]; 
+      oc::Chord *edit_user_chord_ = &oc::user_chords[edit_this_chord_ + edit_this_progression_ * oc::Chords::NUM_CHORDS]; 
       
 	    switch(cursor_quality_pos_) {
 
 	      case 0: // quality:
 	      {
 	        chord_quality_ += event.value;
-	        CONSTRAIN(chord_quality_, 0, OC::Chords::CHORDS_QUALITY_LAST - 1);
+	        CONSTRAIN(chord_quality_, 0, oc::Chords::CHORDS_QUALITY_LAST - 1);
 	        edit_user_chord_->quality = chord_quality_;
 	      }
 	      break;
 	      case 1: // voicing:
 	      {
 	        chord_voicing_ += event.value;
-	        CONSTRAIN(chord_voicing_, 0, OC::Chords::CHORDS_VOICING_LAST - 1);
+	        CONSTRAIN(chord_voicing_, 0, oc::Chords::CHORDS_VOICING_LAST - 1);
 	        edit_user_chord_->voicing = chord_voicing_;
 	      }
 	      break;
 	      case 2: // inversion:
 	      {
 	        chord_inversion_ += event.value;
-	        CONSTRAIN(chord_inversion_, 0, OC::Chords::CHORDS_INVERSION_LAST - 1);
+	        CONSTRAIN(chord_inversion_, 0, oc::Chords::CHORDS_INVERSION_LAST - 1);
 	        edit_user_chord_->inversion = chord_inversion_;
 	      }
 	      break;
 	      case 3: // base note
 	      {
 	        chord_base_note_ += event.value;
-          const OC::Scale &scale_def = OC::Scales::GetScale(owner_->get_scale(DUMMY));
+          const oc::Scale &scale_def = oc::Scales::GetScale(owner_->get_scale(DUMMY));
 	        CONSTRAIN(chord_base_note_, 0, (uint8_t)scale_def.num_notes);
 	        edit_user_chord_->base_note = chord_base_note_;
 	      }
@@ -334,7 +334,7 @@ void ChordEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
         // expand/contract
         int max_chords = max_chords_;
         max_chords += event.value;
-        CONSTRAIN(max_chords, 0, OC::Chords::NUM_CHORDS - 0x1);
+        CONSTRAIN(max_chords, 0, oc::Chords::NUM_CHORDS - 0x1);
 
         max_chords_ = max_chords;
         cursor_pos_ = max_chords_ + 1;
@@ -346,7 +346,7 @@ void ChordEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
 template <typename Owner>
 void ChordEditor<Owner>::update_chord(int8_t chord_num) {
    // update chord properties:
-   const OC::Chord &chord_def = OC::Chords::GetChord(chord_num, edit_this_progression_); 
+   const oc::Chord &chord_def = oc::Chords::GetChord(chord_num, edit_this_progression_); 
    chord_quality_ = chord_def.quality;
    chord_voicing_ = chord_def.voicing;
    chord_inversion_ = chord_def.inversion;
@@ -378,7 +378,7 @@ template <typename Owner>
 void ChordEditor<Owner>::handleButtonUp(const UI::Event &event) {
    // go to next chords progression
    edit_this_progression_++;
-   if (edit_this_progression_ >= OC::Chords::NUM_CHORD_PROGRESSIONS)
+   if (edit_this_progression_ >= oc::Chords::NUM_CHORD_PROGRESSIONS)
     edit_this_progression_ = 0x0;
    update_chord(cursor_pos_);
 }
@@ -388,7 +388,7 @@ void ChordEditor<Owner>::handleButtonDown(const UI::Event &event) {
    // go to previous chords progression
    edit_this_progression_--;
    if (edit_this_progression_ < 0x0)
-    edit_this_progression_ = OC::Chords::NUM_CHORD_PROGRESSIONS - 1;
+    edit_this_progression_ = oc::Chords::NUM_CHORD_PROGRESSIONS - 1;
    update_chord(cursor_pos_);
 }
 
@@ -430,7 +430,7 @@ template <typename Owner>
 void ChordEditor<Owner>::BeginEditing() {
 
   cursor_pos_ = edit_this_chord_= owner_->get_chord_slot();
-  const OC::Chord &chord_def = OC::Chords::GetChord(edit_this_chord_, edit_this_progression_);
+  const oc::Chord &chord_def = oc::Chords::GetChord(edit_this_chord_, edit_this_progression_);
   chord_quality_ = chord_def.quality;
   chord_voicing_ = chord_def.voicing;
   chord_inversion_ = chord_def.inversion;
@@ -445,6 +445,6 @@ void ChordEditor<Owner>::Close() {
   owner_ = nullptr;
 }
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_CHORD_EDIT_H_

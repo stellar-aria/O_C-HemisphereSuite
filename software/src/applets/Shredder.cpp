@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2021, Benjamin Rosenbach
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,16 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "hemisphere/applet_base.hpp"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
+using namespace hemisphere;
 
 #define HEM_SHREDDER_ANIMATION_SPEED 500
 #define HEM_SHREDDER_DOUBLE_CLICK_DELAY 5000
 #define HEM_SHREDDER_POS_5V 7680 // 5 * (12 << 7)
 #define HEM_SHREDDER_NEG_3V 4608 // 3 * (12 << 7)
 
-class Shredder : public HemisphereApplet {
+class Shredder : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -41,8 +42,8 @@ public:
         reset = true;
         quant_channels = 0;
         quantizer.Init();
-        scale = OC::Scales::SCALE_NONE;
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+        scale = oc::Scales::SCALE_NONE;
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
         ForEachChannel(ch) {
             Shred(ch);
         }
@@ -153,9 +154,9 @@ public:
         if (cursor == 2) quant_channels = constrain(quant_channels + direction, 0, 2);
         if (cursor == 3) {
           scale += direction;
-          if (scale >= OC::Scales::NUM_SCALES) scale = 0;
-          if (scale < 0) scale = OC::Scales::NUM_SCALES - 1;
-          quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+          if (scale >= oc::Scales::NUM_SCALES) scale = 0;
+          if (scale < 0) scale = oc::Scales::NUM_SCALES - 1;
+          quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
         }
     }
         
@@ -178,7 +179,7 @@ public:
         bipolar[1] = Unpack(data, PackLocation {12,1}); 
         quant_channels = Unpack(data, PackLocation {16,8});
         scale = Unpack(data, PackLocation {24,8});
-        quantizer.Configure(OC::Scales::GetScale(scale), 0xffff);
+        quantizer.Configure(oc::Scales::GetScale(scale), 0xffff);
         ForEachChannel(ch) {
             Shred(ch);
         }
@@ -245,7 +246,7 @@ private:
         if (cursor == 2) gfxCursor(42, 33, 20);
 
         // quantize scale selection
-        gfxPrint(32, 35, OC::scale_names_short[scale]);
+        gfxPrint(32, 35, oc::scale_names_short[scale]);
         if (cursor == 3) gfxCursor(32, 43, 30);
 
     }

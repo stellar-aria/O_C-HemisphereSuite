@@ -36,8 +36,8 @@
 
 #include "util/math.h"
 #include "util/settings.h"
-#include "frames_poly_lfo.h"
-namespace menu = OC::menu;
+#include "frames/poly_lfo.h"
+namespace menu = oc::menu;
 
 enum POLYLFO_SETTINGS {
   POLYLFO_SETTING_COARSE,
@@ -219,7 +219,7 @@ const char* const tr4_multiplier[6] = {
 SETTINGS_DECLARE(PolyLfo, POLYLFO_SETTING_LAST) {
   { 64, 0, 255, "C", NULL, settings::STORAGE_TYPE_U8 },
   { 0, -128, 127, "F", NULL, settings::STORAGE_TYPE_I16 },
-  { 0, 0, 1, "Tap tempo", OC::Strings::off_on, settings::STORAGE_TYPE_U8 }, 
+  { 0, 0, 1, "Tap tempo", oc::Strings::off_on, settings::STORAGE_TYPE_U8 }, 
   { 0, 0, 255, "Shape", NULL, settings::STORAGE_TYPE_U8 },
   { 0, -128, 127, "Shape spread", NULL, settings::STORAGE_TYPE_I8 },
   { 0, -128, 127, "Phase/frq sprd", NULL, settings::STORAGE_TYPE_I8 },
@@ -250,14 +250,14 @@ struct {
 
 void FASTRUN POLYLFO_isr() {
 
-  bool reset_phase = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_1>();
-  bool freeze = OC::DigitalInputs::read_immediate<OC::DIGITAL_INPUT_2>();
-  bool tempo_sync = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_3>();
+  bool reset_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
+  bool freeze = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_2>();
+  bool tempo_sync = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_3>();
  
-  poly_lfo.cv_freq.push(OC::ADC::value<ADC_CHANNEL_1>());
-  poly_lfo.cv_shape.push(OC::ADC::value<ADC_CHANNEL_2>());
-  poly_lfo.cv_spread.push(OC::ADC::value<ADC_CHANNEL_3>());
-  poly_lfo.cv_mappable.push(OC::ADC::value<ADC_CHANNEL_4>());
+  poly_lfo.cv_freq.push(oc::ADC::value<ADC_CHANNEL_1>());
+  poly_lfo.cv_shape.push(oc::ADC::value<ADC_CHANNEL_2>());
+  poly_lfo.cv_spread.push(oc::ADC::value<ADC_CHANNEL_3>());
+  poly_lfo.cv_mappable.push(oc::ADC::value<ADC_CHANNEL_4>());
 
   // Range in settings is (0-256] so this gets scaled to (0,65535]
   // CV value is 12 bit so also needs scaling
@@ -347,10 +347,10 @@ void FASTRUN POLYLFO_isr() {
   if (!freeze && !poly_lfo.frozen())
     poly_lfo.lfo.Render(freq, reset_phase, tempo_sync, freq_mult);
 
-  OC::DAC::set<DAC_CHANNEL_A>(poly_lfo.lfo.dac_code(0));
-  OC::DAC::set<DAC_CHANNEL_B>(poly_lfo.lfo.dac_code(1));
-  OC::DAC::set<DAC_CHANNEL_C>(poly_lfo.lfo.dac_code(2));
-  OC::DAC::set<DAC_CHANNEL_D>(poly_lfo.lfo.dac_code(3));
+  oc::DAC::set<DAC_CHANNEL_A>(poly_lfo.lfo.dac_code(0));
+  oc::DAC::set<DAC_CHANNEL_B>(poly_lfo.lfo.dac_code(1));
+  oc::DAC::set<DAC_CHANNEL_C>(poly_lfo.lfo.dac_code(2));
+  oc::DAC::set<DAC_CHANNEL_D>(poly_lfo.lfo.dac_code(3));
 }
 
 void POLYLFO_init() {
@@ -387,7 +387,7 @@ void POLYLFO_menu() {
     float menu_freq_ = poly_lfo.lfo.get_freq_ch1();
 
     if (poly_lfo.freq_mult() < 0xFF) 
-        graphics.drawBitmap8(122, menu::DefaultTitleBar::kTextY, 4, OC::bitmap_indicator_4x8); 
+        graphics.drawBitmap8(122, menu::DefaultTitleBar::kTextY, 4, oc::bitmap_indicator_4x8); 
     if (menu_freq_ >= 0.1f) {
         const int f = int(floor(menu_freq_ * 100));
         const int value = f / 100;
@@ -422,17 +422,17 @@ void POLYLFO_menu() {
 }
 
 void POLYLFO_screensaver() {
-  OC::scope_render();
+  oc::scope_render();
 }
 
-void POLYLFO_handleAppEvent(OC::AppEvent event) {
+void POLYLFO_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       poly_lfo_state.cursor.set_editing(false);
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       break;
   }
 }
@@ -440,13 +440,13 @@ void POLYLFO_handleAppEvent(OC::AppEvent event) {
 void POLYLFO_handleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         if (!poly_lfo.get_tap_tempo()) poly_lfo.change_value(POLYLFO_SETTING_COARSE, 32);
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         if (!poly_lfo.get_tap_tempo()) poly_lfo.change_value(POLYLFO_SETTING_COARSE, -32);
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
       if (!poly_lfo.get_tap_tempo()) {
         if (POLYLFO_SETTING_COARSE == poly_lfo_state.left_edit_mode)
           poly_lfo_state.left_edit_mode = POLYLFO_SETTING_FINE;
@@ -454,7 +454,7 @@ void POLYLFO_handleButtonEvent(const UI::Event &event) {
           poly_lfo_state.left_edit_mode = POLYLFO_SETTING_COARSE;
       }
       break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         poly_lfo_state.cursor.toggle_editing();
         break;
     }
@@ -462,7 +462,7 @@ void POLYLFO_handleButtonEvent(const UI::Event &event) {
   
   if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
      switch (event.control) {
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         poly_lfo.lfo.set_phase_reset_flag(true);
         break;
       default:
@@ -474,9 +474,9 @@ void POLYLFO_handleButtonEvent(const UI::Event &event) {
 
 
 void POLYLFO_handleEncoderEvent(const UI::Event &event) {
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     if (!poly_lfo.get_tap_tempo()) poly_lfo.change_value(poly_lfo_state.left_edit_mode, event.value);
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     if (poly_lfo_state.cursor.editing()) {
       poly_lfo.change_value(poly_lfo_state.cursor.cursor_pos(), event.value);
     } else {

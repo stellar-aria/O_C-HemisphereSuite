@@ -19,7 +19,7 @@ enum ADC_CHANNEL {
   ADC_CHANNEL_LAST,
 };
 
-namespace OC {
+namespace oc {
 
 class ADC {
 public:

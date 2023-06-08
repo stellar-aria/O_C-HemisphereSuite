@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2021, Bryan Head
 //
 // Based on Braids Quantizer, Copyright 2015 Émilie Gillet.
@@ -21,12 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "braids_quantizer.h"
+#include "hemisphere/applet_base.hpp"
+#include "braids/quantizer.h"
 #include "bjorklund.h"
 #include "oc/strings.h"
 #include "oc/scales.h"
 
-class Chordinator : public HemisphereApplet {
+using namespace hemisphere;
+
+class Chordinator : public AppletBase {
 public:
   const char *applet_name() { return "Chordnate"; }
 
@@ -69,10 +71,10 @@ public:
   void View() {
     gfxHeader(applet_name());
 
-    gfxPrint(0, 15, OC::scale_names_short[scale]);
+    gfxPrint(0, 15, oc::scale_names_short[scale]);
     if (cursor == 0) gfxCursor(0, 23, 30);
 
-    gfxPrint(36, 15, OC::Strings::note_names_unpadded[root]);
+    gfxPrint(36, 15, oc::Strings::note_names_unpadded[root]);
     if (cursor == 1) gfxCursor(36, 23, 12);
 
     uint16_t mask = chord_mask;
@@ -191,10 +193,10 @@ private:
   }
 
   void set_scale(int value) {
-    if (value < 0) scale = OC::Scales::NUM_SCALES - 1;
-    else if (value >= OC::Scales::NUM_SCALES) scale = 0;
+    if (value < 0) scale = oc::Scales::NUM_SCALES - 1;
+    else if (value >= oc::Scales::NUM_SCALES) scale = 0;
     else scale = value;
-    active_scale = OC::Scales::GetScale(scale);
+    active_scale = oc::Scales::GetScale(scale);
     root_quantizer.Configure(active_scale);
   }
 };

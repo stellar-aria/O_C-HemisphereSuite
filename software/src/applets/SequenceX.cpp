@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,13 +21,16 @@
 /* original 8-step mod by Logarhythm, adapted by djphazer
  */
 
-#include "hemisphere/MIDI.h"
+#include "hemisphere/applet_base.hpp"
+#include "hemisphere/midi.hpp"
+
+using namespace hemisphere;
 
 // DON'T GO PAST 8!
-#define SEQX_STEPS 8
-#define SEQX_MAX_VALUE 31
+constexpr auto SEQX_STEPS = 8;
+constexpr auto SEQX_MAX_VALUE = 31;
 
-class SequenceX : public HemisphereApplet {
+class SequenceX : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters

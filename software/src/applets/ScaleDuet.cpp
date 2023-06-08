@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Based on Braids Quantizer, Copyright 2015 Émilie Gillet.
@@ -20,12 +19,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "hemisphere/applet_base.hpp"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
+using namespace hemisphere;
 
-class ScaleDuet : public HemisphereApplet {
+class ScaleDuet : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -38,7 +38,7 @@ public:
             mask[scale] = 0xffff;
         }
         quantizer.Init();
-        quantizer.Configure(OC::Scales::GetScale(5), mask[0]);
+        quantizer.Configure(oc::Scales::GetScale(5), mask[0]);
         last_scale = 0;
         adc_lag_countdown = 0;
     }
@@ -51,7 +51,7 @@ public:
         if (EndOfADCLag()) {
             uint8_t scale = Gate(1);
             if (scale != last_scale) {
-                quantizer.Configure(OC::Scales::GetScale(5), mask[scale]);
+                quantizer.Configure(oc::Scales::GetScale(5), mask[scale]);
                 last_scale = scale;
             }
             int32_t pitch = In(0);
@@ -72,7 +72,7 @@ public:
 
         // Toggle the mask bit at the cursor position
         mask[scale] ^= (0x01 << bit);
-        if (scale == last_scale) quantizer.Configure(OC::Scales::GetScale(5), mask[scale]);
+        if (scale == last_scale) quantizer.Configure(oc::Scales::GetScale(5), mask[scale]);
     }
 
     void OnEncoderMove(int direction) {
@@ -93,7 +93,7 @@ public:
         mask[1] = Unpack(data, PackLocation {12,12});
 
         last_scale = 0;
-        quantizer.Configure(OC::Scales::GetScale(5), mask[last_scale]);
+        quantizer.Configure(oc::Scales::GetScale(5), mask[last_scale]);
     }
 
 protected:

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,12 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 const char* const crusher_rate[8] = {
     "16.7", "8.3", "5.6", "4.2", "3.3", "2.1", "1", ".5"
 };
 const int crusher_ticks[8] = {1, 2, 3, 4, 5, 8, 16, 32};
 
-class DrCrusher : public HemisphereApplet {
+class DrCrusher : public AppletBase {
 public:
 
     const char* applet_name() {

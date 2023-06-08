@@ -8,7 +8,7 @@
 #include "ui/encoder.h"
 #include "ui/event_queue.h"
 
-namespace OC {
+namespace oc {
 
 enum EncoderConfig : uint32_t;
 struct App;
@@ -71,7 +71,7 @@ public:
   void DebugStats();
   void Calibrate();
   void AppSettings();
-  UiMode DispatchEvents(OC::App *app);
+  UiMode DispatchEvents(oc::App *app);
 
   void Poll();
   void _Poke();
@@ -175,6 +175,6 @@ private:
 
 extern Ui ui;
 
-}; // namespace OC
+}; // namespace oc
 
 #endif // OC_UI_H_

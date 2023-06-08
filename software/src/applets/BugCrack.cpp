@@ -1,4 +1,4 @@
-#include "HemisphereApplet.h"
+
 // Copyright (c) 2022, Korbinian Schreiber
 // Copyright (c) 2018, Jason Justian
 //
@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
 #include "vector_osc/HSVectorOscillator.h"
 #include "vector_osc/WaveformManager.h"
 #include "tiny_dsp.h"
@@ -35,7 +36,9 @@
 #define CV_MODE_FM    3
 #define CV_MODE_DROP_OR_BLEND  4
 
-class BugCrack : public HemisphereApplet {
+using namespace hemisphere;
+
+class BugCrack : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -55,39 +58,39 @@ public:
 
         noise = random(0, (1<<12));
 
-        kick = WaveformManager::VectorOscillatorFromWaveform(HS::Sine);
+        kick = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Sine);
         kick.SetFrequency(Proportion(tone_kick, BNC_MAX_PARAM, 3000) + 3000);
         kick.SetScale((12 << 7) * 3);
 
         ForEachChannel(ch) levels[ch] = 0;
 
-        env_kick = WaveformManager::VectorOscillatorFromWaveform(HS::Exponential);
+        env_kick = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Exponential);
         env_kick.SetScale(HEMISPHERE_MAX_CV);
         env_kick.Offset(HEMISPHERE_MAX_CV);
         env_kick.Cycle(0);
         SetEnvDecayKick(decay_kick);
 
-        env_punch = WaveformManager::VectorOscillatorFromWaveform(HS::Exponential);
+        env_punch = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Exponential);
         env_punch.SetScale(HEMISPHERE_3V_CV);
         env_punch.Offset(HEMISPHERE_3V_CV);
         env_punch.Cycle(0);
         SetEnvDecayPunch(decay_punch);
 
-        snare = WaveformManager::VectorOscillatorFromWaveform(HS::Sine);
+        snare = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Sine);
         snare.SetFrequency(Proportion(tone_snare, BNC_MAX_PARAM, 60000) + 10000);
         snare.SetScale((12 << 7) * 3);
 
-        env_snare = WaveformManager::VectorOscillatorFromWaveform(HS::Exponential);
+        env_snare = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Exponential);
         env_snare.SetScale(HEMISPHERE_MAX_CV);
         env_snare.Offset(HEMISPHERE_MAX_CV);
         env_snare.Cycle(0);
-        env_noise = WaveformManager::VectorOscillatorFromWaveform(HS::Exponential);
+        env_noise = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Exponential);
         env_noise.SetScale(HEMISPHERE_MAX_CV);
         env_noise.Offset(HEMISPHERE_MAX_CV);
         env_noise.Cycle(0);
         SetEnvDecaySnare(decay_snare);
 
-        env_snap = WaveformManager::VectorOscillatorFromWaveform(HS::Exponential);
+        env_snap = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Exponential);
         env_snap.SetScale(HEMISPHERE_3V_CV);
         env_snap.Offset(HEMISPHERE_3V_CV);
         env_snap.Cycle(0);

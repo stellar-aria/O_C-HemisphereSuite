@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 // Arithmetic functions and typedef to function pointer
 #define HEMISPHERE_NUMBER_OF_CALC 7
 int hem_MIN(int v1, int v2) {return (v1 < v2) ? v1 : v2;}
@@ -28,7 +30,7 @@ int hem_DIFF(int v1, int v2) {return hem_MAX(v1, v2) - hem_MIN(v1, v2);}
 int hem_MEAN(int v1, int v2) {return (v1 + v2) / 2;}
 typedef int(*CalcFunction)(int, int);
 
-class Calculate : public HemisphereApplet {
+class Calculate : public AppletBase {
 public:
 
     const char* applet_name() {

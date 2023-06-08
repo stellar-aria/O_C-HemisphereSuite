@@ -37,15 +37,15 @@
 #include "oc/scale_edit.h"
 #include "oc/input_map.h"
 #include "oc/input_maps.h"
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "extern/dspinst.h"
 #include "util/arp.h"
-#include "peaks_multistage_envelope.h"
+#include "peaks/multistage_envelope.h"
 #include "oc/digital_inputs.h"
 
-namespace menu = OC::menu;
-const bool DUMMY = OC::DUMMY;
+namespace menu = oc::menu;
+const bool DUMMY = oc::DUMMY;
 
 const uint8_t NUM_CHANNELS = 2;
 const uint8_t MULT_MAX = 26;    // max multiplier
@@ -71,7 +71,7 @@ uint32_t ticks_src2 = 0; // sec. clock frequency (bottom)
 
 // copy sequence, global
 uint8_t copy_sequence = 0;
-uint8_t copy_length = OC::Patterns::kMax;
+uint8_t copy_length = oc::Patterns::kMax;
 uint16_t copy_mask = 0xFFFF;
 uint64_t copy_timeout = COPYTIMEOUT;
 
@@ -629,17 +629,17 @@ public:
 
   int32_t get_pitch_at_step(uint8_t seq, uint8_t step) const {
 
-    uint8_t _channel_offset = !channel_id_ ? 0x0 : OC::Patterns::NUM_PATTERNS;
+    uint8_t _channel_offset = !channel_id_ ? 0x0 : oc::Patterns::NUM_PATTERNS;
 
-    OC::Pattern *read_pattern_ = &OC::user_patterns[seq + _channel_offset];
+    oc::Pattern *read_pattern_ = &oc::user_patterns[seq + _channel_offset];
     return read_pattern_->notes[step];
   }
 
   void set_pitch_at_step(uint8_t seq, uint8_t step, int32_t pitch) {
 
-    uint8_t _channel_offset = !channel_id_ ? 0x0 : OC::Patterns::NUM_PATTERNS;
+    uint8_t _channel_offset = !channel_id_ ? 0x0 : oc::Patterns::NUM_PATTERNS;
 
-    OC::Pattern *write_pattern_ = &OC::user_patterns[seq + _channel_offset];
+    oc::Pattern *write_pattern_ = &oc::user_patterns[seq + _channel_offset];
     write_pattern_->notes[step] = pitch;
   }
 
@@ -649,14 +649,14 @@ public:
 
   void clear_user_pattern(uint8_t seq) {
 
-    uint8_t _channel_offset = !channel_id_ ? 0x0 : OC::Patterns::NUM_PATTERNS;
-    memcpy(&OC::user_patterns[seq + _channel_offset], &OC::patterns[0], sizeof(OC::Pattern));
+    uint8_t _channel_offset = !channel_id_ ? 0x0 : oc::Patterns::NUM_PATTERNS;
+    memcpy(&oc::user_patterns[seq + _channel_offset], &oc::patterns[0], sizeof(oc::Pattern));
   }
 
   void copy_seq(uint8_t seq, uint8_t len, uint16_t mask) {
 
     // which sequence ?
-    copy_sequence = seq + (!channel_id_ ? 0x0 : OC::Patterns::NUM_PATTERNS);
+    copy_sequence = seq + (!channel_id_ ? 0x0 : oc::Patterns::NUM_PATTERNS);
     copy_length = len;
     copy_mask = mask;
     copy_timeout = 0;
@@ -667,13 +667,13 @@ public:
     if (copy_timeout < COPYTIMEOUT) {
 
        // which sequence to copy to ?
-       uint8_t sequence = seq + (!channel_id_ ? 0x0 : OC::Patterns::NUM_PATTERNS);
+       uint8_t sequence = seq + (!channel_id_ ? 0x0 : oc::Patterns::NUM_PATTERNS);
        // copy length:
        set_sequence_length(copy_length, seq);
        // copy mask:
        update_pattern_mask(copy_mask, seq);
        // copy note values:
-       memcpy(&OC::user_patterns[sequence], &OC::user_patterns[copy_sequence], sizeof(OC::Pattern));
+       memcpy(&oc::user_patterns[sequence], &oc::user_patterns[copy_sequence], sizeof(oc::Pattern));
        // give more time for more pasting...
        copy_timeout = 0;
 
@@ -766,7 +766,7 @@ public:
   }
 
   void update_inputmap(int num_slots, uint8_t range) {
-    input_map_.Configure(OC::InputMaps::GetInputMap(num_slots), range);
+    input_map_.Configure(oc::InputMaps::GetInputMap(num_slots), range);
   }
 
   int get_cv_input_range() const {
@@ -818,7 +818,7 @@ public:
     sequence_manual_ = display_num_sequence_;
     sequence_advance_state_ = false;
     pendulum_fwd_ = true;
-    uint32_t _seed = OC::ADC::value<ADC_CHANNEL_1>() + OC::ADC::value<ADC_CHANNEL_2>() + OC::ADC::value<ADC_CHANNEL_3>() + OC::ADC::value<ADC_CHANNEL_4>();
+    uint32_t _seed = oc::ADC::value<ADC_CHANNEL_1>() + oc::ADC::value<ADC_CHANNEL_2>() + oc::ADC::value<ADC_CHANNEL_3>() + oc::ADC::value<ADC_CHANNEL_4>();
     randomSeed(_seed);
     clock_display_.Init();
     arpeggiator_.Init();
@@ -831,14 +831,14 @@ public:
     const int scale = get_scale(DUMMY);
 
     if (mask_rotate)
-      scale_mask = OC::ScaleEditor<SEQ_Channel>::RotateMask(scale_mask, OC::Scales::GetScale(scale).num_notes, mask_rotate);
+      scale_mask = oc::ScaleEditor<SEQ_Channel>::RotateMask(scale_mask, oc::Scales::GetScale(scale).num_notes, mask_rotate);
 
     if (last_scale_mask_ != scale_mask) {
 
       force_scale_update_ = false;
       last_scale_ = scale;
       last_scale_mask_ = scale_mask;
-      quantizer_.Configure(OC::Scales::GetScale(scale), scale_mask);
+      quantizer_.Configure(oc::Scales::GetScale(scale), scale_mask);
       return true;
     } else {
       return false;
@@ -855,7 +855,7 @@ public:
       force_scale_update_ = false;
       last_scale_ = scale;
       last_scale_mask_ = scale_mask;
-      quantizer_.Configure(OC::Scales::GetScale(scale), scale_mask);
+      quantizer_.Configure(oc::Scales::GetScale(scale), scale_mask);
       return true;
     } else {
       return false;
@@ -898,7 +898,7 @@ public:
      // clocked ?
      _none = SEQ_CHANNEL_TRIGGER_NONE == _clock_source;
      // TR1 or TR3?
-     _triggered = _clock_source ? (!_none && (triggers & (1 << OC::DIGITAL_INPUT_3))) : (!_none && (triggers & (1 << OC::DIGITAL_INPUT_1)));
+     _triggered = _clock_source ? (!_none && (triggers & (1 << oc::DIGITAL_INPUT_3))) : (!_none && (triggers & (1 << oc::DIGITAL_INPUT_1)));
      _tock = false;
      _sync = false;
 
@@ -907,7 +907,7 @@ public:
 
       trigger_delay_.Update();
       if (_triggered)
-        trigger_delay_.Push(OC::trigger_delay_ticks[get_trigger_delay()]);
+        trigger_delay_.Push(oc::trigger_delay_ticks[get_trigger_delay()]);
         _triggered = trigger_delay_.triggered();
      }
 
@@ -928,7 +928,7 @@ public:
          _multiplier = get_multiplier();
 
          if (get_mult_cv_source()) {
-            _multiplier += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_mult_cv_source() - 1)) + 127) >> 8;
+            _multiplier += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_mult_cv_source() - 1)) + 127) >> 8;
             CONSTRAIN(_multiplier, 0, MULT_MAX);
          }
 
@@ -1064,7 +1064,7 @@ public:
 
          // mask CV ?
          if (get_scale_mask_cv_source()) {
-            int16_t _rotate = (OC::ADC::value(static_cast<ADC_CHANNEL>(get_scale_mask_cv_source() - 1)) + 127) >> 8;
+            int16_t _rotate = (oc::ADC::value(static_cast<ADC_CHANNEL>(get_scale_mask_cv_source() - 1)) + 127) >> 8;
             rotate_scale(_rotate);
          }
 
@@ -1076,17 +1076,17 @@ public:
 
             int8_t _octave = get_octave();
             if (get_octave_cv_source())
-              _octave += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_octave_cv_source() - 1)) + 255) >> 9;
+              _octave += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_octave_cv_source() - 1)) + 255) >> 9;
 
             int8_t _transpose = 0x0;
             if (get_transpose_cv_source()) {
-              _transpose += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_transpose_cv_source() - 1)) + 64) >> 7;
+              _transpose += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_transpose_cv_source() - 1)) + 64) >> 7;
               CONSTRAIN(_transpose, -12, 12);
             }
 
             int8_t _root = get_root(0x0);
             if (get_root_cv_source()) {
-              _root += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_root_cv_source() - 1)) + 127) >> 8;
+              _root += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_root_cv_source() - 1)) + 127) >> 8;
               CONSTRAIN(_root, 0, 11);
             }
 
@@ -1098,14 +1098,14 @@ public:
 
               int8_t arp_range = get_arp_range();
               if (get_arp_range_cv_source()) {
-                arp_range += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_arp_range_cv_source() - 1)) + 255) >> 9;
+                arp_range += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_arp_range_cv_source() - 1)) + 255) >> 9;
                 CONSTRAIN(arp_range, 0, 4);
               }
               arpeggiator_.set_range(arp_range);
 
               int8_t arp_direction = get_arp_direction();
               if (get_arp_direction_cv_source()) {
-                arp_direction += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_arp_direction_cv_source() - 1)) + 255) >> 9;
+                arp_direction += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_arp_direction_cv_source() - 1)) + 255) >> 9;
                 CONSTRAIN(arp_direction, 0, 4);
               }
               arpeggiator_.set_direction(arp_direction);
@@ -1129,23 +1129,23 @@ public:
                 case ENV_ADR:
                 case ENV_ADSR:
                   if (get_attack_duration_cv()) {
-                    _attack += OC::ADC::value(static_cast<ADC_CHANNEL>(get_attack_duration_cv() - 1)) << 3;
+                    _attack += oc::ADC::value(static_cast<ADC_CHANNEL>(get_attack_duration_cv() - 1)) << 3;
                     USAT16(_attack) ;
                   }
                   if (get_decay_duration_cv()) {
-                    _decay += OC::ADC::value(static_cast<ADC_CHANNEL>(get_decay_duration_cv() - 1)) << 3;
+                    _decay += oc::ADC::value(static_cast<ADC_CHANNEL>(get_decay_duration_cv() - 1)) << 3;
                     USAT16(_decay);
                   }
                   if (get_sustain_level_cv()) {
-                    _sustain += OC::ADC::value(static_cast<ADC_CHANNEL>(get_sustain_level_cv() - 1)) << 4;
+                    _sustain += oc::ADC::value(static_cast<ADC_CHANNEL>(get_sustain_level_cv() - 1)) << 4;
                     CONSTRAIN(_sustain, 0, 65534);
                   }
                   if (get_release_duration_cv()) {
-                    _release += OC::ADC::value(static_cast<ADC_CHANNEL>(get_release_duration_cv() - 1)) << 3;
+                    _release += oc::ADC::value(static_cast<ADC_CHANNEL>(get_release_duration_cv() - 1)) << 3;
                     USAT16(_release) ;
                   }
                   if (get_env_loops_cv_source()) {
-                    _loops += OC::ADC::value(static_cast<ADC_CHANNEL>(get_env_loops_cv_source() - 1)) ;
+                    _loops += oc::ADC::value(static_cast<ADC_CHANNEL>(get_env_loops_cv_source() - 1)) ;
                     CONSTRAIN(_loops,1<<8, 65534) ;
                   }
                   // set the specified reset behaviours
@@ -1165,7 +1165,7 @@ public:
                 {
                   int8_t _octave_aux = _octave + get_octave_aux();
                   if (get_octave_aux_cv_source())
-                    _octave_aux += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_octave_aux_cv_source() - 1)) + 255) >> 9;
+                    _octave_aux += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_octave_aux_cv_source() - 1)) + 255) >> 9;
 
                   if (_playmode != PM_ARP)
                     step_pitch_aux_ = get_pitch_at_step(display_num_sequence_, clk_cnt_) + (_octave_aux * 12 << 7);
@@ -1229,7 +1229,7 @@ public:
             // CV?
             if (get_pulsewidth_cv_source()) {
 
-              _pulsewidth += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_pulsewidth_cv_source() - 1)) + 4) >> 3;
+              _pulsewidth += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_pulsewidth_cv_source() - 1)) + 4) >> 3;
               if (!_gates)
                 CONSTRAIN(_pulsewidth, 1, PULSEW_MAX);
               else // CV for 50% duty cycle:
@@ -1313,12 +1313,12 @@ public:
       }
 
       if (get_sequence_cv_source()) {
-        num_sequence_cv = _num_seq += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_sequence_cv_source() - 1)) + 255) >> 9;
-        CONSTRAIN(_num_seq, 0, OC::Patterns::PATTERN_USER_LAST - 0x1);
+        num_sequence_cv = _num_seq += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_sequence_cv_source() - 1)) + 255) >> 9;
+        CONSTRAIN(_num_seq, 0, oc::Patterns::PATTERN_USER_LAST - 0x1);
       }
 
       if (get_sequence_length_cv_source())
-        sequence_length_cv = (OC::ADC::value(static_cast<ADC_CHANNEL>(get_sequence_length_cv_source() - 1)) + 64) >> 7;
+        sequence_length_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(get_sequence_length_cv_source() - 1)) + 64) >> 7;
 
       switch (_playmode) {
 
@@ -1328,7 +1328,7 @@ public:
         case PM_ARP:
         sequence_change_pending_ = ALL_OK;
         sequence_length = get_sequence_length(_num_seq) + sequence_length_cv;
-        CONSTRAIN(sequence_length, OC::Patterns::kMin, OC::Patterns::kMax);
+        CONSTRAIN(sequence_length, oc::Patterns::kMin, oc::Patterns::kMax);
 
         if (active_sequence_ != _num_seq || sequence_length != active_sequence_length_ || prev_playmode_ != _playmode)
           arpeggiator_.UpdateArpeggiator(channel_id_, _num_seq, get_mask(_num_seq), sequence_length);
@@ -1356,15 +1356,15 @@ public:
                 // update
                 active_sequence_ = _num_seq + sequence_cnt_;
                 // wrap around:
-                if (active_sequence_ >= OC::Patterns::PATTERN_USER_LAST)
-                    active_sequence_ -= OC::Patterns::PATTERN_USER_LAST;
+                if (active_sequence_ >= oc::Patterns::PATTERN_USER_LAST)
+                    active_sequence_ -= oc::Patterns::PATTERN_USER_LAST;
                 // reset
                 _clock(get_sequence_length(active_sequence_), 0x0, sequence_max, true);
                 _reset = true;
               }
               else if (num_sequence_cv)  {
                 active_sequence_ += num_sequence_cv;
-                CONSTRAIN(active_sequence_, 0, OC::Patterns::PATTERN_USER_LAST - 1);
+                CONSTRAIN(active_sequence_, 0, oc::Patterns::PATTERN_USER_LAST - 1);
               }
               sequence_cnt = sequence_cnt_;
         }
@@ -1389,12 +1389,12 @@ public:
             // + reset
             _reset = true;
             // wrap around:
-            if (active_sequence_ >= OC::Patterns::PATTERN_USER_LAST)
-                active_sequence_ -= OC::Patterns::PATTERN_USER_LAST;
+            if (active_sequence_ >= oc::Patterns::PATTERN_USER_LAST)
+                active_sequence_ -= oc::Patterns::PATTERN_USER_LAST;
           }
           else if (num_sequence_cv)  {
               active_sequence_ += num_sequence_cv;
-              CONSTRAIN(active_sequence_, 0, OC::Patterns::PATTERN_USER_LAST - 1);
+              CONSTRAIN(active_sequence_, 0, oc::Patterns::PATTERN_USER_LAST - 1);
           }
           sequence_advance_state_ = _advance_trig;
           sequence_max = 0x0;
@@ -1407,7 +1407,7 @@ public:
         {
            int input_range;
            sequence_length = get_sequence_length(_num_seq) + sequence_length_cv;
-           CONSTRAIN(sequence_length, OC::Patterns::kMin, OC::Patterns::kMax);
+           CONSTRAIN(sequence_length, oc::Patterns::kMin, oc::Patterns::kMax);
            input_range =  get_cv_input_range();
 
            // length or range changed ?
@@ -1421,9 +1421,9 @@ public:
 
            // process input:
            if (!input_range)
-              clk_cnt_ = input_map_.Process(OC::ADC::value(static_cast<ADC_CHANNEL>(_playmode - PM_SH1)));
+              clk_cnt_ = input_map_.Process(oc::ADC::value(static_cast<ADC_CHANNEL>(_playmode - PM_SH1)));
            else
-              clk_cnt_ = input_map_.Process(0xFFF - OC::ADC::smoothed_raw_value(static_cast<ADC_CHANNEL>(_playmode - PM_SH1)));
+              clk_cnt_ = input_map_.Process(0xFFF - oc::ADC::smoothed_raw_value(static_cast<ADC_CHANNEL>(_playmode - PM_SH1)));
         }
         break;
         case PM_CV1:
@@ -1433,7 +1433,7 @@ public:
         {
            int input_range;
            sequence_length = get_sequence_length(_num_seq) + sequence_length_cv;
-           CONSTRAIN(sequence_length, OC::Patterns::kMin, OC::Patterns::kMax);
+           CONSTRAIN(sequence_length, oc::Patterns::kMin, oc::Patterns::kMax);
            input_range =  get_cv_input_range();
            // length changed ?
            if (active_sequence_length_ != sequence_length || input_range != prev_input_range_ || prev_playmode_ != _playmode)
@@ -1446,9 +1446,9 @@ public:
 
            // process input:
            if (!input_range)
-              clk_cnt_ = input_map_.Process(OC::ADC::value(static_cast<ADC_CHANNEL>(_playmode - PM_CV1))); // = 5V
+              clk_cnt_ = input_map_.Process(oc::ADC::value(static_cast<ADC_CHANNEL>(_playmode - PM_CV1))); // = 5V
            else
-              clk_cnt_ = input_map_.Process(0xFFF - OC::ADC::smoothed_raw_value(static_cast<ADC_CHANNEL>(_playmode - PM_CV1))); // = 10V
+              clk_cnt_ = input_map_.Process(0xFFF - oc::ADC::smoothed_raw_value(static_cast<ADC_CHANNEL>(_playmode - PM_CV1))); // = 10V
 
            // update output, if slot # changed:
            if (prev_slot_ == clk_cnt_)
@@ -1470,7 +1470,7 @@ public:
 
         sequence_length = get_sequence_length(_num_seq) + sequence_length_cv;
         if (sequence_length_cv)
-            CONSTRAIN(sequence_length, OC::Patterns::kMin, OC::Patterns::kMax);
+            CONSTRAIN(sequence_length, oc::Patterns::kMin, oc::Patterns::kMax);
 
         CONSTRAIN(clk_cnt_, 0x0, sequence_length);
         sequence_EoS_ = _clock(sequence_length - 0x1, sequence_cnt, sequence_max, _reset);
@@ -1508,7 +1508,7 @@ public:
     _direction = get_direction();
 
     if (get_direction_cv()) {
-       _direction += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_direction_cv() - 1)) + 255) >> 9;
+       _direction += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_direction_cv() - 1)) + 255) >> 9;
        CONSTRAIN(_direction, 0, SEQ_DIRECTIONS_LAST - 0x1);
     }
 
@@ -1546,7 +1546,7 @@ public:
         int16_t brown_prb = get_brownian_probability();
 
         if (get_brownian_probability_cv()) {
-          brown_prb += (OC::ADC::value(static_cast<ADC_CHANNEL>(get_brownian_probability_cv() - 1)) + 8) >> 3;
+          brown_prb += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_brownian_probability_cv() - 1)) + 8) >> 3;
           CONSTRAIN(brown_prb, 0, 256);
         }
         if (random(0,256) < brown_prb)
@@ -1843,8 +1843,8 @@ public:
 
   template <DAC_CHANNEL dacChannel>
   void update_main_channel() {
-    int32_t _output = OC::DAC::pitch_to_scaled_voltage_dac(dacChannel, get_step_pitch(), 0, OC::DAC::get_voltage_scaling(dacChannel));
-    OC::DAC::set<dacChannel>(_output);
+    int32_t _output = oc::DAC::pitch_to_scaled_voltage_dac(dacChannel, get_step_pitch(), 0, oc::DAC::get_voltage_scaling(dacChannel));
+    oc::DAC::set<dacChannel>(_output);
 
   }
 
@@ -1859,13 +1859,13 @@ public:
 
         case GATE_OUT: // gate
           #ifdef BUCHLA_4U
-          _output = (get_step_gate() == ON) ? OC::DAC::get_octave_offset(dacChannel, OCTAVES - OC::DAC::kOctaveZero - 0x2) : OC::DAC::get_zero_offset(dacChannel);
+          _output = (get_step_gate() == ON) ? oc::DAC::get_octave_offset(dacChannel, OCTAVES - oc::DAC::kOctaveZero - 0x2) : oc::DAC::get_zero_offset(dacChannel);
           #else
-          _output = (get_step_gate() == ON) ? OC::DAC::get_octave_offset(dacChannel, OCTAVES - OC::DAC::kOctaveZero - 0x1) : OC::DAC::get_zero_offset(dacChannel);
+          _output = (get_step_gate() == ON) ? oc::DAC::get_octave_offset(dacChannel, OCTAVES - oc::DAC::kOctaveZero - 0x1) : oc::DAC::get_zero_offset(dacChannel);
           #endif
         break;
         case COPY: // copy
-          _output = OC::DAC::pitch_to_scaled_voltage_dac(dacChannel, get_step_pitch_aux(), 0, OC::DAC::get_voltage_scaling(dacChannel));
+          _output = oc::DAC::pitch_to_scaled_voltage_dac(dacChannel, get_step_pitch_aux(), 0, oc::DAC::get_voltage_scaling(dacChannel));
         break;
         // code to process envelopes here
         case  ENV_AD:
@@ -1880,12 +1880,12 @@ public:
           else if (prev_gate_raised_)
             env_gate_state_ |= peaks::CONTROL_GATE_FALLING;
           prev_gate_raised_ = env_gate_raised_;
-          _output = OC::DAC::get_zero_offset(dacChannel) + env_.ProcessSingleSample(env_gate_state_);
+          _output = oc::DAC::get_zero_offset(dacChannel) + env_.ProcessSingleSample(env_gate_state_);
         break;
         default:
         break;
       }
-      OC::DAC::set<dacChannel>(_output);
+      oc::DAC::set<dacChannel>(_output);
   }
 
   void RenderScreensaver() const;
@@ -1936,14 +1936,14 @@ private:
   uint8_t prev_playmode_;
   bool pending_sync_;
 
-  util::TriggerDelay<OC::kMaxTriggerDelayTicks> trigger_delay_;
+  util::TriggerDelay<oc::kMaxTriggerDelayTicks> trigger_delay_;
   util::Arpeggiator arpeggiator_;
 
   int num_enabled_settings_;
   SEQ_ChannelSetting enabled_settings_[SEQ_CHANNEL_SETTING_LAST];
   braids::Quantizer quantizer_;
-  OC::Input_Map input_map_;
-  OC::DigitalInputDisplay clock_display_;
+  oc::Input_Map input_map_;
+  oc::DigitalInputDisplay clock_display_;
   peaks::MultistageEnvelope env_;
 
 };
@@ -1981,14 +1981,14 @@ SETTINGS_DECLARE(SEQ_Channel, SEQ_CHANNEL_SETTING_LAST) {
 
   { 0, 0, 4, "aux. mode", modes, settings::STORAGE_TYPE_U4 },
   { SEQ_CHANNEL_TRIGGER_TR1, 0, SEQ_CHANNEL_TRIGGER_NONE, "clock src", SEQ_CHANNEL_TRIGGER_sources, settings::STORAGE_TYPE_U4 },
-  { 0, 0, OC::kNumDelayTimes - 1, "trigger delay", OC::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
+  { 0, 0, oc::kNumDelayTimes - 1, "trigger delay", oc::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
   { 2, 0, SEQ_CHANNEL_TRIGGER_LAST - 1, "reset/mute", reset_trigger_sources, settings::STORAGE_TYPE_U8 },
   { MULT_BY_ONE, 0, MULT_MAX, "mult/div", display_multipliers, settings::STORAGE_TYPE_U8 },
   { 25, 0, PULSEW_MAX, "--> pw", NULL, settings::STORAGE_TYPE_U8 },
   //
-  { OC::Scales::SCALE_SEMI, 0, OC::Scales::NUM_SCALES - 1, "scale", OC::scale_names_short, settings::STORAGE_TYPE_U8 },
+  { oc::Scales::SCALE_SEMI, 0, oc::Scales::NUM_SCALES - 1, "scale", oc::scale_names_short, settings::STORAGE_TYPE_U8 },
   { 0, -5, 5, "octave", NULL, settings::STORAGE_TYPE_I8 }, // octave
-  { 0, 0, 11, "root", OC::Strings::note_names_unpadded, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 11, "root", oc::Strings::note_names_unpadded, settings::STORAGE_TYPE_U8 },
   { 0, -5, 5, "--> aux +/-", NULL, settings::STORAGE_TYPE_I8 }, // aux octave
   { 65535, 1, 65535, "--> edit", NULL, settings::STORAGE_TYPE_U16 }, // mask
   // seq
@@ -1996,49 +1996,49 @@ SETTINGS_DECLARE(SEQ_Channel, SEQ_CHANNEL_SETTING_LAST) {
   { 65535, 0, 65535, "--> edit", NULL, settings::STORAGE_TYPE_U16 }, // seq 2
   { 65535, 0, 65535, "--> edit", NULL, settings::STORAGE_TYPE_U16 }, // seq 3
   { 65535, 0, 65535, "--> edit", NULL, settings::STORAGE_TYPE_U16 }, // seq 4
-  { OC::Patterns::PATTERN_USER_0_1, 0, OC::Patterns::PATTERN_USER_LAST-1, "sequence #", OC::pattern_names_short, settings::STORAGE_TYPE_U8 },
-  { OC::Patterns::kMax, OC::Patterns::kMin, OC::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 1
-  { OC::Patterns::kMax, OC::Patterns::kMin, OC::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 2
-  { OC::Patterns::kMax, OC::Patterns::kMin, OC::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 3
-  { OC::Patterns::kMax, OC::Patterns::kMin, OC::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 4
-  { 0, 0, PM_LAST - 1, "playmode", OC::Strings::seq_playmodes, settings::STORAGE_TYPE_U8 },
-  { 0, 0, SEQ_DIRECTIONS_LAST - 1, "direction", OC::Strings::seq_directions, settings::STORAGE_TYPE_U8 },
+  { oc::Patterns::PATTERN_USER_0_1, 0, oc::Patterns::PATTERN_USER_LAST-1, "sequence #", oc::pattern_names_short, settings::STORAGE_TYPE_U8 },
+  { oc::Patterns::kMax, oc::Patterns::kMin, oc::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 1
+  { oc::Patterns::kMax, oc::Patterns::kMin, oc::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 2
+  { oc::Patterns::kMax, oc::Patterns::kMin, oc::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 3
+  { oc::Patterns::kMax, oc::Patterns::kMin, oc::Patterns::kMax, "sequence length", NULL, settings::STORAGE_TYPE_U8 }, // seq 4
+  { 0, 0, PM_LAST - 1, "playmode", oc::Strings::seq_playmodes, settings::STORAGE_TYPE_U8 },
+  { 0, 0, SEQ_DIRECTIONS_LAST - 1, "direction", oc::Strings::seq_directions, settings::STORAGE_TYPE_U8 },
   { 0, 0, 1, "CV adr. range", cv_ranges, settings::STORAGE_TYPE_U4 },
   { 0, 0, 3, "direction", arp_directions, settings::STORAGE_TYPE_U4 },
   { 0, 0, 3, "arp.range", arp_range, settings::STORAGE_TYPE_U8 },
   { 64, 0, 255, "-->brown prob", NULL, settings::STORAGE_TYPE_U8 },
   // cv sources
-  { 0, 0, 4, "mult/div CV ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "transpose   ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "--> pw      ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "octave  +/- ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "root    +/- ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "--> aux +/- ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "sequence #  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "mask rotate ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "direction   ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "arp.range   ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "direction   ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "-->brwn.prb ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "seq.length  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "att dur  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "dec dur  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "sus lvl  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "rel dur  ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 4, "env loops ->", OC::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 4, "mult/div CV ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "transpose   ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "--> pw      ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "octave  +/- ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "root    +/- ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "--> aux +/- ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "sequence #  ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "mask rotate ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "direction   ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "arp.range   ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "direction   ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "-->brwn.prb ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "seq.length  ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "att dur  ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "dec dur  ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "sus lvl  ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "rel dur  ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 4, "env loops ->", oc::Strings::cv_input_names_none, settings::STORAGE_TYPE_U8 },
   { 0, 0, 1, "-", NULL, settings::STORAGE_TYPE_U4 }, // DUMMY, use to store update behaviour
   // envelope parameters
   { 128, 0, 255, "--> att dur", NULL, settings::STORAGE_TYPE_U8 },
-  { peaks::ENV_SHAPE_QUARTIC, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "--> att shape", OC::Strings::envelope_shapes, settings::STORAGE_TYPE_U16 },
+  { peaks::ENV_SHAPE_QUARTIC, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "--> att shape", oc::Strings::envelope_shapes, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "--> dec dur", NULL, settings::STORAGE_TYPE_U8 },
-  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "--> dec shape", OC::Strings::envelope_shapes, settings::STORAGE_TYPE_U16 },
+  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "--> dec shape", oc::Strings::envelope_shapes, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "--> sus lvl", NULL, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "--> rel dur", NULL, settings::STORAGE_TYPE_U8 },
-  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "--> rel shape", OC::Strings::envelope_shapes, settings::STORAGE_TYPE_U16 },
+  { peaks::ENV_SHAPE_EXPONENTIAL, peaks::ENV_SHAPE_LINEAR, peaks::ENV_SHAPE_LAST - 1, "--> rel shape", oc::Strings::envelope_shapes, settings::STORAGE_TYPE_U16 },
   {1, 1, 127, "--> loops", NULL, settings::STORAGE_TYPE_U8 },
-  { peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "att reset", OC::Strings::reset_behaviours, settings::STORAGE_TYPE_U8 },
-  { peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_LAST - 1, "att fall gt", OC::Strings::falling_gate_behaviours, settings::STORAGE_TYPE_U8 },
-  { peaks::RESET_BEHAVIOUR_SEGMENT_PHASE, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "dec/rel reset", OC::Strings::reset_behaviours, settings::STORAGE_TYPE_U8 },
+  { peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "att reset", oc::Strings::reset_behaviours, settings::STORAGE_TYPE_U8 },
+  { peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_IGNORE, peaks::FALLING_GATE_BEHAVIOUR_LAST - 1, "att fall gt", oc::Strings::falling_gate_behaviours, settings::STORAGE_TYPE_U8 },
+  { peaks::RESET_BEHAVIOUR_SEGMENT_PHASE, peaks::RESET_BEHAVIOUR_NULL, peaks::RESET_BEHAVIOUR_LAST - 1, "dec/rel reset", oc::Strings::reset_behaviours, settings::STORAGE_TYPE_U8 },
 };
 
 class SEQ_State {
@@ -2061,8 +2061,8 @@ public:
   int selected_channel;
   menu::ScreenCursor<menu::kScreenLines> cursor;
   menu::ScreenCursor<menu::kScreenLines> cursor_state;
-  OC::PatternEditor<SEQ_Channel> pattern_editor;
-  OC::ScaleEditor<SEQ_Channel> scale_editor;
+  oc::PatternEditor<SEQ_Channel> pattern_editor;
+  oc::ScaleEditor<SEQ_Channel> scale_editor;
 };
 
 SEQ_State seq_state;
@@ -2109,16 +2109,16 @@ size_t SEQ_restore(const void *storage) {
   return used;
 }
 
-void SEQ_handleAppEvent(OC::AppEvent event) {
+void SEQ_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
         seq_state.cursor.set_editing(false);
         seq_state.pattern_editor.Close();
         seq_state.scale_editor.Close();
     break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
     {
        SEQ_Channel &selected = seq_channel[seq_state.selected_channel];
        selected.set_menu_page(PARAMETERS);
@@ -2137,13 +2137,13 @@ void SEQ_isr() {
   ticks_src2++; // src #2 ticks
   copy_timeout++;
 
-  uint32_t triggers = OC::DigitalInputs::clocked();
+  uint32_t triggers = oc::DigitalInputs::clocked();
 
-  if (triggers & (1 << OC::DIGITAL_INPUT_1)) {
+  if (triggers & (1 << oc::DIGITAL_INPUT_1)) {
     ext_frequency[SEQ_CHANNEL_TRIGGER_TR1] = ticks_src1;
     ticks_src1 = 0x0;
   }
-  if (triggers & (1 << OC::DIGITAL_INPUT_3)) {
+  if (triggers & (1 << oc::DIGITAL_INPUT_3)) {
     ext_frequency[SEQ_CHANNEL_TRIGGER_TR2] = ticks_src2;
     ticks_src2 = 0x0;
   }
@@ -2163,13 +2163,13 @@ void SEQ_handleButtonEvent(const UI::Event &event) {
 
   if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
      switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
          SEQ_upButtonLong();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         SEQ_downButtonLong();
         break;
-       case OC::CONTROL_BUTTON_L:
+       case oc::CONTROL_BUTTON_L:
         if (!(seq_state.pattern_editor.active()))
           SEQ_leftButtonLong();
         break;
@@ -2189,16 +2189,16 @@ void SEQ_handleButtonEvent(const UI::Event &event) {
 
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         SEQ_upButton();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         SEQ_downButton();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         SEQ_leftButton();
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         SEQ_rightButton();
         break;
     }
@@ -2216,7 +2216,7 @@ void SEQ_handleEncoderEvent(const UI::Event &event) {
     return;
   }
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
 
     int selected_channel = seq_state.selected_channel + event.value;
     CONSTRAIN(selected_channel, 0, NUM_CHANNELS-1);
@@ -2228,7 +2228,7 @@ void SEQ_handleEncoderEvent(const UI::Event &event) {
     seq_state.cursor.Init(SEQ_CHANNEL_SETTING_MODE, 0);
     seq_state.cursor.AdjustEnd(selected.num_enabled_settings() - 1);
 
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
 
        SEQ_Channel &selected = seq_channel[seq_state.selected_channel];
 
@@ -2336,7 +2336,7 @@ void SEQ_rightButton() {
     case SEQ_CHANNEL_SETTING_SCALE_MASK:
     {
      int scale = selected.get_scale(DUMMY);
-     if (OC::Scales::SCALE_NONE != scale) {
+     if (oc::Scales::SCALE_NONE != scale) {
           seq_state.scale_editor.Edit(&selected, scale);
         }
     }
@@ -2347,7 +2347,7 @@ void SEQ_rightButton() {
     case SEQ_CHANNEL_SETTING_MASK4:
     {
       int pattern = selected.get_sequence();
-      if (OC::Patterns::PATTERN_NONE != pattern) {
+      if (oc::Patterns::PATTERN_NONE != pattern) {
         seq_state.pattern_editor.Edit(&selected, pattern);
       }
     }
@@ -2456,11 +2456,11 @@ void SEQ_menu() {
           menu::DrawEditIcon(6, list_item.y, value, attr);
           graphics.movePrintPos(6, 0);
         }
-        graphics.print(OC::scale_names[value]);
+        graphics.print(oc::scale_names[value]);
         list_item.DrawCustom();
         break;
       case SEQ_CHANNEL_SETTING_SCALE_MASK:
-       menu::DrawMask<false, 16, 8, 1>(menu::kDisplayWidth, list_item.y, channel.get_rotated_scale_mask(), OC::Scales::GetScale(channel.get_scale(DUMMY)).num_notes);
+       menu::DrawMask<false, 16, 8, 1>(menu::kDisplayWidth, list_item.y, channel.get_rotated_scale_mask(), oc::Scales::GetScale(channel.get_scale(DUMMY)).num_notes);
        list_item.DrawNoValue<false>(value, attr);
       break;
       case SEQ_CHANNEL_SETTING_MASK1:

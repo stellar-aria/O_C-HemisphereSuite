@@ -4,9 +4,9 @@
 #include "oc/autotune_presets.h"
 #include "oc/DAC.h"
 
-namespace OC {
+namespace oc {
 
-typedef OC::Autotune_data Autotune_data;
+typedef oc::Autotune_data Autotune_data;
 
 class AUTOTUNE {
 public:

@@ -25,13 +25,15 @@
 
 #ifdef ENABLE_APP_MIDI
 
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
 #include "util/settings.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
 #include "oc/menus.h"
-namespace menu = OC::menu;
+namespace menu = oc::menu;
+
+using namespace hemisphere;
 
 #define MIDI_INDICATOR_COUNTDOWN 2000
 #define MIDI_PARAMETER_COUNT 40
@@ -197,7 +199,7 @@ struct CaptainMIDILog {
     }
 };
 
-class CaptainMIDI : public SystemExclusiveHandler, public HSApplication,
+class CaptainMIDI : public SystemExclusiveHandler, public ApplicationBase,
     public settings::SettingsBase<CaptainMIDI, MIDI_SETTING_LAST> {
 public:
     menu::ScreenCursor<menu::kScreenLines> cursor;
@@ -569,7 +571,7 @@ private:
                         for (int vch = 0; vch < 4; vch++)
                         {
                             if (get_out_assign(vch) == MIDI_OUT_VELOCITY && get_out_channel(vch) == out_ch) {
-                                velocity = Proportion(In(vch), HSAPPLICATION_5V, 127);
+                                velocity = Proportion(In(vch), FIVE_VOLTS, 127);
                             }
                         }
                         velocity = constrain(velocity, 0, 127);
@@ -604,7 +606,7 @@ private:
                     if (out_fn == MIDI_OUT_BREATH) cc = 2;
                     if (out_fn == MIDI_OUT_Y_AXIS) cc = 74;
 
-                    int value = Proportion(In(ch), HSAPPLICATION_5V, 127);
+                    int value = Proportion(In(ch), FIVE_VOLTS, 127);
                     value = constrain(value, 0, 127);
                     if (cc == 64) value = (value >= 60) ? 127 : 0; // On or off for sustain pedal
 
@@ -615,7 +617,7 @@ private:
 
                 // Aftertouch
                 if (out_fn == MIDI_OUT_AFTERTOUCH) {
-                    int value = Proportion(In(ch), HSAPPLICATION_5V, 127);
+                    int value = Proportion(In(ch), FIVE_VOLTS, 127);
                     value = constrain(value, 0, 127);
                     usbMIDI.sendAfterTouch(value, out_ch);
                     UpdateLog(0, ch, 3, out_ch, 0, value);
@@ -624,7 +626,7 @@ private:
 
                 // Pitch Bend
                 if (out_fn == MIDI_OUT_PITCHBEND) {
-                    int16_t bend = Proportion(In(ch) + HSAPPLICATION_3V, HSAPPLICATION_3V * 2, 16383);
+                    int16_t bend = Proportion(In(ch) + THREE_VOLTS, THREE_VOLTS * 2, 16383);
                     bend = constrain(bend, 0, 16383);
                     usbMIDI.sendPitchBend(bend, out_ch);
                     UpdateLog(0, ch, 4, out_ch, 0, bend - 8192);
@@ -644,10 +646,10 @@ private:
             int data2 = usbMIDI.getData2();
 
             // Handle system exclusive dump for Setup data
-            if (message == HEM_MIDI_SYSEX) OnReceiveSysEx();
+            if (message == MIDI_SYSEX) OnReceiveSysEx();
 
             // Listen for incoming clock
-            if (message == HEM_MIDI_CLOCK) {
+            if (message == MIDI_CLOCK) {
                 if (++clock_count >= 24) clock_count = 0;
             }
 
@@ -661,7 +663,7 @@ private:
                 int in_fn = get_in_assign(ch);
                 int in_ch = get_in_channel(ch);
                 bool indicator = 0;
-                if (message == HEM_MIDI_NOTE_ON && in_ch == channel) {
+                if (message == MIDI_NOTE_ON && in_ch == channel) {
                     if (note_in[ch] == -1) { // If this channel isn't already occupied with another note, handle Note On
                         if (in_fn == MIDI_IN_NOTE && !note_captured) {
                             // Send quantized pitch CV. Isolate transposition to quantizer so that it notes off aren't
@@ -694,13 +696,13 @@ private:
 
                         if (in_fn == MIDI_IN_VELOCITY) {
                             // Send velocity data to CV
-                            Out(ch, Proportion(data2, 127, HSAPPLICATION_5V));
+                            Out(ch, Proportion(data2, 127, FIVE_VOLTS));
                             indicator = 1;
                         }
                     }
                 }
 
-                if (message == HEM_MIDI_NOTE_OFF && in_ch == channel) {
+                if (message == MIDI_NOTE_OFF && in_ch == channel) {
                     if (note_in[ch] == data1) { // If the note off matches the note on assingned to this output
                         note_in[ch] = -1;
                         if (in_fn == MIDI_IN_GATE) {
@@ -717,7 +719,7 @@ private:
                 }
 
                 bool cc = (in_fn == MIDI_IN_MOD || in_fn >= MIDI_IN_EXPRESSION);
-                if (cc && message == HEM_MIDI_CC && in_ch == channel) {
+                if (cc && message == MIDI_CC && in_ch == channel) {
                     uint8_t cc = 1; // Modulation wheel
                     if (in_fn == MIDI_IN_EXPRESSION) cc = 11;
                     if (in_fn == MIDI_IN_PAN) cc = 10;
@@ -728,23 +730,23 @@ private:
                     // Send CC wheel to CV
                     if (data1 == cc) {
                         if (in_fn == MIDI_IN_HOLD && data2 > 0) data2 = 127;
-                        Out(ch, Proportion(data2, 127, HSAPPLICATION_5V));
+                        Out(ch, Proportion(data2, 127, FIVE_VOLTS));
                         UpdateLog(1, ch, 2, in_ch, data1, data2);
                         indicator = 1;
                     }
                 }
 
-                if (message == HEM_MIDI_AFTERTOUCH && in_fn == MIDI_IN_AFTERTOUCH && in_ch == channel) {
+                if (message == MIDI_AFTERTOUCH && in_fn == MIDI_IN_AFTERTOUCH && in_ch == channel) {
                     // Send aftertouch to CV
-                    Out(ch, Proportion(data1, 127, HSAPPLICATION_5V));
+                    Out(ch, Proportion(data1, 127, FIVE_VOLTS));
                     UpdateLog(1, ch, 3, in_ch, data1, data2);
                     indicator = 1;
                 }
 
-                if (message == HEM_MIDI_PITCHBEND && in_fn == MIDI_IN_PITCHBEND && in_ch == channel) {
+                if (message == MIDI_PITCHBEND && in_fn == MIDI_IN_PITCHBEND && in_ch == channel) {
                     // Send pitch bend to CV
                     int data = (data2 << 7) + data1 - 8192;
-                    Out(ch, Proportion(data, 0x7fff, HSAPPLICATION_3V));
+                    Out(ch, Proportion(data, 0x7fff, THREE_VOLTS));
                     UpdateLog(1, ch, 4, in_ch, 0, data);
                     indicator = 1;
                 }
@@ -872,8 +874,8 @@ void MIDI_isr() {
 	return captain_midi_instance.BaseController();
 }
 
-void MIDI_handleAppEvent(OC::AppEvent event) {
-    if (event == OC::APP_EVENT_SUSPEND) {
+void MIDI_handleAppEvent(oc::AppEvent event) {
+    if (event == oc::APP_EVENT_SUSPEND) {
         captain_midi_instance.OnSendSysEx();
     }
 }
@@ -887,23 +889,23 @@ void MIDI_menu() {
 void MIDI_screensaver() {}
 
 void MIDI_handleButtonEvent(const UI::Event &event) {
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS)
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS)
         captain_midi_instance.ToggleCursor();
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) captain_midi_instance.Panic();
         if (event.type == UI::EVENT_BUTTON_PRESS) captain_midi_instance.ToggleDisplay();
     }
 
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS)
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS)
         captain_midi_instance.SwitchSetup(1);
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) captain_midi_instance.SwitchSetup(-1);
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) captain_midi_instance.ToggleCopyMode();
     }
 }
 
 void MIDI_handleEncoderEvent(const UI::Event &event) {
-    if (event.control == OC::CONTROL_ENCODER_R) {
+    if (event.control == oc::CONTROL_ENCODER_R) {
         if (captain_midi_instance.cursor.editing()) {
             captain_midi_instance.change_value(captain_midi_instance.cursor.cursor_pos(), event.value);
             captain_midi_instance.ConstrainRangeValue(captain_midi_instance.cursor.cursor_pos());
@@ -911,7 +913,7 @@ void MIDI_handleEncoderEvent(const UI::Event &event) {
             captain_midi_instance.cursor.Scroll(event.value);
         }
     }
-    if (event.control == OC::CONTROL_ENCODER_L) {
+    if (event.control == oc::CONTROL_ENCODER_L) {
         captain_midi_instance.SwitchScreenOrLogView(event.value);
     }
 }

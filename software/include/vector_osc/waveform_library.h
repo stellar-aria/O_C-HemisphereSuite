@@ -1,6 +1,6 @@
 #pragma once
 #include "HSVectorOscillator.h"
-namespace HS {
+namespace hemisphere {
 
 #define VO_TOC 255
 const byte WAVEFORM_LIBRARY_COUNT = 32;
@@ -318,4 +318,4 @@ constexpr VOSegment library_waveforms[] = {
 	VOSegment {148, 5},
 };
 
-}; // namespace HS
+}; // namespace hemisphere

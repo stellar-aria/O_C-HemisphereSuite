@@ -27,7 +27,7 @@
 
 #ifdef ENABLE_APP_LORENZ
 
-#include "streams_lorenz_generator.h"
+#include "streams/lorenz_generator.h"
 #include "util/math.h"
 #include "oc/digital_inputs.h"
 #include "util/settings.h"
@@ -35,7 +35,7 @@
 #include "oc/apps.h"
 #include "oc/ui.h"
 #include "oc/menus.h"
-namespace menu = OC::menu;
+namespace menu = oc::menu;
 
 enum LORENZ_SETTINGS {
   LORENZ_SETTING_FREQ1,
@@ -184,15 +184,15 @@ struct {
 
 void FASTRUN LORENZ_isr() {
 
-  bool reset1_phase = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_1>();
-  bool reset2_phase = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_2>();
-  bool reset_both_phase = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_3>();
-  bool freeze = OC::DigitalInputs::read_immediate<OC::DIGITAL_INPUT_4>();
+  bool reset1_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
+  bool reset2_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_2>();
+  bool reset_both_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_3>();
+  bool freeze = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_4>();
 
-  lorenz_generator.cv_freq1.push(OC::ADC::value<ADC_CHANNEL_1>());
-  lorenz_generator.cv_rho1.push(OC::ADC::value<ADC_CHANNEL_2>());
-  lorenz_generator.cv_freq2.push(OC::ADC::value<ADC_CHANNEL_3>());
-  lorenz_generator.cv_rho2.push(OC::ADC::value<ADC_CHANNEL_4>());
+  lorenz_generator.cv_freq1.push(oc::ADC::value<ADC_CHANNEL_1>());
+  lorenz_generator.cv_rho1.push(oc::ADC::value<ADC_CHANNEL_2>());
+  lorenz_generator.cv_freq2.push(oc::ADC::value<ADC_CHANNEL_3>());
+  lorenz_generator.cv_rho2.push(oc::ADC::value<ADC_CHANNEL_4>());
 
   // Range in settings is (0-256] so this gets scaled to (0,65535]
   // CV value is 12 bit so also needs scaling
@@ -235,10 +235,10 @@ void FASTRUN LORENZ_isr() {
   if (!freeze && !lorenz_generator.frozen())
     lorenz_generator.lorenz.Process(freq1, freq2, reset1_phase, reset2_phase, lorenz_generator.get_freq_range1(), lorenz_generator.get_freq_range2());
 
-  OC::DAC::set<DAC_CHANNEL_A>(lorenz_generator.lorenz.dac_code(0));
-  OC::DAC::set<DAC_CHANNEL_B>(lorenz_generator.lorenz.dac_code(1));
-  OC::DAC::set<DAC_CHANNEL_C>(lorenz_generator.lorenz.dac_code(2));
-  OC::DAC::set<DAC_CHANNEL_D>(lorenz_generator.lorenz.dac_code(3));
+  oc::DAC::set<DAC_CHANNEL_A>(lorenz_generator.lorenz.dac_code(0));
+  oc::DAC::set<DAC_CHANNEL_B>(lorenz_generator.lorenz.dac_code(1));
+  oc::DAC::set<DAC_CHANNEL_C>(lorenz_generator.lorenz.dac_code(2));
+  oc::DAC::set<DAC_CHANNEL_D>(lorenz_generator.lorenz.dac_code(3));
 }
 
 void LORENZ_init() {
@@ -287,16 +287,16 @@ void LORENZ_menu() {
 }
 
 void LORENZ_screensaver() {
-  OC::vectorscope_render();
+  oc::vectorscope_render();
 }
 
-void LORENZ_handleAppEvent(OC::AppEvent event) {
+void LORENZ_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       break;
   }
 }
@@ -328,16 +328,16 @@ void LORENZ_leftButton() {
 void LORENZ_handleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         LORENZ_topButton();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         LORENZ_lowerButton();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         LORENZ_leftButton();
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         LORENZ_rightButton();
         break;
     }
@@ -346,13 +346,13 @@ void LORENZ_handleButtonEvent(const UI::Event &event) {
 
 void LORENZ_handleEncoderEvent(const UI::Event &event) {
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     if (lorenz_generator_state.selected_generator) {
       lorenz_generator.change_value(LORENZ_SETTING_FREQ2, event.value);
     } else {
       lorenz_generator.change_value(LORENZ_SETTING_FREQ1, event.value);
     }
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     if (lorenz_generator_state.cursor.editing()) {
       lorenz_generator.change_value(lorenz_generator_state.cursor.cursor_pos(), event.value);
     } else {

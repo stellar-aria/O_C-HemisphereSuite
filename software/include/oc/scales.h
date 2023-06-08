@@ -1,10 +1,11 @@
 #ifndef OS_SCALES_H_
 #define OS_SCALES_H_
 
-#include "braids_quantizer.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 
 // Common scales and stuff
-namespace OC {
+namespace oc {
 
 typedef braids::Scale Scale;
 
@@ -13,9 +14,6 @@ static constexpr int kMinScaleLength = 4;
 
 class Scales {
 public:
-
-  static const int NUM_SCALES;
-
   enum {
     SCALE_USER_0,
     SCALE_USER_1,
@@ -25,6 +23,8 @@ public:
     SCALE_SEMI,
     SCALE_NONE = SCALE_USER_LAST,
   };
+
+  constexpr static int NUM_SCALES = oc::Scales::SCALE_USER_LAST + sizeof(braids::scales) / sizeof(braids::scales[0]);  
 
   static void Init();
   static const Scale &GetScale(int index);
@@ -58,7 +58,7 @@ private:
 
 extern const char *const scale_names[];
 extern const char *const scale_names_short[];
-extern Scale user_scales[OC::Scales::SCALE_USER_LAST];
+extern Scale user_scales[oc::Scales::SCALE_USER_LAST];
 extern Scale dummy_scale;
 extern const char *const voltage_scalings[];
 

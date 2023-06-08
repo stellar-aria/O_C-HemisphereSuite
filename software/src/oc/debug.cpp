@@ -37,7 +37,7 @@ extern void QQ_debug();
 extern void ASR_debug();
 #endif // ASR_DEBUG
 
-namespace OC {
+namespace oc {
 
 namespace DEBUG {
   debug::AveragedCycles ISR_cycles;
@@ -195,4 +195,4 @@ void Ui::DebugStats() {
   event_queue_.Poke();
 }
 
-}; // namespace OC
+}; // namespace oc

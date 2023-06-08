@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "weegfx.h"
+#include "drivers/weegfx.h"
 #include "util/macros.h"
 
 namespace weegfx {
@@ -389,7 +389,7 @@ void Graphics::drawCircle(coord_t center_x, coord_t center_y, coord_t r) {
   }
 }
 
-#include "extern/gfx_font_6x8.h"
+#include "extern/font_6x8.h"
 static inline weegfx::font_glyph get_char_glyph(char c) __attribute__((always_inline));
 static inline weegfx::font_glyph get_char_glyph(char c) {
   return ssd1306xled_font6x8 + Graphics::kFixedFontW * (c - 32);

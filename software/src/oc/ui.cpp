@@ -19,7 +19,7 @@ VBiasManager *VBiasManager::instance = 0;
 
 extern uint_fast8_t MENU_REDRAW;
 
-namespace OC {
+namespace oc {
 
 Ui ui;
 
@@ -49,7 +49,7 @@ void Ui::Init() {
 }
 
 void Ui::configure_encoders(EncoderConfig encoder_config) {
-  SERIAL_PRINTLN("Configuring encoders: %s (%x)", OC::Strings::encoder_config_strings[encoder_config], encoder_config);
+  SERIAL_PRINTLN("Configuring encoders: %s (%x)", oc::Strings::encoder_config_strings[encoder_config], encoder_config);
 
   encoder_right_.reverse(encoder_config & ENCODER_CONFIG_R_REVERSED);
   encoder_left_.reverse(encoder_config & ENCODER_CONFIG_L_REVERSED);
@@ -126,7 +126,7 @@ UiMode Ui::DispatchEvents(App *app) {
         break;
       case UI::EVENT_BUTTON_DOWN:
 #ifdef VOR
-        if (OC::CONTROL_BUTTON_M == event.control) {
+        if (oc::CONTROL_BUTTON_M == event.control) {
             VBiasManager *vbias_m = vbias_m->get();
             vbias_m->AdvanceBias();
         } else app->HandleButtonEvent(event);
@@ -135,10 +135,10 @@ UiMode Ui::DispatchEvents(App *app) {
 #endif
         break;
       case UI::EVENT_BUTTON_LONG_PRESS:
-        if (OC::CONTROL_BUTTON_UP == event.control) {
+        if (oc::CONTROL_BUTTON_UP == event.control) {
             if (!preempt_screensaver_) screensaver_ = true;
         }
-        else if (OC::CONTROL_BUTTON_R == event.control)
+        else if (oc::CONTROL_BUTTON_R == event.control)
           return UI_MODE_APP_SETTINGS;
         else
           app->HandleButtonEvent(event);
@@ -201,4 +201,4 @@ UiMode Ui::Splashscreen(bool &reset_settings) {
   return mode;
 }
 
-} // namespace OC
+} // namespace oc

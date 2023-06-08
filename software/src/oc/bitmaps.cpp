@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include "oc/bitmaps.h"
 
-namespace OC {
+namespace oc {
 
 const uint8_t bitmap_empty_frame4x8[] = {
   0xff, 0x81, 0x81, 0xff

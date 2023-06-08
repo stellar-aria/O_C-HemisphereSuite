@@ -6,7 +6,7 @@
 #include "oc/core.h"
 #include "oc/gpio.h"
 
-namespace OC {
+namespace oc {
 
 enum DigitalInput {
   DIGITAL_INPUT_1,

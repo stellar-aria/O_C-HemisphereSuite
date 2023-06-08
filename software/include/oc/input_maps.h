@@ -3,7 +3,7 @@
 
 #include "oc/input_map.h"
 
-namespace OC {
+namespace oc {
 
 // {range: 5v, range: 10v} :
 const Map input_maps[] = {
@@ -47,9 +47,9 @@ const Map input_maps[] = {
 
 }  
 
-namespace OC {
+namespace oc {
 
-  typedef OC::Map Map;
+  typedef oc::Map Map;
 
   class InputMaps {
   public:

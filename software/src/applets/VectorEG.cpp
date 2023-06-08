@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,10 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
 #include "vector_osc/HSVectorOscillator.h"
 #include "vector_osc/WaveformManager.h"
+using namespace hemisphere;
 
-class VectorEG : public HemisphereApplet {
+class VectorEG : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -33,7 +34,7 @@ public:
         ForEachChannel(ch)
         {
             freq[ch] = 50;
-            SwitchWaveform(ch, HS::EG1 + ch);
+            SwitchWaveform(ch, hemisphere::EG1 + ch);
             gated[ch] = 0;
             Out(ch, 0);
         }

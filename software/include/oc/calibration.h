@@ -16,7 +16,7 @@
 
 //#define CALIBRATION_LOAD_LEGACY
 
-namespace OC {
+namespace oc {
 
 // Originally, this was a single bit that would reverse both encoders.
 // With board revisisions >= 2c however, the pins of the right encoder are
@@ -70,7 +70,7 @@ typedef PageStorage<EEPROMStorage, EEPROM_CALIBRATIONDATA_START, EEPROM_CALIBRAT
 
 extern CalibrationData calibration_data;
 
-}; // namespace OC
+}; // namespace oc
 
 // Forward declarations for screwy build system
 struct CalibrationStep;

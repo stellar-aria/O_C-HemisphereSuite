@@ -31,26 +31,26 @@ public:
      * segment storage. If Validate() is false, then Setup() should be executed.
      */
     bool static Validate() {
-        return (HS::user_waveforms[0].level == 0xfc && HS::user_waveforms[0].time == 0xe2);
+        return (hemisphere::user_waveforms[0].level == 0xfc && hemisphere::user_waveforms[0].time == 0xe2);
     }
 
     /* Add a triangle and sawtooth waveform */
     void static Setup() {
-        HS::user_waveforms[0] = VOSegment {0xfc, 0xe2};
-        HS::user_waveforms[1] = VOSegment {0x02, 0xff}; // TOC entry: 2 steps
-        HS::user_waveforms[2] = VOSegment {0xff, 0x01}; // First segment of triangle
-        HS::user_waveforms[3] = VOSegment {0x00, 0x01}; // Second segment of triangle
-        HS::user_waveforms[4] = VOSegment {0x02, 0xff}; // TOC entry: 2 steps
-        HS::user_waveforms[5] = VOSegment {0xff, 0x00}; // First segment of sawtooth
-        HS::user_waveforms[6] = VOSegment {0x00, 0x01}; // Second segment of sawtooth
-        for (byte i = 7; i < 64; i++) HS::user_waveforms[i] = VOSegment {0x00, 0xff};
+        hemisphere::user_waveforms[0] = VOSegment {0xfc, 0xe2};
+        hemisphere::user_waveforms[1] = VOSegment {0x02, 0xff}; // TOC entry: 2 steps
+        hemisphere::user_waveforms[2] = VOSegment {0xff, 0x01}; // First segment of triangle
+        hemisphere::user_waveforms[3] = VOSegment {0x00, 0x01}; // Second segment of triangle
+        hemisphere::user_waveforms[4] = VOSegment {0x02, 0xff}; // TOC entry: 2 steps
+        hemisphere::user_waveforms[5] = VOSegment {0xff, 0x00}; // First segment of sawtooth
+        hemisphere::user_waveforms[6] = VOSegment {0x00, 0x01}; // Second segment of sawtooth
+        for (byte i = 7; i < 64; i++) hemisphere::user_waveforms[i] = VOSegment {0x00, 0xff};
     }
 
     byte static WaveformCount() {
         byte count = 0;
-        for (byte i = 0; i < HS::VO_SEGMENT_COUNT; i++)
+        for (byte i = 0; i < hemisphere::VO_SEGMENT_COUNT; i++)
         {
-            if (HS::user_waveforms[i].IsTOC()) count++;
+            if (hemisphere::user_waveforms[i].IsTOC()) count++;
         }
         return count;
     }
@@ -67,16 +67,16 @@ public:
         if (new_number < 0) new_number = 0;
         if (new_number == count) new_number = 32; // Move from last user waveform to first library waveform
         if (new_number <= 31 && new_number >= count) new_number = count - 1; // Move from first library waveform to last user waveform
-        if (new_number >= (HS::WAVEFORM_LIBRARY_COUNT + 32)) new_number = HS::WAVEFORM_LIBRARY_COUNT + 31;
+        if (new_number >= (hemisphere::WAVEFORM_LIBRARY_COUNT + 32)) new_number = hemisphere::WAVEFORM_LIBRARY_COUNT + 31;
         return new_number;
     }
 
     byte static SegmentsRemaining() {
         byte segment_count = 1; // Include validation segment
-        for (byte i = 0; i < HS::VO_SEGMENT_COUNT; i++)
+        for (byte i = 0; i < hemisphere::VO_SEGMENT_COUNT; i++)
         {
-            if (HS::user_waveforms[i].IsTOC()) {
-                segment_count += HS::user_waveforms[i].Segments();
+            if (hemisphere::user_waveforms[i].IsTOC()) {
+                segment_count += hemisphere::user_waveforms[i].Segments();
             }
         }
         return (64 - segment_count);
@@ -88,13 +88,13 @@ public:
             osc = VectorOscillatorFromLibrary(waveform_number);
         } else {
             byte count = 0;
-            for (byte i = 0; i < HS::VO_SEGMENT_COUNT; i++)
+            for (byte i = 0; i < hemisphere::VO_SEGMENT_COUNT; i++)
             {
-                if (HS::user_waveforms[i].IsTOC()) {
+                if (hemisphere::user_waveforms[i].IsTOC()) {
                     if (count == waveform_number) {
-                        for (int s = 0; s < HS::user_waveforms[i].Segments(); s++)
+                        for (int s = 0; s < hemisphere::user_waveforms[i].Segments(); s++)
                         {
-                            osc.SetSegment(HS::user_waveforms[i + s + 1]);
+                            osc.SetSegment(hemisphere::user_waveforms[i + s + 1]);
                         }
                         break;
                     }
@@ -107,16 +107,16 @@ public:
 
     VectorOscillator static VectorOscillatorFromLibrary(byte waveform_number) {
         waveform_number = waveform_number - 32; // Library waveforms start at 32
-        if (waveform_number >= HS::WAVEFORM_LIBRARY_COUNT) waveform_number = HS::WAVEFORM_LIBRARY_COUNT - 1;
+        if (waveform_number >= hemisphere::WAVEFORM_LIBRARY_COUNT) waveform_number = hemisphere::WAVEFORM_LIBRARY_COUNT - 1;
         VectorOscillator osc;
         byte count = 0;
         for (byte i = 0; i < 255; i++)
         {
-            if (HS::library_waveforms[i].IsTOC()) {
+            if (hemisphere::library_waveforms[i].IsTOC()) {
                 if (count == waveform_number) {
-                    for (int s = 0; s < HS::library_waveforms[i].Segments(); s++)
+                    for (int s = 0; s < hemisphere::library_waveforms[i].Segments(); s++)
                     {
-                        osc.SetSegment(HS::library_waveforms[i + s + 1]);
+                        osc.SetSegment(hemisphere::library_waveforms[i + s + 1]);
                     }
                     break;
                 }
@@ -131,11 +131,11 @@ public:
         byte segment_index = 0; // Index from which to copy
 
         // Find the waveform that's the target of the add operation
-        for (byte i = 0; i < HS::VO_SEGMENT_COUNT; i++)
+        for (byte i = 0; i < hemisphere::VO_SEGMENT_COUNT; i++)
         {
-            if (HS::user_waveforms[i].IsTOC() && count++ == waveform_number) {
+            if (hemisphere::user_waveforms[i].IsTOC() && count++ == waveform_number) {
                 segment_index = i + segment_number + 1;
-                HS::user_waveforms[i].SetTOC(HS::user_waveforms[i].Segments() + direction);
+                hemisphere::user_waveforms[i].SetTOC(hemisphere::user_waveforms[i].Segments() + direction);
                 break;
             }
         }
@@ -149,11 +149,11 @@ public:
         // If the waveform was found, move the remaining steps to insert a new segment. The
         // newly-inserted step should be a copy of the insert point.
         if (insert_point) {
-            for (int i = (HS::VO_SEGMENT_COUNT - 1); i > insert_point ; i--)
+            for (int i = (hemisphere::VO_SEGMENT_COUNT - 1); i > insert_point ; i--)
             {
-                memcpy(&HS::user_waveforms[i], &HS::user_waveforms[i - 1], sizeof(HS::user_waveforms[i - 1]));
+                memcpy(&hemisphere::user_waveforms[i], &hemisphere::user_waveforms[i - 1], sizeof(hemisphere::user_waveforms[i - 1]));
             }
-            if (HS::user_waveforms[insert_point + 1].time == 0) HS::user_waveforms[insert_point + 1].time = 1;
+            if (hemisphere::user_waveforms[insert_point + 1].time == 0) hemisphere::user_waveforms[insert_point + 1].time = 1;
         }
     }
 
@@ -162,9 +162,9 @@ public:
 
         // If the waveform was found, move the remaining steps to overwrite the deleted segment.
         if (delete_point) {
-            for (int i = delete_point; i < (HS::VO_SEGMENT_COUNT - 1); i++)
+            for (int i = delete_point; i < (hemisphere::VO_SEGMENT_COUNT - 1); i++)
             {
-                memcpy(&HS::user_waveforms[i], &HS::user_waveforms[i + 1], sizeof(HS::user_waveforms[i + 1]));
+                memcpy(&hemisphere::user_waveforms[i], &hemisphere::user_waveforms[i + 1], sizeof(hemisphere::user_waveforms[i + 1]));
             }
         }
     }
@@ -172,25 +172,25 @@ public:
     void static Update(byte waveform_number, byte segment_number, VOSegment *segment) {
         byte ix = GetSegmentIndex(waveform_number, segment_number);
         if (ix) {
-            HS::user_waveforms[ix].level = segment->level;
-            HS::user_waveforms[ix].time = segment->time;
+            hemisphere::user_waveforms[ix].level = segment->level;
+            hemisphere::user_waveforms[ix].time = segment->time;
         }
     }
 
     void static AddWaveform() {
         byte ix = 1;
-        for (byte i = 0; i < HS::VO_SEGMENT_COUNT; i++)
+        for (byte i = 0; i < hemisphere::VO_SEGMENT_COUNT; i++)
         {
-            if (HS::user_waveforms[i].IsTOC()) {
-                ix = i + HS::user_waveforms[i].Segments() + 1;
+            if (hemisphere::user_waveforms[i].IsTOC()) {
+                ix = i + hemisphere::user_waveforms[i].Segments() + 1;
             }
         }
 
         // If there's enough room, add a new triangle waveform
         if (ix < 61) {
-            HS::user_waveforms[ix] = VOSegment {0x02, 0xff}; // TOC entry: 2 steps
-            HS::user_waveforms[ix + 1] = VOSegment {0xff, 0x01}; // First segment of triangle
-            HS::user_waveforms[ix + 2] = VOSegment {0x00, 0x01}; // Second segment of triangle
+            hemisphere::user_waveforms[ix] = VOSegment {0x02, 0xff}; // TOC entry: 2 steps
+            hemisphere::user_waveforms[ix + 1] = VOSegment {0xff, 0x01}; // First segment of triangle
+            hemisphere::user_waveforms[ix + 2] = VOSegment {0x00, 0x01}; // Second segment of triangle
         }
     }
 
@@ -198,18 +198,18 @@ public:
         // Index of first segment minus one is the TOC record
         byte ix = GetSegmentIndex(waveform_number, 0) - 1;
         if (ix) {
-            byte offset = HS::user_waveforms[ix].Segments() + 1;
+            byte offset = hemisphere::user_waveforms[ix].Segments() + 1;
 
             // Move the data downward to delete
-            for (byte i = ix; i < HS::VO_SEGMENT_COUNT - offset; i++)
+            for (byte i = ix; i < hemisphere::VO_SEGMENT_COUNT - offset; i++)
             {
-                memcpy(&HS::user_waveforms[i], &HS::user_waveforms[i + offset], sizeof(HS::user_waveforms[i + offset]));
+                memcpy(&hemisphere::user_waveforms[i], &hemisphere::user_waveforms[i + offset], sizeof(hemisphere::user_waveforms[i + offset]));
             }
 
             // Fill in freed memory with empty segments
-            for (byte i = HS::VO_SEGMENT_COUNT - offset; i < HS::VO_SEGMENT_COUNT; i++)
+            for (byte i = hemisphere::VO_SEGMENT_COUNT - offset; i < hemisphere::VO_SEGMENT_COUNT; i++)
             {
-                HS::user_waveforms[i] = VOSegment {0x00, 0xff};
+                hemisphere::user_waveforms[i] = VOSegment {0x00, 0xff};
             }
         }
     }

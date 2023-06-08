@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,11 +17,12 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
+#include "hemisphere/applet_base.hpp"
 #include "vector_osc/HSVectorOscillator.h"
 #include "vector_osc/WaveformManager.h"
+using namespace hemisphere;
 
-class VectorMorph : public HemisphereApplet {
+class VectorMorph : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -34,7 +34,7 @@ public:
         {
         		phase[ch] = (ch * 180) + (hemisphere * 90);
         		last_phase[ch] = 0;
-            SwitchWaveform(ch, HS::Morph1);
+            SwitchWaveform(ch, hemisphere::Morph1);
             Out(ch, 0);
         }
     }

@@ -25,16 +25,16 @@
 
 #ifdef ENABLE_APP_CALIBR8OR
 
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
-#include "hemisphere/ClockManager.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
+#include "hemisphere/clock_manager.hpp"
 #include "util/settings.h"
-#include "braids_quantizer.h"
-#include "braids_quantizer_scales.h"
+#include "braids/quantizer.h"
+#include "braids/quantizer_scales.h"
 #include "oc/scales.h"
 #include "SegmentDisplay.h"
 #include "FreqMeasure.h"
-#include "HemisphereApplet.h"
+#include "hemisphere/applet_base.hpp"
 #include "ui/events.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
@@ -42,6 +42,8 @@
 
 #define CAL8_MAX_TRANSPOSE 60
 const int CAL8OR_PRECISION = 10000;
+
+using namespace hemisphere;
 
 // channel configs
 struct Cal8ChannelConfig {
@@ -126,7 +128,7 @@ public:
 
         for (int ch = 0; ch < NR_OF_CHANNELS; ++ch) {
             channel[ch].scale = values_[ix++];
-            channel[ch].scale = constrain(channel[ch].scale, 0, OC::Scales::NUM_SCALES - 1);
+            channel[ch].scale = constrain(channel[ch].scale, 0, oc::Scales::NUM_SCALES - 1);
 
             channel[ch].scale_factor = values_[ix++] - 500;
             channel[ch].offset = values_[ix++] - 63;
@@ -157,7 +159,7 @@ public:
 
 Calibr8orPreset cal8_presets[NR_OF_PRESETS];
 
-class Calibr8or : public HSApplication {
+class Calibr8or : public ApplicationBase {
 public:
 
 	void Start() {
@@ -165,7 +167,7 @@ public:
 
         // make sure to turn this off, just in case
         FreqMeasure.end();
-        OC::DigitalInputs::reInit();
+        oc::DigitalInputs::reInit();
 
         ClearPreset();
 	}
@@ -173,8 +175,8 @@ public:
     void ClearPreset() {
         for (int ch = 0; ch < NR_OF_CHANNELS; ++ch) {
             quantizer[ch].Init();
-            channel[ch].scale = OC::Scales::SCALE_SEMI;
-            quantizer[ch].Configure(OC::Scales::GetScale(channel[ch].scale), 0xffff);
+            channel[ch].scale = oc::Scales::SCALE_SEMI;
+            quantizer[ch].Configure(oc::Scales::GetScale(channel[ch].scale), 0xffff);
 
             channel[ch].scale_factor = 0;
             channel[ch].offset = 0;
@@ -188,7 +190,7 @@ public:
         bool success = cal8_presets[index].load_preset(channel);
         if (success) {
             for (int ch = 0; ch < NR_OF_CHANNELS; ++ch) {
-                quantizer[ch].Configure(OC::Scales::GetScale(channel[ch].scale), 0xffff);
+                quantizer[ch].Configure(oc::Scales::GetScale(channel[ch].scale), 0xffff);
                 quantizer[ch].Requantize();
             }
             preset_modified = 0;
@@ -205,8 +207,8 @@ public:
 	}
 
     void Controller() {
-        bool clock_sync = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_1>();
-        bool reset = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_4>();
+        bool clock_sync = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
+        bool reset = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_4>();
         bool midi_sync = 0;
 
         // flush MIDI input and catch incoming Clock
@@ -236,7 +238,7 @@ public:
         if (clock_m->IsRunning()) clock_m->SyncTrig( clock_sync, reset );
 
         // ClockSetup applet handles MIDI Clock Out
-        HS::clock_setup_applet.Controller(0, 0);
+        hemisphere::clock_setup_applet.Controller(0, 0);
 
         // -- core processing --
         for (int ch = 0; ch < NR_OF_CHANNELS; ++ch) {
@@ -269,7 +271,7 @@ public:
 
     void View() {
         if (clock_setup) {
-            HS::clock_setup_applet.View(0);
+            hemisphere::clock_setup_applet.View(0);
             return;
         }
 
@@ -365,19 +367,19 @@ public:
 
     void OnButtonDown(const UI::Event &event) {
         // check for clock setup secret combo (dual press)
-        if ( event.control == OC::CONTROL_BUTTON_DOWN || event.control == OC::CONTROL_BUTTON_UP)
-            UpOrDownButtonPress(event.control == OC::CONTROL_BUTTON_UP);
+        if ( event.control == oc::CONTROL_BUTTON_DOWN || event.control == oc::CONTROL_BUTTON_UP)
+            UpOrDownButtonPress(event.control == oc::CONTROL_BUTTON_UP);
         else if (clock_setup) // pass button down to Clock Setup
-            HS::clock_setup_applet.OnButtonPress(0);
+            hemisphere::clock_setup_applet.OnButtonPress(0);
     }
 
     void UpOrDownButtonPress(bool up) {
-        if (OC::CORE::ticks - click_tick < HEMISPHERE_DOUBLE_CLICK_TIME && up != first_click) {
+        if (oc::core::ticks - click_tick < HEMISPHERE_DOUBLE_CLICK_TIME && up != first_click) {
             // show clock setup if both buttons pressed quickly
             clock_setup = 1;
             click_tick = 0;
         } else {
-            click_tick = OC::CORE::ticks;
+            click_tick = oc::core::ticks;
             first_click = up;
         }
     }
@@ -404,7 +406,7 @@ public:
     // Left encoder: Octave or VScaling + Root Note
     void OnLeftEncoderMove(int direction) {
         if (clock_setup) {
-            HS::clock_setup_applet.OnEncoderMove(0, direction);
+            hemisphere::clock_setup_applet.OnEncoderMove(0, direction);
             return;
         }
         if (preset_select) {
@@ -422,7 +424,7 @@ public:
         }
 
         if (!edit_mode) { // Octave jump
-            int s = OC::Scales::GetScale(channel[sel_chan].scale).num_notes;
+            int s = oc::Scales::GetScale(channel[sel_chan].scale).num_notes;
             channel[sel_chan].transpose += (direction * s);
             while (channel[sel_chan].transpose > CAL8_MAX_TRANSPOSE) channel[sel_chan].transpose -= s;
             while (channel[sel_chan].transpose < -CAL8_MAX_TRANSPOSE) channel[sel_chan].transpose += s;
@@ -435,7 +437,7 @@ public:
     // Right encoder: Semitones or Bias Offset + Scale Select
     void OnRightEncoderMove(int direction) {
         if (clock_setup) {
-            HS::clock_setup_applet.OnEncoderMove(0, direction);
+            hemisphere::clock_setup_applet.OnEncoderMove(0, direction);
             return;
         }
         if (preset_select) {
@@ -446,11 +448,11 @@ public:
         preset_modified = 1;
         if (scale_edit) {
             int s_ = channel[sel_chan].scale + direction;
-            if (s_ >= OC::Scales::NUM_SCALES) s_ = 0;
-            if (s_ < 0) s_ = OC::Scales::NUM_SCALES - 1;
+            if (s_ >= oc::Scales::NUM_SCALES) s_ = 0;
+            if (s_ < 0) s_ = oc::Scales::NUM_SCALES - 1;
 
             channel[sel_chan].scale = s_;
-            quantizer[sel_chan].Configure(OC::Scales::GetScale(s_), 0xffff);
+            quantizer[sel_chan].Configure(oc::Scales::GetScale(s_), 0xffff);
             quantizer[sel_chan].Requantize();
             return;
         }
@@ -482,7 +484,7 @@ private:
     braids::Quantizer quantizer[NR_OF_CHANNELS];
     Cal8ChannelConfig channel[NR_OF_CHANNELS];
 
-    ClockManager *clock_m = clock_m->get();
+    hemisphere::ClockManager *clock_m = clock_m->get();
 
     void DrawPresetSelector() {
         // index is the currently loaded preset (0-3)
@@ -526,7 +528,7 @@ private:
         gfxFrame(20, y-3, 64, 18);
         gfxIcon(23, y+2, (channel[sel_chan].transpose >= 0)? PLUS_ICON : MINUS_ICON);
 
-        int s = OC::Scales::GetScale(channel[sel_chan].scale).num_notes;
+        int s = oc::Scales::GetScale(channel[sel_chan].scale).num_notes;
         int octave = channel[sel_chan].transpose / s;
         int semitone = channel[sel_chan].transpose % s;
         segment.PrintWhole(33, y, abs(octave), 10);
@@ -535,13 +537,13 @@ private:
 
         // Scale
         gfxIcon(89, y, SCALE_ICON);
-        gfxPrint(99, y, OC::scale_names_short[channel[sel_chan].scale]);
+        gfxPrint(99, y, oc::scale_names_short[channel[sel_chan].scale]);
         if (scale_edit) {
             gfxInvert(98, y-1, 29, 9);
             gfxIcon(100, y+10, RIGHT_ICON);
         }
         // Root Note
-        gfxPrint(110, y+10, OC::Strings::note_names_unpadded[channel[sel_chan].root_note]);
+        gfxPrint(110, y+10, oc::Strings::note_names_unpadded[channel[sel_chan].root_note]);
 
         // Tracking Compensation
         y += 22;
@@ -621,15 +623,15 @@ size_t Calibr8or_restore(const void *storage) {
 
 void Calibr8or_isr() { return Calibr8or_instance.BaseController(); }
 
-void Calibr8or_handleAppEvent(OC::AppEvent event) {
+void Calibr8or_handleAppEvent(oc::AppEvent event) {
     switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
         Calibr8or_instance.Resume();
         break;
 
     // The idea is to auto-save when the screen times out...
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
         // TODO: initiate actual EEPROM save
         // app_data_save();
         break;
@@ -658,24 +660,24 @@ void Calibr8or_handleButtonEvent(const UI::Event &event) {
         break;
     case UI::EVENT_BUTTON_PRESS: {
         switch (event.control) {
-        case OC::CONTROL_BUTTON_L:
+        case oc::CONTROL_BUTTON_L:
             Calibr8or_instance.OnLeftButtonPress();
             break;
-        case OC::CONTROL_BUTTON_R:
+        case oc::CONTROL_BUTTON_R:
             Calibr8or_instance.OnRightButtonPress();
             break;
-        case OC::CONTROL_BUTTON_DOWN:
-        case OC::CONTROL_BUTTON_UP:
-            Calibr8or_instance.SwitchChannel(event.control == OC::CONTROL_BUTTON_UP);
+        case oc::CONTROL_BUTTON_DOWN:
+        case oc::CONTROL_BUTTON_UP:
+            Calibr8or_instance.SwitchChannel(event.control == oc::CONTROL_BUTTON_UP);
             break;
         default: break;
         }
     } break;
     case UI::EVENT_BUTTON_LONG_PRESS:
-        if (event.control == OC::CONTROL_BUTTON_L) {
+        if (event.control == oc::CONTROL_BUTTON_L) {
             Calibr8or_instance.OnLeftButtonLongPress();
         }
-        if (event.control == OC::CONTROL_BUTTON_DOWN) {
+        if (event.control == oc::CONTROL_BUTTON_DOWN) {
             Calibr8or_instance.OnDownButtonLongPress();
         }
         break;
@@ -686,9 +688,9 @@ void Calibr8or_handleButtonEvent(const UI::Event &event) {
 
 void Calibr8or_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) Calibr8or_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) Calibr8or_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) Calibr8or_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) Calibr8or_instance.OnRightEncoderMove(event.value);
 }
 #endif

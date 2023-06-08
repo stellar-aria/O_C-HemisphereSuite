@@ -34,7 +34,7 @@
 #include "util/math.h"
 #include "util/settings.h"
 #include "oc/menus.h"
-#include "peaks_bouncing_balls.h"
+#include "peaks/bouncing_balls.h"
 #include "oc/ui.h"
 #include "oc/ADC.h"
 
@@ -63,17 +63,17 @@ enum BallCVMapping {
   BB_CV_MAPPING_LAST
 };
 
-namespace menu = OC::menu;
+namespace menu = oc::menu;
 
 class BouncingBall : public settings::SettingsBase<BouncingBall, BB_SETTING_LAST> {
 public:
 
   static constexpr int kMaxBouncingBallParameters = 5;
 
-  void Init(OC::DigitalInput default_trigger);
+  void Init(oc::DigitalInput default_trigger);
 
-  OC::DigitalInput get_trigger_input() const {
-    return static_cast<OC::DigitalInput>(values_[BB_SETTING_TRIGGER_INPUT]);
+  oc::DigitalInput get_trigger_input() const {
+    return static_cast<oc::DigitalInput>(values_[BB_SETTING_TRIGGER_INPUT]);
   }
 
   BallCVMapping get_cv1_mapping() const {
@@ -174,12 +174,12 @@ public:
     // hard reset forces the bouncing ball to start at level_[0] on rising gate.
     bb_.set_hard_reset(get_hard_reset());
 
-    OC::DigitalInput trigger_input = get_trigger_input();
+    oc::DigitalInput trigger_input = get_trigger_input();
     uint8_t gate_state = 0;
     if (triggers & DIGITAL_INPUT_MASK(trigger_input))
       gate_state |= peaks::CONTROL_GATE_RISING;
 
-    bool gate_raised = OC::DigitalInputs::read_immediate(trigger_input);
+    bool gate_raised = oc::DigitalInputs::read_immediate(trigger_input);
     if (gate_raised)
       gate_state |= peaks::CONTROL_GATE;
     else if (gate_raised_)
@@ -187,8 +187,8 @@ public:
     gate_raised_ = gate_raised;
 
     // TODO Scale range or offset?
-    uint32_t value = OC::DAC::get_zero_offset(dac_channel) + bb_.ProcessSingleSample(gate_state, OC::DAC::MAX_VALUE - OC::DAC::get_zero_offset(dac_channel));
-    OC::DAC::set<dac_channel>(value);
+    uint32_t value = oc::DAC::get_zero_offset(dac_channel) + bb_.ProcessSingleSample(gate_state, oc::DAC::MAX_VALUE - oc::DAC::get_zero_offset(dac_channel));
+    oc::DAC::set<dac_channel>(value);
   }
 
 
@@ -199,7 +199,7 @@ private:
 
 };
 
-void BouncingBall::Init(OC::DigitalInput default_trigger) {
+void BouncingBall::Init(oc::DigitalInput default_trigger) {
   InitDefaults();
   apply_value(BB_SETTING_TRIGGER_INPUT, default_trigger);
   bb_.Init();
@@ -216,13 +216,13 @@ SETTINGS_DECLARE(BouncingBall, BB_SETTING_LAST) {
   { 96, 0, 255, "Bounce loss", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Amplitude", NULL, settings::STORAGE_TYPE_U8 },
   { 228, 0, 255, "Velocity", NULL, settings::STORAGE_TYPE_U8 },
-  { OC::DIGITAL_INPUT_1, OC::DIGITAL_INPUT_1, OC::DIGITAL_INPUT_4, "Trigger input", OC::Strings::trigger_input_names, settings::STORAGE_TYPE_U8 },
+  { oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_4, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Retrigger", NULL, settings::STORAGE_TYPE_U8 },
   { BB_CV_MAPPING_NONE, BB_CV_MAPPING_NONE, BB_CV_MAPPING_LAST - 1, "CV1 -> ", bb_cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { BB_CV_MAPPING_NONE, BB_CV_MAPPING_NONE, BB_CV_MAPPING_LAST - 1, "CV2 -> ", bb_cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { BB_CV_MAPPING_NONE, BB_CV_MAPPING_NONE, BB_CV_MAPPING_LAST - 1, "CV3 -> ", bb_cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { BB_CV_MAPPING_NONE, BB_CV_MAPPING_NONE, BB_CV_MAPPING_LAST - 1, "CV4 -> ", bb_cv_mapping_names, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 1, "Hard reset", OC::Strings::no_yes, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 1, "Hard reset", oc::Strings::no_yes, settings::STORAGE_TYPE_U8 },
 };
 
 class QuadBouncingBalls {
@@ -233,9 +233,9 @@ public:
   // QuadBouncingBalls = QuadEnvelopeGenerator, bbgen = envgen, BBGEN = ENVGEN
 
   void Init() {
-    int input = OC::DIGITAL_INPUT_1;
+    int input = oc::DIGITAL_INPUT_1;
     for (auto &bb : balls_) {
-      bb.Init(static_cast<OC::DigitalInput>(input));
+      bb.Init(static_cast<oc::DigitalInput>(input));
       ++input;
     }
 
@@ -247,13 +247,13 @@ public:
   }
 
   void ISR() {
-    cv1.push(OC::ADC::value<ADC_CHANNEL_1>());
-    cv2.push(OC::ADC::value<ADC_CHANNEL_2>());
-    cv3.push(OC::ADC::value<ADC_CHANNEL_3>());
-    cv4.push(OC::ADC::value<ADC_CHANNEL_4>());
+    cv1.push(oc::ADC::value<ADC_CHANNEL_1>());
+    cv2.push(oc::ADC::value<ADC_CHANNEL_2>());
+    cv3.push(oc::ADC::value<ADC_CHANNEL_3>());
+    cv4.push(oc::ADC::value<ADC_CHANNEL_4>());
 
     const int32_t cvs[ADC_CHANNEL_LAST] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
-    uint32_t triggers = OC::DigitalInputs::clocked();
+    uint32_t triggers = oc::DigitalInputs::clocked();
 
     balls_[0].Update<DAC_CHANNEL_A>(triggers, cvs);
     balls_[1].Update<DAC_CHANNEL_B>(triggers, cvs);
@@ -311,14 +311,14 @@ size_t BBGEN_restore(const void *storage) {
   return s;
 }
 
-void BBGEN_handleAppEvent(OC::AppEvent event) {
+void BBGEN_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       bbgen.ui.cursor.set_editing(false);
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       break;
   }
 }
@@ -357,15 +357,15 @@ void BBGEN_lowerButton() {
 void BBGEN_handleButtonEvent(const UI::Event &event) {
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         BBGEN_topButton();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         BBGEN_lowerButton();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         bbgen.ui.cursor.toggle_editing();
         break;
     }
@@ -374,11 +374,11 @@ void BBGEN_handleButtonEvent(const UI::Event &event) {
 
 void BBGEN_handleEncoderEvent(const UI::Event &event) {
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
     int left_value = bbgen.ui.selected_channel + event.value;
     CONSTRAIN(left_value, 0, 3);
     bbgen.ui.selected_channel = left_value;
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
     if (bbgen.ui.cursor.editing()) {
       auto &selected = bbgen.selected();
       selected.change_value(bbgen.ui.cursor.cursor_pos(), event.value);
@@ -404,7 +404,7 @@ void BBGEN_debug() {
 #endif // BBGEN_DEBUG
 
 void BBGEN_screensaver() {
-  OC::scope_render();
+  oc::scope_render();
 }
 
 void FASTRUN BBGEN_isr() {

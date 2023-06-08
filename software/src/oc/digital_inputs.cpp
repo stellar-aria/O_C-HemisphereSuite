@@ -5,29 +5,29 @@
 #include "oc/options.h"
 
 /*static*/
-uint32_t OC::DigitalInputs::clocked_mask_;
+uint32_t oc::DigitalInputs::clocked_mask_;
 
 /*static*/
-volatile uint32_t OC::DigitalInputs::clocked_[DIGITAL_INPUT_LAST];
+volatile uint32_t oc::DigitalInputs::clocked_[DIGITAL_INPUT_LAST];
 
 void FASTRUN tr1_ISR() {  
-  OC::DigitalInputs::clock<OC::DIGITAL_INPUT_1>();
+  oc::DigitalInputs::clock<oc::DIGITAL_INPUT_1>();
 }  // main clock
 
 void FASTRUN tr2_ISR() {
-  OC::DigitalInputs::clock<OC::DIGITAL_INPUT_2>();
+  oc::DigitalInputs::clock<oc::DIGITAL_INPUT_2>();
 }
 
 void FASTRUN tr3_ISR() {
-  OC::DigitalInputs::clock<OC::DIGITAL_INPUT_3>();
+  oc::DigitalInputs::clock<oc::DIGITAL_INPUT_3>();
 }
 
 void FASTRUN tr4_ISR() {
-  OC::DigitalInputs::clock<OC::DIGITAL_INPUT_4>();
+  oc::DigitalInputs::clock<oc::DIGITAL_INPUT_4>();
 }
 
 /*static*/
-void OC::DigitalInputs::Init() {
+void oc::DigitalInputs::Init() {
 
   static const struct {
     uint8_t pin;
@@ -65,7 +65,7 @@ void OC::DigitalInputs::Init() {
   // Defaults is 0, or set OC_GPIO_ISR_PRIO for all ports
 }
 
-void OC::DigitalInputs::reInit() {
+void oc::DigitalInputs::reInit() {
   // re-init TR4, to avoid conflict with the FTM
   #ifdef FLIP_180
     pinMode(TR1, OC_GPIO_TRx_PINMODE);
@@ -77,7 +77,7 @@ void OC::DigitalInputs::reInit() {
 }
 
 /*static*/
-void OC::DigitalInputs::Scan() {
+void oc::DigitalInputs::Scan() {
   clocked_mask_ =
     ScanInput<DIGITAL_INPUT_1>() |
     ScanInput<DIGITAL_INPUT_2>() |

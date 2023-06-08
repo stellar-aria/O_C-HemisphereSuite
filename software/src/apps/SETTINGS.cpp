@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "hemisphere/Application.h"
+#include "hemisphere/application_base.hpp"
 #include "oc/strings.h"
 #include "oc/ui.h"
 #include "oc/apps.h"
@@ -62,7 +62,9 @@ const uint32_t QR[25] = {
 };
 */
 
-class Settings : public HSApplication {
+using namespace hemisphere;
+
+class Settings : public ApplicationBase {
 public:
 	void Start() {
 	}
@@ -76,7 +78,7 @@ public:
     void View() {
         gfxHeader("Setup / About");
         gfxPrint(0, 15, "Phazerville Suite");
-        gfxPrint(0, 25, OC::Strings::VERSION);
+        gfxPrint(0, 25, oc::Strings::VERSION);
         gfxPrint(0, 35, "github.com/djphazer");
         gfxPrint(0, 55, "[CALIBRATE]   [RESET]");
 
@@ -87,14 +89,14 @@ public:
     // Control handlers
     /////////////////////////////////////////////////////////////////
     void OnLeftButtonPress() {
-        OC::ui.Calibrate();
+        oc::ui.Calibrate();
     }
 
     void OnLeftButtonLongPress() {
     }
 
     void OnRightButtonPress() {
-        OC::apps::Init(1);
+        oc::apps::Init(1);
     }
 
     void OnUpButtonPress() {
@@ -144,8 +146,8 @@ void Settings_isr() {
 	return Settings_instance.BaseController();
 }
 
-void Settings_handleAppEvent(OC::AppEvent event) {
-    if (event ==  OC::APP_EVENT_RESUME) {
+void Settings_handleAppEvent(oc::AppEvent event) {
+    if (event ==  oc::APP_EVENT_RESUME) {
         Settings_instance.Resume();
     }
 }
@@ -160,19 +162,19 @@ void Settings_screensaver() {} // Deprecated
 
 void Settings_handleButtonEvent(const UI::Event &event) {
     // For left encoder, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) Settings_instance.OnLeftButtonLongPress();
         if (event.type == UI::EVENT_BUTTON_PRESS) Settings_instance.OnLeftButtonPress();
     }
 
     // For right encoder, only handle press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) Settings_instance.OnRightButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) Settings_instance.OnRightButtonPress();
 
     // For up button, handle only press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) Settings_instance.OnUpButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) Settings_instance.OnUpButtonPress();
 
     // For down button, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) Settings_instance.OnDownButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) Settings_instance.OnDownButtonLongPress();
     }
@@ -180,8 +182,8 @@ void Settings_handleButtonEvent(const UI::Event &event) {
 
 void Settings_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) Settings_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) Settings_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) Settings_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) Settings_instance.OnRightEncoderMove(event.value);
 }

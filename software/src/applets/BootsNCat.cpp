@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,12 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
 #include "vector_osc/HSVectorOscillator.h"
 #include "vector_osc/WaveformManager.h"
 
 #define BNC_MAX_PARAM 63
 
-class BootsNCat : public HemisphereApplet {
+using namespace hemisphere;
+
+class BootsNCat : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -39,14 +41,14 @@ public:
         noise_tone_countdown = 1;
         blend = 0;
 
-        bass = WaveformManager::VectorOscillatorFromWaveform(HS::Triangle);
+        bass = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Triangle);
         SetBDFreq();
         bass.SetScale((12 << 7) * 3); // Audio signal is -3V to +3V due to DAC asymmetry
 
         ForEachChannel(ch)
         {
             levels[ch] = 0;
-            eg[ch] = WaveformManager::VectorOscillatorFromWaveform(HS::Sawtooth);
+            eg[ch] = WaveformManager::VectorOscillatorFromWaveform(hemisphere::Sawtooth);
             eg[ch].SetFrequency(decay[ch]);
             eg[ch].SetScale(ch ? HEMISPHERE_3V_CV : HEMISPHERE_MAX_CV);
             eg[ch].Offset(ch ? HEMISPHERE_3V_CV : HEMISPHERE_MAX_CV);

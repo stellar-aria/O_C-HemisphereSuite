@@ -30,13 +30,13 @@
 #include "oc/scale_edit.h"
 #include "oc/strings.h"
 #include "oc/visualfx.h"
-#include "peaks_bytebeat.h"
+#include "peaks/bytebeat.h"
 #include "extern/dspinst.h"
 #include "oc/digital_inputs.h"
 #include "oc/apps.h"
 
-namespace menu = OC::menu; // Ugh. This works for all .ino files
-const bool DUMMY = OC::DUMMY;
+namespace menu = oc::menu; // Ugh. This works for all .ino files
+const bool DUMMY = oc::DUMMY;
 extern uint_fast8_t MENU_REDRAW;
 
 #define NUM_ASR_CHANNELS 0x4
@@ -117,7 +117,7 @@ public:
 
   void set_scale(int scale) {
     if (scale != get_scale(DUMMY)) {
-      const OC::Scale &scale_def = OC::Scales::GetScale(scale);
+      const oc::Scale &scale_def = oc::Scales::GetScale(scale);
       uint16_t mask = get_mask();
       if (0 == (mask & ~(0xffff << scale_def.num_notes)))
         mask |= 0x1;
@@ -310,7 +310,7 @@ public:
     octave_toggle_ = false;
     freeze_switch_ = false;
     TR2_state_ = 0x1;
-    set_scale(OC::Scales::SCALE_SEMI);
+    set_scale(oc::Scales::SCALE_SEMI);
     last_mask_ = 0x0;
     quantizer_.Init();
     update_scale(true, 0x0);
@@ -333,13 +333,13 @@ public:
     const int scale = get_scale(DUMMY);
     uint16_t mask = get_mask();
     if (mask_rotate)
-      mask = OC::ScaleEditor<ASRApp>::RotateMask(mask, OC::Scales::GetScale(scale).num_notes, mask_rotate);
+      mask = oc::ScaleEditor<ASRApp>::RotateMask(mask, oc::Scales::GetScale(scale).num_notes, mask_rotate);
 
     if (force || (last_scale_ != scale || last_mask_ != mask)) {
 
       last_scale_ = scale;
       last_mask_ = mask;
-      quantizer_.Configure(OC::Scales::GetScale(scale), mask);
+      quantizer_.Configure(oc::Scales::GetScale(scale), mask);
       return true;
     } else {
       return false;
@@ -424,7 +424,7 @@ public:
 
         int8_t _buflen = get_buffer_length();
         if (get_cv4_destination() == ASR_DEST_BUFLEN) {
-          _buflen += ((OC::ADC::value<ADC_CHANNEL_4>() + 31) >> 6);
+          _buflen += ((oc::ADC::value<ADC_CHANNEL_4>() + 31) >> 6);
           CONSTRAIN(_buflen, NUM_ASR_CHANNELS, ASR_HOLD_BUF_SIZE - 0x1);
         }
         _ASR.Freeze(_buflen);
@@ -448,13 +448,13 @@ public:
 
   inline void update() {
 
-     bool update = OC::DigitalInputs::clocked<OC::DIGITAL_INPUT_1>();
+     bool update = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
      clock_display_.Update(1, update);
 
      trigger_delay_.Update();
 
      if (update)
-      trigger_delay_.Push(OC::trigger_delay_ticks[get_trigger_delay()]);
+      trigger_delay_.Push(oc::trigger_delay_ticks[get_trigger_delay()]);
 
      update = trigger_delay_.triggered();
 
@@ -462,33 +462,33 @@ public:
 
          bool _freeze_switch, _freeze = digitalReadFast(TR2);
          int8_t _root  = get_root();
-         int8_t _index = get_index() + ((OC::ADC::value<ADC_CHANNEL_2>() + 31) >> 6);
+         int8_t _index = get_index() + ((oc::ADC::value<ADC_CHANNEL_2>() + 31) >> 6);
          int8_t _octave = get_octave();
          int8_t _transpose = 0;
          int8_t _mult = get_mult();
-         int32_t _pitch = OC::ADC::raw_pitch_value(ADC_CHANNEL_1);
+         int32_t _pitch = oc::ADC::raw_pitch_value(ADC_CHANNEL_1);
          int32_t _asr_buffer[NUM_ASR_CHANNELS];
 
          bool forced_update = force_update_;
          force_update_ = false;
-         update_scale(forced_update, (OC::ADC::value<ADC_CHANNEL_3>() + 127) >> 8);
+         update_scale(forced_update, (oc::ADC::value<ADC_CHANNEL_3>() + 127) >> 8);
 
          // cv4 destination, defaults to octave:
          switch(get_cv4_destination()) {
 
             case ASR_DEST_OCTAVE:
-              _octave += (OC::ADC::value<ADC_CHANNEL_4>() + 255) >> 9;
+              _octave += (oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9;
             break;
             case ASR_DEST_ROOT:
-              _root += (OC::ADC::value<ADC_CHANNEL_4>() + 127) >> 8;
+              _root += (oc::ADC::value<ADC_CHANNEL_4>() + 127) >> 8;
               CONSTRAIN(_root, 0, 11);
             break;
             case ASR_DEST_TRANSPOSE:
-              _transpose += (OC::ADC::value<ADC_CHANNEL_4>() + 63) >> 7;
+              _transpose += (oc::ADC::value<ADC_CHANNEL_4>() + 63) >> 7;
               CONSTRAIN(_transpose, -12, 12);
             break;
             case ASR_DEST_INPUT_SCALING:
-              _mult += (OC::ADC::value<ADC_CHANNEL_4>() + 63) >> 7;
+              _mult += (oc::ADC::value<ADC_CHANNEL_4>() + 63) >> 7;
               CONSTRAIN(_mult, 0, NUM_INPUT_SCALING - 1);
             break;
             // CV for buffer length happens in updateASR_indexed
@@ -685,14 +685,14 @@ public:
              }
 
              _sample = quantizer_.Process(_sample, _root << 7, _transpose);
-             _sample = OC::DAC::pitch_to_scaled_voltage_dac(static_cast<DAC_CHANNEL>(i), _sample, _octave, OC::DAC::get_voltage_scaling(i));
+             _sample = oc::DAC::pitch_to_scaled_voltage_dac(static_cast<DAC_CHANNEL>(i), _sample, _octave, oc::DAC::get_voltage_scaling(i));
              scrolling_history_[i].Push(_sample);
              _asr_buffer[i] = _sample;
          }
 
         // ... and write to DAC
         for (int i = 0; i < NUM_ASR_CHANNELS; ++i)
-          OC::DAC::set(static_cast<DAC_CHANNEL>(i), _asr_buffer[i]);
+          oc::DAC::set(static_cast<DAC_CHANNEL>(i), _asr_buffer[i]);
 
         MENU_REDRAW = 0x1;
       }
@@ -704,7 +704,7 @@ public:
     return clock_display_.getState();
   }
 
-  const OC::vfx::ScrollingHistory<uint16_t, kHistoryDepth> &history(int i) const {
+  const oc::vfx::ScrollingHistory<uint16_t, kHistoryDepth> &history(int i) const {
     return scrolling_history_[i];
   }
 
@@ -717,14 +717,14 @@ private:
   int last_scale_;
   uint16_t last_mask_;
   braids::Quantizer quantizer_;
-  OC::DigitalInputDisplay clock_display_;
-  util::TriggerDelay<OC::kMaxTriggerDelayTicks> trigger_delay_;
+  oc::DigitalInputDisplay clock_display_;
+  util::TriggerDelay<oc::kMaxTriggerDelayTicks> trigger_delay_;
   util::TuringShiftRegister turing_machine_;
   util::RingBuffer<ASR_pitch, ASR_MAX_ITEMS> _ASR;
   int8_t turing_display_length_;
   peaks::ByteBeat bytebeat_ ;
   util::IntegerSequence int_seq_ ;
-  OC::vfx::ScrollingHistory<uint16_t, kHistoryDepth> scrolling_history_[NUM_ASR_CHANNELS];
+  oc::vfx::ScrollingHistory<uint16_t, kHistoryDepth> scrolling_history_[NUM_ASR_CHANNELS];
   int num_enabled_settings_;
   ASRSettings enabled_settings_[ASR_SETTING_LAST];
 };
@@ -747,29 +747,29 @@ const char* const int_seq_CV_destinations[] = {
 
 // TOTAL EEPROM SIZE: 23 bytes
 SETTINGS_DECLARE(ASRApp, ASR_SETTING_LAST) {
-  { OC::Scales::SCALE_SEMI, 0, OC::Scales::NUM_SCALES - 1, "Scale", OC::scale_names_short, settings::STORAGE_TYPE_U8 },
+  { oc::Scales::SCALE_SEMI, 0, oc::Scales::NUM_SCALES - 1, "Scale", oc::scale_names_short, settings::STORAGE_TYPE_U8 },
   { 0, -5, 5, "octave", NULL, settings::STORAGE_TYPE_I8 }, // octave
-  { 0, 0, 11, "root", OC::Strings::note_names_unpadded, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 11, "root", oc::Strings::note_names_unpadded, settings::STORAGE_TYPE_U8 },
   { 65535, 1, 65535, "mask", NULL, settings::STORAGE_TYPE_U16 }, // mask
   { 0, 0, ASR_HOLD_BUF_SIZE - 1, "buf.index", NULL, settings::STORAGE_TYPE_U8 },
-  { MULT_ONE, 0, NUM_INPUT_SCALING - 1, "input gain", OC::Strings::mult, settings::STORAGE_TYPE_U8 },
-  { 0, 0, OC::kNumDelayTimes - 1, "trigger delay", OC::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
+  { MULT_ONE, 0, NUM_INPUT_SCALING - 1, "input gain", oc::Strings::mult, settings::STORAGE_TYPE_U8 },
+  { 0, 0, oc::kNumDelayTimes - 1, "trigger delay", oc::Strings::trigger_delay_times, settings::STORAGE_TYPE_U8 },
   { 4, 4, ASR_HOLD_BUF_SIZE - 1, "hold (buflen)", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, ASR_CHANNEL_SOURCE_LAST -1, "CV source", asr_input_sources, settings::STORAGE_TYPE_U4 },
   { 0, 0, ASR_DEST_LAST - 1, "CV4 dest. ->", asr_cv4_destinations, settings::STORAGE_TYPE_U4 },
   { 16, 1, 32, "> LFSR length", NULL, settings::STORAGE_TYPE_U8 },
   { 128, 0, 255, "> LFSR p", NULL, settings::STORAGE_TYPE_U8 },
-  { 0, 0, 3, "> LFSR CV1", OC::Strings::TM_aux_cv_destinations, settings::STORAGE_TYPE_U8 }, // ??
-  { 0, 0, 15, "> BB eqn", OC::Strings::bytebeat_equation_names, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 3, "> LFSR CV1", oc::Strings::TM_aux_cv_destinations, settings::STORAGE_TYPE_U8 }, // ??
+  { 0, 0, 15, "> BB eqn", oc::Strings::bytebeat_equation_names, settings::STORAGE_TYPE_U8 },
   { 8, 1, 255, "> BB P0", NULL, settings::STORAGE_TYPE_U8 },
   { 12, 1, 255, "> BB P1", NULL, settings::STORAGE_TYPE_U8 },
   { 14, 1, 255, "> BB P2", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 4, "> BB CV1", bb_CV_destinations, settings::STORAGE_TYPE_U4 },
-  { 0, 0, 9, "> IntSeq", OC::Strings::integer_sequence_names, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 9, "> IntSeq", oc::Strings::integer_sequence_names, settings::STORAGE_TYPE_U4 },
   { 24, 2, 121, "> IntSeq modul", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, kIntSeqLen - 2, "> IntSeq start", NULL, settings::STORAGE_TYPE_U8 },
   { 8, 2, kIntSeqLen, "> IntSeq len", NULL, settings::STORAGE_TYPE_U8 },
-  { 1, 0, 1, "> IntSeq dir", OC::Strings::integer_sequence_dirs, settings::STORAGE_TYPE_U4 },
+  { 1, 0, 1, "> IntSeq dir", oc::Strings::integer_sequence_dirs, settings::STORAGE_TYPE_U4 },
   { 1, 1, kIntSeqLen - 1, "> Fract stride", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 5, "> IntSeq CV1", int_seq_CV_destinations, settings::STORAGE_TYPE_U4 }
 };
@@ -782,7 +782,7 @@ public:
   void Init() {
     cursor.Init(ASR_SETTING_SCALE, ASR_SETTING_LAST - 1);
     scale_editor.Init(false);
-    left_encoder_value = OC::Scales::SCALE_SEMI;
+    left_encoder_value = oc::Scales::SCALE_SEMI;
   }
 
   inline bool editing() const {
@@ -796,7 +796,7 @@ public:
   int left_encoder_value;
   menu::ScreenCursor<menu::kScreenLines> cursor;
   menu::ScreenCursor<menu::kScreenLines> cursor_state;
-  OC::ScaleEditor<ASRApp> scale_editor;
+  oc::ScaleEditor<ASRApp> scale_editor;
 };
 
 ASRState asr_state;
@@ -827,15 +827,15 @@ size_t ASR_restore(const void *storage) {
   return storage_size;
 }
 
-void ASR_handleAppEvent(OC::AppEvent event) {
+void ASR_handleAppEvent(oc::AppEvent event) {
   switch (event) {
-    case OC::APP_EVENT_RESUME:
+    case oc::APP_EVENT_RESUME:
       asr_state.cursor.set_editing(false);
       asr_state.scale_editor.Close();
       break;
-    case OC::APP_EVENT_SUSPEND:
-    case OC::APP_EVENT_SCREENSAVER_ON:
-    case OC::APP_EVENT_SCREENSAVER_OFF:
+    case oc::APP_EVENT_SUSPEND:
+    case oc::APP_EVENT_SCREENSAVER_ON:
+    case oc::APP_EVENT_SCREENSAVER_OFF:
       asr.update_enabled_settings();
       asr_state.cursor.AdjustEnd(asr.num_enabled_settings() - 1);
       break;
@@ -864,23 +864,23 @@ void ASR_handleButtonEvent(const UI::Event &event) {
 
   if (UI::EVENT_BUTTON_PRESS == event.type) {
     switch (event.control) {
-      case OC::CONTROL_BUTTON_UP:
+      case oc::CONTROL_BUTTON_UP:
         ASR_topButton();
         break;
-      case OC::CONTROL_BUTTON_DOWN:
+      case oc::CONTROL_BUTTON_DOWN:
         ASR_lowerButton();
         break;
-      case OC::CONTROL_BUTTON_L:
+      case oc::CONTROL_BUTTON_L:
         ASR_leftButton();
         break;
-      case OC::CONTROL_BUTTON_R:
+      case oc::CONTROL_BUTTON_R:
         ASR_rightButton();
         break;
     }
   } else if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
-    if (OC::CONTROL_BUTTON_L == event.control)
+    if (oc::CONTROL_BUTTON_L == event.control)
       ASR_leftButtonLong();
-    else if (OC::CONTROL_BUTTON_DOWN == event.control)
+    else if (oc::CONTROL_BUTTON_DOWN == event.control)
       ASR_downButtonLong();
   }
 }
@@ -892,13 +892,13 @@ void ASR_handleEncoderEvent(const UI::Event &event) {
     return;
   }
 
-  if (OC::CONTROL_ENCODER_L == event.control) {
+  if (oc::CONTROL_ENCODER_L == event.control) {
 
     int value = asr_state.left_encoder_value + event.value;
-    CONSTRAIN(value, 0, OC::Scales::NUM_SCALES - 1);
+    CONSTRAIN(value, 0, oc::Scales::NUM_SCALES - 1);
     asr_state.left_encoder_value = value;
 
-  } else if (OC::CONTROL_ENCODER_R == event.control) {
+  } else if (oc::CONTROL_ENCODER_R == event.control) {
 
     if (asr_state.editing()) {
 
@@ -946,7 +946,7 @@ void ASR_rightButton() {
 
       case ASR_SETTING_MASK: {
         int scale = asr.get_scale(DUMMY);
-        if (OC::Scales::SCALE_NONE != scale)
+        if (oc::Scales::SCALE_NONE != scale)
           asr_state.scale_editor.Edit(&asr, scale);
         }
       break;
@@ -966,7 +966,7 @@ void ASR_leftButtonLong() {
 
   int scale = asr_state.left_encoder_value;
   asr.set_scale(asr_state.left_encoder_value);
-  if (scale != OC::Scales::SCALE_NONE)
+  if (scale != oc::Scales::SCALE_NONE)
       asr_state.scale_editor.Edit(&asr, scale);
 }
 
@@ -984,12 +984,12 @@ void ASR_menu() {
 
   int scale = asr_state.left_encoder_value;
   graphics.movePrintPos(weegfx::Graphics::kFixedFontW, 0);
-  graphics.print(OC::scale_names[scale]);
+  graphics.print(oc::scale_names[scale]);
 
   if (asr.freeze_state())
-    graphics.drawBitmap8(1, menu::QuadTitleBar::kTextY, 4, OC::bitmap_hold_indicator_4x8);
+    graphics.drawBitmap8(1, menu::QuadTitleBar::kTextY, 4, oc::bitmap_hold_indicator_4x8);
   else if (asr.get_scale(DUMMY) == scale)
-    graphics.drawBitmap8(1, menu::QuadTitleBar::kTextY, 4, OC::bitmap_indicator_4x8);
+    graphics.drawBitmap8(1, menu::QuadTitleBar::kTextY, 4, oc::bitmap_indicator_4x8);
 
   if (asr.poke_octave_toggle()) {
     graphics.setPrintPos(110, 2);
@@ -997,13 +997,13 @@ void ASR_menu() {
   }
 
   if (asr.get_delay_type())
-    graphics.drawBitmap8(118, menu::QuadTitleBar::kTextY, 4, OC::bitmap_hold_indicator_4x8);
+    graphics.drawBitmap8(118, menu::QuadTitleBar::kTextY, 4, oc::bitmap_hold_indicator_4x8);
   else
-    graphics.drawBitmap8(118, menu::QuadTitleBar::kTextY, 4, OC::bitmap_indicator_4x8);
+    graphics.drawBitmap8(118, menu::QuadTitleBar::kTextY, 4, oc::bitmap_indicator_4x8);
 
   uint8_t clock_state = (asr.clockState() + 3) >> 2;
   if (clock_state)
-    graphics.drawBitmap8(124, 2, 4, OC::bitmap_gate_indicators_8 + (clock_state << 2));
+    graphics.drawBitmap8(124, 2, 4, oc::bitmap_gate_indicators_8 + (clock_state << 2));
 
   menu::SettingsList<menu::kScreenLines, 0, menu::kDefaultValueX> settings_list(asr_state.cursor);
   menu::SettingsListItem list_item;
@@ -1017,7 +1017,7 @@ void ASR_menu() {
     switch (setting) {
 
       case ASR_SETTING_MASK:
-      menu::DrawMask<false, 16, 8, 1>(menu::kDisplayWidth, list_item.y, asr.get_rotated_mask(), OC::Scales::GetScale(asr.get_scale(DUMMY)).num_notes);
+      menu::DrawMask<false, 16, 8, 1>(menu::kDisplayWidth, list_item.y, asr.get_rotated_mask(), oc::Scales::GetScale(asr.get_scale(DUMMY)).num_notes);
       list_item.DrawNoValue<false>(value, attr);
       break;
       case ASR_SETTING_CV_SOURCE:

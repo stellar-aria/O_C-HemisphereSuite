@@ -1,13 +1,10 @@
 #include "oc/scales.h"
-#include "braids_quantizer_scales.h"
+#include <Arduino.h>
 
-namespace OC {
+namespace oc {
 
 Scale user_scales[Scales::SCALE_USER_LAST];
 Scale dummy_scale;
-
-/*static*/
-const int Scales::NUM_SCALES = OC::Scales::SCALE_USER_LAST + sizeof(braids::scales) / sizeof(braids::scales[0]);
 
 /*static*/
 void Scales::Init() {
@@ -336,4 +333,4 @@ const char* const voltage_scalings[] = {
     " 2V/O"  // 2V/oct Buchla
     } ;
 
-}; // namespace OC
+}; // namespace oc

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
 
 // Logical gate functions and typedef to function pointer
 #define HEMISPHERE_NUMBER_OF_LOGIC 7
@@ -39,7 +41,7 @@ const uint8_t LOGIC_ICON[6][12] = {
     {0x22, 0x22, 0x77, 0x08, 0x77, 0x7f, 0x3e, 0x1c, 0x1c, 0x08, 0x0a, 0x0c}  // XNOR
 };
 
-class Logic : public HemisphereApplet {
+class Logic : public AppletBase {
 public:
 
     const char* applet_name() {

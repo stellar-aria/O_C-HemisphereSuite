@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,10 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "hemisphere/applet_base.hpp"
+using namespace hemisphere;
+
 #define HEM_ENV_FOLLOWER_SAMPLES 166
 #define HEM_ENV_FOLLOWER_MAXSPEED 16
 
-class EnvFollow : public HemisphereApplet {
+class EnvFollow : public AppletBase {
 public:
 
     enum EnvFollowCursor {

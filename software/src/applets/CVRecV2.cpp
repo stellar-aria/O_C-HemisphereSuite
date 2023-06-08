@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+
+#include "hemisphere/applet_base.hpp"
 #include "SegmentDisplay.h"
 #define CVREC_MAX_STEP 384
 
@@ -26,7 +27,9 @@ const char* const CVRecV2_MODES[4] = {
     "Play", "Rec 1", "Rec 2", "Rec 1+2"
 };
 
-class CVRecV2 : public HemisphereApplet {
+using namespace hemisphere;
+
+class CVRecV2 : public AppletBase {
 public:
 
     const char* applet_name() {

@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,18 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "apps/HEMISPHERE.hpp"
-#include "hemisphere/MIDILogEntry.h"
+#include "hemisphere/applet_base.hpp"
+#include "HEMISPHERE.hpp"
+
+using namespace hemisphere;
 
 // See https://www.pjrc.com/teensy/td_midi.html
 
 // The functions available for each output
-#define HEM_MIDI_CC_IN 0
-#define HEM_MIDI_AT_IN 1
-#define HEM_MIDI_PB_IN 2
-#define HEM_MIDI_VEL_IN 3
+constexpr int MIDI_CC_IN = 0;
+constexpr int MIDI_AT_IN = 1;
+constexpr int MIDI_PB_IN = 2;
+constexpr int MIDI_VEL_IN = 3;
 
-class hMIDIOut : public HemisphereApplet {
+struct MIDILogEntry {
+    int message;
+    int data1;
+    int data2;
+};
+
+class hMIDIOut : public AppletBase {
 public:
 
     const char* applet_name() { // Maximum 10 characters
@@ -65,13 +72,13 @@ public:
             if (legato_on && midi_note != last_note) {
                 // Send note off if the note has changed
                 usbMIDI.sendNoteOff(last_note, 0, last_channel + 1);
-                UpdateLog(HEM_MIDI_NOTE_OFF, midi_note, 0);
+                UpdateLog(MIDI_NOTE_OFF, midi_note, 0);
                 note_on = 1;
             }
 
             if (note_on) {
                 int velocity = 0x64;
-                if (function == HEM_MIDI_VEL_IN) {
+                if (function == MIDI_VEL_IN) {
                     velocity = ProportionCV(In(1), 127);
                 }
                 last_velocity = velocity;
@@ -80,52 +87,52 @@ public:
                 usbMIDI.send_now();
                 last_note = midi_note;
                 last_channel = channel;
-                last_tick = OC::CORE::ticks;
+                last_tick = oc::core::ticks;
                 if (legato) legato_on = 1;
 
-                UpdateLog(HEM_MIDI_NOTE_ON, midi_note, velocity);
+                UpdateLog(MIDI_NOTE_ON, midi_note, velocity);
             }
         }
 
         if (!read_gate && gated) { // A note off message should be sent
             usbMIDI.sendNoteOff(last_note, 0, last_channel + 1);
             usbMIDI.send_now();
-            UpdateLog(HEM_MIDI_NOTE_OFF, last_note, 0);
-            last_tick = OC::CORE::ticks;
+            UpdateLog(MIDI_NOTE_OFF, last_note, 0);
+            last_tick = oc::core::ticks;
         }
 
         gated = read_gate;
         if (!gated) legato_on = 0;
 
         // Handle other messages
-        if (function != HEM_MIDI_VEL_IN) {
+        if (function != MIDI_VEL_IN) {
             if (Changed(1)) {
                 // Modulation wheel
-                if (function == HEM_MIDI_CC_IN) {
+                if (function == MIDI_CC_IN) {
                     int value = ProportionCV(In(1), 127);
                     usbMIDI.sendControlChange(1, value, channel + 1);
                     usbMIDI.send_now();
-                    UpdateLog(HEM_MIDI_CC, value, 0);
-                    last_tick = OC::CORE::ticks;
+                    UpdateLog(MIDI_CC, value, 0);
+                    last_tick = oc::core::ticks;
                 }
 
                 // Aftertouch
-                if (function == HEM_MIDI_AT_IN) {
+                if (function == MIDI_AT_IN) {
                     int value = ProportionCV(In(1), 127);
                     usbMIDI.sendAfterTouch(value, channel + 1);
                     usbMIDI.send_now();
-                    UpdateLog(HEM_MIDI_AFTERTOUCH, value, 0);
-                    last_tick = OC::CORE::ticks;
+                    UpdateLog(MIDI_AFTERTOUCH, value, 0);
+                    last_tick = oc::core::ticks;
                 }
 
                 // Pitch Bend
-                if (function == HEM_MIDI_PB_IN) {
+                if (function == MIDI_PB_IN) {
                     uint16_t bend = Proportion(In(1) + HEMISPHERE_3V_CV, HEMISPHERE_3V_CV * 2, 16383);
                     bend = constrain(bend, 0, 16383);
                     usbMIDI.sendPitchBend(bend, channel + 1);
                     usbMIDI.send_now();
-                    UpdateLog(HEM_MIDI_PITCHBEND, bend - 8192, 0);
-                    last_tick = OC::CORE::ticks;
+                    UpdateLog(MIDI_PITCHBEND, bend - 8192, 0);
+                    last_tick = oc::core::ticks;
                 }
             }
         }
@@ -218,7 +225,7 @@ private:
     }
 
     void DrawMonitor() {
-        if (OC::CORE::ticks - last_tick < 4000) {
+        if (oc::core::ticks - last_tick < 4000) {
             gfxBitmap(46, 1, 8, MIDI_ICON);
         }
     }
@@ -263,28 +270,28 @@ private:
     }
 
     void log_entry(int y, int index) {
-        if (log[index].message == HEM_MIDI_NOTE_ON) {
+        if (log[index].message == MIDI_NOTE_ON) {
             gfxBitmap(1, y, 8, NOTE_ICON);
             gfxPrint(10, y, midi_note_numbers[log[index].data1]);
             gfxPrint(40, y, log[index].data2);
         }
 
-        if (log[index].message == HEM_MIDI_NOTE_OFF) {
+        if (log[index].message == MIDI_NOTE_OFF) {
             gfxPrint(1, y, "-");
             gfxPrint(10, y, midi_note_numbers[log[index].data1]);
         }
 
-        if (log[index].message == HEM_MIDI_CC) {
+        if (log[index].message == MIDI_CC) {
             gfxBitmap(1, y, 8, MOD_ICON);
             gfxPrint(10, y, log[index].data1);
         }
 
-        if (log[index].message == HEM_MIDI_AFTERTOUCH) {
+        if (log[index].message == MIDI_AFTERTOUCH) {
             gfxBitmap(1, y, 8, AFTERTOUCH_ICON);
             gfxPrint(10, y, log[index].data1);
         }
 
-        if (log[index].message == HEM_MIDI_PITCHBEND) {
+        if (log[index].message == MIDI_PITCHBEND) {
             int data = log[index].data1;
             gfxBitmap(1, y, 8, BEND_ICON);
             gfxPrint(10, y, data);

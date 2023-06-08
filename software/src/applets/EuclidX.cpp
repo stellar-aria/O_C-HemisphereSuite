@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2022, Bryan Head
 // Copyright (c) 2022, Nicholas J. Michalek
 // Copyright (c) 2022, Alessio Degani
@@ -29,12 +28,15 @@
  * The CV input logic as well as the name were copied from a separate rewrite by adegani.
  */
 
+#include "hemisphere/applet_base.hpp"
 #include "bjorklund.h"
 
 const int NUM_PARAMS = 5;
 const int PARAM_SIZE = 6;
 
-class EuclidX : public HemisphereApplet {
+using namespace hemisphere;
+
+class EuclidX : public AppletBase {
 public:
 
     enum EuclidXParam {

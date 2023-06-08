@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace OC {
+namespace oc {
 
 template <ADC_CHANNEL> struct ChannelDesc { };
 template <> struct ChannelDesc<ADC_CHANNEL_1> {
@@ -121,4 +121,4 @@ template <> struct ChannelDesc<ADC_CHANNEL_4> {
   }
 }
 
-}; // namespace OC
+}; // namespace oc

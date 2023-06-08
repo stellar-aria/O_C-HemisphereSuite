@@ -21,16 +21,17 @@
 
 #ifdef ENABLE_APP_ENIGMA
 
-#include "hemisphere/Application.h"
-#include "hemisphere/MIDI.h"
-#include "enigma/TuringMachine.h"
-#include "enigma/TuringMachineState.h"
-#include "enigma/EnigmaStep.h"
-#include "enigma/EnigmaOutput.h"
-#include "enigma/EnigmaTrack.h"
+#include "hemisphere/application_base.hpp"
+#include "hemisphere/midi.hpp"
+#include "apps/enigma/TuringMachine.h"
+#include "apps/enigma/TuringMachineState.h"
+#include "apps/enigma/EnigmaStep.h"
+#include "apps/enigma/EnigmaOutput.h"
+#include "apps/enigma/EnigmaTrack.h"
 #include "util/settings.h"
 #include "oc/apps.h"
 #include "oc/ui.h"
+#include "hemisphere/icons.hpp"
 
 // Modes
 #define ENIGMA_MODE_LIBRARY 0  // Create, edit, save, favorite, sysex dump Turing Machines
@@ -66,11 +67,13 @@
 #define ENIGMA_NO_STEP_AVAILABLE 0xffff
 #define ENIGMA_INITIAL_HELP_TIME 65535
 
-class EnigmaTMWS : public HSApplication, public SystemExclusiveHandler,
+using namespace hemisphere;
+
+class EnigmaTMWS : public ApplicationBase, public SystemExclusiveHandler,
     public settings::SettingsBase<EnigmaTMWS, ENIGMA_SETTING_LAST> {
 public:
 	void Start() {
-	    for (byte ix = 0; ix < HS::TURING_MACHINE_COUNT; ix++) state_prob[ix] = 0;
+	    for (byte ix = 0; ix < hemisphere::TuringMachine::COUNT; ix++) state_prob[ix] = 0;
 	    tm_cursor = 0;
 	    SwitchTuringMachine(0);
 
@@ -135,9 +138,9 @@ public:
             if (type == '1') {
                 // Receive if the current occupant is not a Favorite
                 if (mode == ENIGMA_MODE_LIBRARY) V[1] = tm_cursor;
-                if (!HS::user_turing_machines[V[1]].favorite) {
+                if (!hemisphere::user_turing_machines[V[1]].favorite) {
                     ReceiveTuringMachine(V);
-                    HS::user_turing_machines[V[1]].favorite = 0; // Favorite off, so that update may be automated in performance
+                    hemisphere::user_turing_machines[V[1]].favorite = 0; // Favorite off, so that update may be automated in performance
                     SwitchTuringMachine(V[1]);
                 }
             }
@@ -239,8 +242,8 @@ public:
             if (mode == ENIGMA_MODE_LIBRARY) {
                 // For Library mode, that's the Turing Machine
                 tm_cursor += direction;
-                if (tm_cursor < 0) tm_cursor = HS::TURING_MACHINE_COUNT - 1;
-                if (tm_cursor >= HS::TURING_MACHINE_COUNT) tm_cursor = 0;
+                if (tm_cursor < 0) tm_cursor = hemisphere::TuringMachine::COUNT - 1;
+                if (tm_cursor >= hemisphere::TuringMachine::COUNT) tm_cursor = 0;
                 SwitchTuringMachine(tm_cursor);
             }
             if (mode == ENIGMA_MODE_ASSIGN) {
@@ -283,7 +286,7 @@ public:
 private:
     //////// OPERATING STATES
     TuringMachineState tm_state; // The currently-selected state in Library mode
-    byte state_prob[HS::TURING_MACHINE_COUNT]; // Remember the last probability
+    byte state_prob[hemisphere::TuringMachine::COUNT]; // Remember the last probability
     bool assign_audition = 0; // Which area does Assign monitor? 0=Library, 1=Song
     bool last_assign_audition; // Temporarily save the old audition state during playback
     uint16_t track_step[100]; // List of steps in the current track
@@ -365,11 +368,11 @@ private:
         for (byte line = 0; line < 4; line++)
         {
             byte y = 24 + (line * 10);
-            byte ix = (tm_cursor + line) % HS::TURING_MACHINE_COUNT;
+            byte ix = (tm_cursor + line) % hemisphere::TuringMachine::COUNT;
             char name[4];
-            HS::TuringMachine::SetName(name, ix);
+            hemisphere::TuringMachine::SetName(name, ix);
             gfxPrint(3, y, name);
-            if (HS::user_turing_machines[ix].favorite) gfxIcon(36, y, FAVORITE_ICON);
+            if (hemisphere::user_turing_machines[ix].favorite) gfxIcon(36, y, FAVORITE_ICON);
         }
         DrawSelectorBox("Register");
 
@@ -431,7 +434,7 @@ private:
 
             // Scale
             if (output[output_cursor].type() <= EnigmaOutputType::NOTE7) {
-                gfxPrint(56, 45, OC::scale_names_short[output[output_cursor].scale()]);
+                gfxPrint(56, 45, oc::scale_names_short[output[output_cursor].scale()]);
             }
 
             // MIDI Channel
@@ -478,15 +481,15 @@ private:
                 gfxPrint(56 + pad(10, edit_index + 1), 15, edit_index + 1); // Step number (1-99)
                 gfxPrint(": ");
                 char name[4];
-                HS::TuringMachine::SetName(name, song_step[ssi].tm());
+                hemisphere::TuringMachine::SetName(name, song_step[ssi].tm());
                 gfxPrint(name); // Turing machine name
                 gfxPrint(" ");
 
                 if (step_param == ENIGMA_STEP_TM) {
                     // If the Turing Machine is being selected, display the length and favorite
                     // status instead of the probability
-                    byte length = HS::user_turing_machines[song_step[ssi].tm()].len;
-                    bool favorite = HS::user_turing_machines[song_step[ssi].tm()].favorite;
+                    byte length = hemisphere::user_turing_machines[song_step[ssi].tm()].len;
+                    bool favorite = hemisphere::user_turing_machines[song_step[ssi].tm()].favorite;
 
                     if (length > 0) gfxPrint(pad(10, length), length);
                     else gfxPrint("--");
@@ -523,7 +526,7 @@ private:
                             gfxPrint(56 + pad(10, edit_index + n + 2), y, edit_index + n + 2); // Step number (1-99)
                             gfxPrint(": ");
                             char name[4];
-                            HS::TuringMachine::SetName(name, song_step[ssi].tm());
+                            hemisphere::TuringMachine::SetName(name, song_step[ssi].tm());
                             gfxPrint(name); // Turing machine name
                             gfxPrint(" x");
                             gfxPrint(song_step[ssi].repeats()); // Number of times played
@@ -568,7 +571,7 @@ private:
                     gfxPrint(":");
                     gfxPrint(playback_step_repeat[t] + 1);
                     char name[4];
-                    HS::TuringMachine::SetName(name, song_step[ssi].tm());
+                    hemisphere::TuringMachine::SetName(name, song_step[ssi].tm());
                     gfxPrint(54, y, name);
                     track_tm[t].DrawSmallAt(54, y + 8);
                 }
@@ -836,13 +839,13 @@ private:
             // If CV 1 and CV 2 are ungated:
             //     End the song only if ALL tracks are non-looping
             bool keep_going = 0;
-            if (In(0) > HSAPPLICATION_3V || In(1) > HSAPPLICATION_3V) {
+            if (In(0) > THREE_VOLTS || In(1) > THREE_VOLTS) {
                 for (byte t = 0; t < 4; t++) if (!track[t].loop() && !playback_end[t]) keep_going = 1;
             } else {
                 for (byte t = 0; t < 4; t++) if (track[t].loop() || !playback_end[t]) keep_going = 1;
             }
             if (!keep_going) {
-                if (In(1) > HSAPPLICATION_3V) ResetSong();
+                if (In(1) > THREE_VOLTS) ResetSong();
                 else play = 0;
             }
 
@@ -945,11 +948,11 @@ private:
 
     //////// SysEx
     void SendTuringMachineLibrary() {
-        for (byte tm = 0; tm < HS::TURING_MACHINE_COUNT; tm++)
+        for (byte tm = 0; tm < hemisphere::TuringMachine::COUNT; tm++)
         {
-            uint16_t reg = HS::user_turing_machines[tm].reg;
-            byte len = HS::user_turing_machines[tm].len;
-            byte favorite = HS::user_turing_machines[tm].favorite;
+            uint16_t reg = hemisphere::user_turing_machines[tm].reg;
+            byte len = hemisphere::user_turing_machines[tm].len;
+            byte favorite = hemisphere::user_turing_machines[tm].favorite;
 
             byte V[6];
             byte ix = 0;
@@ -967,9 +970,9 @@ private:
     }
 
     void SendSingleTuringMachine(byte tm) {
-        uint16_t reg = HS::user_turing_machines[tm].reg;
-        byte len = HS::user_turing_machines[tm].len;
-        byte favorite = HS::user_turing_machines[tm].favorite;
+        uint16_t reg = hemisphere::user_turing_machines[tm].reg;
+        byte len = hemisphere::user_turing_machines[tm].len;
+        byte favorite = hemisphere::user_turing_machines[tm].favorite;
 
         byte V[6];
         byte ix = 0;
@@ -1043,15 +1046,15 @@ private:
     void ReceiveTuringMachine(uint8_t *V) {
         byte ix = 1; // index 0 was already handled
         byte tm = V[ix++];
-        if (tm < HS::TURING_MACHINE_COUNT) {
+        if (tm < hemisphere::TuringMachine::COUNT) {
             uint8_t low = V[ix++];
             uint8_t high = V[ix++];
             uint16_t reg = static_cast<uint16_t>((high << 8) | low);
             byte len = V[ix++];
             byte favorite = V[ix++];
-            HS::user_turing_machines[tm].reg = reg;
-            HS::user_turing_machines[tm].len  = len;
-            HS::user_turing_machines[tm].favorite = favorite;
+            hemisphere::user_turing_machines[tm].reg = reg;
+            hemisphere::user_turing_machines[tm].len  = len;
+            hemisphere::user_turing_machines[tm].favorite = favorite;
         }
     }
 
@@ -1194,11 +1197,11 @@ void EnigmaTMWS_isr() {
 	return EnigmaTMWS_instance.BaseController();
 }
 
-void EnigmaTMWS_handleAppEvent(OC::AppEvent event) {
-    if (event ==  OC::APP_EVENT_RESUME) {
+void EnigmaTMWS_handleAppEvent(oc::AppEvent event) {
+    if (event ==  oc::APP_EVENT_RESUME) {
         EnigmaTMWS_instance.Resume();
     }
-    if (event == OC::APP_EVENT_SUSPEND) {
+    if (event == oc::APP_EVENT_SUSPEND) {
         EnigmaTMWS_instance.OnSaveSettings();
         EnigmaTMWS_instance.OnSendSysEx();
     }
@@ -1214,19 +1217,19 @@ void EnigmaTMWS_screensaver() {} // Deprecated
 
 void EnigmaTMWS_handleButtonEvent(const UI::Event &event) {
     // For left encoder, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_L) {
+    if (event.control == oc::CONTROL_BUTTON_L) {
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) EnigmaTMWS_instance.OnLeftButtonLongPress();
         if (event.type == UI::EVENT_BUTTON_PRESS) EnigmaTMWS_instance.OnLeftButtonPress();
     }
 
     // For right encoder, only handle press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) EnigmaTMWS_instance.OnRightButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_R && event.type == UI::EVENT_BUTTON_PRESS) EnigmaTMWS_instance.OnRightButtonPress();
 
     // For up button, handle only press (long press is reserved)
-    if (event.control == OC::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) EnigmaTMWS_instance.OnUpButtonPress();
+    if (event.control == oc::CONTROL_BUTTON_UP && event.type == UI::EVENT_BUTTON_PRESS) EnigmaTMWS_instance.OnUpButtonPress();
 
     // For down button, handle press and long press
-    if (event.control == OC::CONTROL_BUTTON_DOWN) {
+    if (event.control == oc::CONTROL_BUTTON_DOWN) {
         if (event.type == UI::EVENT_BUTTON_PRESS) EnigmaTMWS_instance.OnDownButtonPress();
         if (event.type == UI::EVENT_BUTTON_LONG_PRESS) EnigmaTMWS_instance.OnDownButtonLongPress();
     }
@@ -1234,9 +1237,9 @@ void EnigmaTMWS_handleButtonEvent(const UI::Event &event) {
 
 void EnigmaTMWS_handleEncoderEvent(const UI::Event &event) {
     // Left encoder turned
-    if (event.control == OC::CONTROL_ENCODER_L) EnigmaTMWS_instance.OnLeftEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_L) EnigmaTMWS_instance.OnLeftEncoderMove(event.value);
 
     // Right encoder turned
-    if (event.control == OC::CONTROL_ENCODER_R) EnigmaTMWS_instance.OnRightEncoderMove(event.value);
+    if (event.control == oc::CONTROL_ENCODER_R) EnigmaTMWS_instance.OnRightEncoderMove(event.value);
 }
 #endif

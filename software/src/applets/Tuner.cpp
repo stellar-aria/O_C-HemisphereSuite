@@ -1,4 +1,3 @@
-#include "HemisphereApplet.h"
 // Copyright (c) 2018, Jason Justian
 //
 // Port of APP_REFS tuner,
@@ -27,11 +26,13 @@
 // hemisphere. So there are various checks for the FLIP_180 compile-time option
 // in this code.
 
+#include "hemisphere/applet_base.hpp"
 #include "oc/strings.h"
+using namespace hemisphere;
 
 static constexpr double HEM_TUNER_AaboveMidCtoC0 = 0.03716272234383494188492;
 
-class Tuner : public HemisphereApplet {
+class Tuner : public AppletBase {
 public:
 
     const char* applet_name() {
@@ -142,7 +143,7 @@ private:
         int32_t residual = ((deviation - ((octave - 1) * 12000)) % 1000) - 500;
 
         if (frequency_ > 0.0) {
-            gfxPrint(20, 30, OC::Strings::note_names[note]);
+            gfxPrint(20, 30, oc::Strings::note_names[note]);
             gfxPrint(" ");
             gfxPrint(octave);
             if (residual < 10 && residual > -10) gfxInvert(1, 28, 62, 11);

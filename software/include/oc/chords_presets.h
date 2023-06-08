@@ -5,7 +5,7 @@
 #include "oc/chords.h"
 #include <Arduino.h>
 
-namespace OC {
+namespace oc {
 
   struct Chord {
    
