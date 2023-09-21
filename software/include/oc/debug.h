@@ -5,10 +5,11 @@
 #include "util/math.h"
 #include "util/macros.h"
 #include "util/profiling.h"
+#include "per/gpio.h"
 
 namespace oc {
 
-namespace DEBUG {
+namespace debug {
 
   void Init();
 
@@ -22,12 +23,13 @@ namespace DEBUG {
 };
 
 class DebugPins {
-public:
-  static void Init() {
-    pinMode(OC_GPIO_DEBUG_PIN1, OUTPUT);
-    pinMode(OC_GPIO_DEBUG_PIN2, OUTPUT);
-    digitalWriteFast(OC_GPIO_DEBUG_PIN1, LOW);
-    digitalWriteFast(OC_GPIO_DEBUG_PIN2, LOW);
+  daisy::GPIO pin1;
+  daisy::GPIO pin2;
+
+  void Init() {
+    using namespace daisy;
+    pin1.Init(OC_GPIO_DEBUG_PIN1, GPIO::Mode::OUTPUT, GPIO::Pull::NOPULL, GPIO::Speed::VERY_HIGH);
+    pin2.Init(OC_GPIO_DEBUG_PIN2, GPIO::Mode::OUTPUT, GPIO::Pull::NOPULL, GPIO::Speed::VERY_HIGH);
   }
 };
 

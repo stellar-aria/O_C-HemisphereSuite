@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+// TODO: Eliminate the need for these
+using byte = uint8_t;
+constexpr auto HIGH = 0x01;
+constexpr auto LOW = 0x00;
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+
 #include "drivers/display.h"
 #include "oc/config.h"
 #include "util/debugpins.h"

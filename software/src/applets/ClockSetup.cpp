@@ -19,7 +19,10 @@
 // SOFTWARE.
 
 #include "hemisphere/applet_base.hpp"
+#include "hemisphere/midi.hpp"
+
 using namespace hemisphere;
+
 
 class ClockSetup : public AppletBase {
 public:
@@ -50,20 +53,23 @@ public:
     void Controller() {
         if (start_q){
             start_q = 0;
-            usbMIDI.sendRealTime(usbMIDI.Start);
+            usbMIDI.SendStart();
         }
         if (stop_q){
             stop_q = 0;
-            usbMIDI.sendRealTime(usbMIDI.Stop);
+            usbMIDI.SendStop();
         }
-        if (clock_m->IsRunning() && clock_m->MIDITock()) usbMIDI.sendRealTime(usbMIDI.Clock);
+        if (clock_m->IsRunning() && clock_m->MIDITock()){ 
+            usbMIDI.SendClock();
+        }
 
         // 4 internal clock flashers
         for (int i = 0; i < 4; ++i) {
-            if (clock_m->Tock(i))
+            if (clock_m->Tock(i)){
                 flash_ticker[i] = HEMISPHERE_PULSE_ANIMATION_TIME;
-            else if (flash_ticker[i])
+            } else if (flash_ticker[i]) {
                 --flash_ticker[i];
+            }
         }
 
         if (button_ticker) --button_ticker;

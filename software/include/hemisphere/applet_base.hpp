@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include "FreqMeasure.h"
 #include "hemisphere/applet_base.hpp"
 #include "hemisphere/clock_manager.hpp"
 #include "hemisphere/icons.hpp"
@@ -35,55 +34,16 @@
 #include "oc/DAC.h"
 #include "oc/digital_inputs.h"
 
+#include "sky/random.hpp"
+
+#include "hemisphere_config.h"
+
 // Simulated fixed floats by multiplying and dividing by powers of 2
 #ifndef int2simfloat
 #define int2simfloat(x) (x << 14)
 #define simfloat2int(x) (x >> 14)
 typedef int32_t simfloat;
 #endif
-
-#define LEFT_HEMISPHERE 0
-#define RIGHT_HEMISPHERE 1
-#ifdef BUCHLA_4U
-#define HEMISPHERE_PULSE_VOLTAGE 8
-#define HEMISPHERE_MAX_CV 15360
-#define HEMISPHERE_CENTER_CV 7680  // 5V
-#define HEMISPHERE_MIN_CV 0
-#elif defined(VOR)
-#define HEMISPHERE_PULSE_VOLTAGE 8
-#define HEMISPHERE_MAX_CV (hemisphere::octave_max * 12 << 7)
-#define HEMISPHERE_CENTER_CV 0
-#define HEMISPHERE_MIN_CV (HEMISPHERE_MAX_CV - 15360)
-#else
-#define HEMISPHERE_PULSE_VOLTAGE 5
-#define HEMISPHERE_MAX_CV 9216  // 6V
-#define HEMISPHERE_CENTER_CV 0
-#define HEMISPHERE_MIN_CV -4608  // -3V
-#endif
-#define HEMISPHERE_3V_CV 4608
-#define HEMISPHERE_MAX_INPUT_CV 9216  // 6V
-#define HEMISPHERE_CENTER_DETENT 80
-#define HEMISPHERE_CLOCK_TICKS 50
-#define HEMISPHERE_CURSOR_TICKS 12000
-#define HEMISPHERE_ADC_LAG 33
-#define HEMISPHERE_CHANGE_THRESHOLD 32
-
-// Codes for help system sections
-#define HEMISPHERE_HELP_DIGITALS 0
-#define HEMISPHERE_HELP_CVS 1
-#define HEMISPHERE_HELP_OUTS 2
-#define HEMISPHERE_HELP_ENCODER 3
-
-// Hemisphere-specific macros
-#define BottomAlign(h) (62 - h)
-#define ForEachChannel(ch) for (int_fast8_t ch = 0; ch < 2; ch++)
-#define gfx_offset (hemisphere * 64)  // Graphics offset, based on the side
-#define io_offset (hemisphere * 2)    // Input/Output offset, based on the side
-
-#define HEMISPHERE_SIM_CLICK_TIME 1000
-#define HEMISPHERE_DOUBLE_CLICK_TIME 8000
-#define HEMISPHERE_PULSE_ANIMATION_TIME 500
-#define HEMISPHERE_PULSE_ANIMATION_TIME_LONG 1200
 
 #define DECLARE_APPLET(id, categories, class_name)                 \
   {                                                                \
@@ -93,7 +53,7 @@ typedef int32_t simfloat;
         class_name##_OnDataRequest, class_name##_OnDataReceive     \
   }
 
-#include "hemisphere_config.h"
+
 
 namespace hemisphere {
 
@@ -116,6 +76,53 @@ constexpr Applet clock_setup_applet = DECLARE_APPLET(9999, 0x01, ClockSetup);
 extern int octave_max;
 }  // namespace hemisphere
 
+
+constexpr int LEFT_HEMISPHERE = 0;
+constexpr int RIGHT_HEMISPHERE = 1;
+
+#ifdef BUCHLA_4U
+constexpr int HEMISPHERE_PULSE_VOLTAGE = 8;
+constexpr int HEMISPHERE_MAX_CV = 15360;
+constexpr int HEMISPHERE_CENTER_CV = 7680;  // 5V
+constexpr int HEMISPHERE_MIN_CV = 0;
+
+#elif defined(VOR)
+constexpr int HEMISPHERE_PULSE_VOLTAGE = 8;
+#define HEMISPHERE_MAX_CV (hemisphere::octave_max * 12 << 7)
+constexpr int HEMISPHERE_CENTER_CV = 0;
+#define HEMISPHERE_MIN_CV (HEMISPHERE_MAX_CV - 15360)
+
+#else
+constexpr int HEMISPHERE_PULSE_VOLTAGE = 5;
+constexpr int HEMISPHERE_MAX_CV = 9216;  // 6V
+constexpr int HEMISPHERE_CENTER_CV = 0;
+constexpr int HEMISPHERE_MIN_CV = -4608;  // -3V
+#endif
+
+constexpr int HEMISPHERE_3V_CV = 4608;
+constexpr int HEMISPHERE_MAX_INPUT_CV = 9216;  // 6V
+constexpr int HEMISPHERE_CENTER_DETENT = 80;
+constexpr int HEMISPHERE_CLOCK_TICKS = 50;
+constexpr int HEMISPHERE_CURSOR_TICKS = 12000;
+constexpr int HEMISPHERE_ADC_LAG = 33;
+constexpr int HEMISPHERE_CHANGE_THRESHOLD = 32;
+
+// Codes for help system sections
+constexpr int HEMISPHERE_HELP_DIGITALS = 0;
+constexpr int HEMISPHERE_HELP_CVS = 1;
+constexpr int HEMISPHERE_HELP_OUTS = 2;
+constexpr int HEMISPHERE_HELP_ENCODER = 3;
+
+// Hemisphere-specific macros
+#define BottomAlign(h) (62 - h)
+#define ForEachChannel(ch) for (int_fast8_t ch = 0; ch < 2; ch++)
+#define gfx_offset (hemisphere * 64)  // Graphics offset, based on the side
+#define io_offset (hemisphere * 2)    // Input/Output offset, based on the side
+
+constexpr int HEMISPHERE_SIM_CLICK_TIME = 1000;
+constexpr int HEMISPHERE_DOUBLE_CLICK_TIME = 8000;
+constexpr int HEMISPHERE_PULSE_ANIMATION_TIME = 500;
+constexpr int HEMISPHERE_PULSE_ANIMATION_TIME_LONG = 1200;
 
 namespace hemisphere {
 // Specifies where data goes in flash storage for each selcted applet, and how
@@ -306,18 +313,18 @@ class AppletBase {
   }
 
   int SmoothedIn(int ch) {
-    ADC_CHANNEL channel = (ADC_CHANNEL)(ch + io_offset);
+    size_t channel = (ch + io_offset);
     return oc::ADC::value(channel);
   }
 
   void Out(int ch, int value, int octave = 0) {
-    DAC_CHANNEL channel = (DAC_CHANNEL)(ch + io_offset);
+    size_t channel = (ch + io_offset);
     oc::DAC::set_pitch(channel, value, octave);
     outputs[channel] = value + (octave * (12 << 7));
   }
 
   void SmoothedOut(int ch, int value, int kSmoothing) {
-    DAC_CHANNEL channel = (DAC_CHANNEL)(ch + io_offset);
+    size_t channel = (ch + io_offset);
     value = (outputs_smooth[channel] * (kSmoothing - 1) + value) / kSmoothing;
     oc::DAC::set_pitch(channel, value, 0);
     outputs[channel] = outputs_smooth[channel] = value;
@@ -339,26 +346,26 @@ class AppletBase {
         if (useTock && clock_m->GetMultiply(0) != 0)
           clocked = clock_m->Tock(0);
         else
-          clocked = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
+          clocked = oc::DigitalInputs::clocked(0);
       } else {  // right side is special
         if (useTock && clock_m->GetMultiply(2) != 0)
           clocked = clock_m->Tock(2);
         else if (master_clock_bus)  // forwarding from left
-          clocked = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
+          clocked = oc::DigitalInputs::clocked(0);
         else
-          clocked = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_3>();
+          clocked = oc::DigitalInputs::clocked(2);
       }
     } else if (ch == 1) {  // TR2 and TR4
       if (hemisphere == LEFT_HEMISPHERE) {
         if (useTock && clock_m->GetMultiply(1) != 0)
           clocked = clock_m->Tock(1);
         else
-          clocked = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_2>();
+          clocked = oc::DigitalInputs::clocked(1);
       } else {
         if (useTock && clock_m->GetMultiply(3) != 0)
           clocked = clock_m->Tock(3);
         else
-          clocked = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_4>();
+          clocked = oc::DigitalInputs::clocked(3);
       }
     }
 
@@ -381,15 +388,15 @@ class AppletBase {
     bool high = 0;
     if (hemisphere == 0) {
       if (ch == 0)
-        high = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_1>();
+        high = oc::DigitalInputs::read_immediate(0);
       if (ch == 1)
-        high = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_2>();
+        high = oc::DigitalInputs::read_immediate(1);
     }
     if (hemisphere == 1) {
       if (ch == 0)
-        high = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_3>();
+        high = oc::DigitalInputs::read_immediate(2);
       if (ch == 1)
-        high = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_4>();
+        high = oc::DigitalInputs::read_immediate(3);
     }
     return high;
   }

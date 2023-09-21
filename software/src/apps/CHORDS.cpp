@@ -430,7 +430,7 @@ public:
         _direction = get_direction();
 
         if (get_direction_cv()) {
-           _direction += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_direction_cv() - 1)) + 255) >> 9;
+           _direction += (oc::ADC::value((get_direction_cv() - 1)) + 255) >> 9;
            CONSTRAIN(_direction, 0, CHORDS_DIRECTIONS_LAST - 0x1);
         }
 
@@ -467,7 +467,7 @@ public:
             int16_t brown_prb = get_brownian_probability();
 
             if (get_brownian_probability_cv()) {
-              brown_prb += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_brownian_probability_cv() - 1)) + 8) >> 3;
+              brown_prb += (oc::ADC::value((get_brownian_probability_cv() - 1)) + 8) >> 3;
               CONSTRAIN(brown_prb, 0, 256);
             }
             if (random(0,256) < brown_prb)
@@ -593,7 +593,7 @@ public:
 
       // update mask?
       if (get_mask_cv()) {
-        mask_rotate = (oc::ADC::value(static_cast<ADC_CHANNEL>(get_mask_cv() - 0x1)) + 127) >> 8;
+        mask_rotate = (oc::ADC::value((get_mask_cv() - 0x1)) + 127) >> 8;
       }
 
       update_scale(force_update_, mask_rotate);
@@ -607,12 +607,12 @@ public:
       progression_last_ = num_progression;
 
       if (get_progression_cv()) {
-        num_progression_cv = num_progression += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_progression_cv() - 1)) + 255) >> 9;
+        num_progression_cv = num_progression += (oc::ADC::value((get_progression_cv() - 1)) + 255) >> 9;
         CONSTRAIN(num_progression, 0, oc::Chords::NUM_CHORD_PROGRESSIONS - 0x1);
       }
 
       if (get_num_chords_cv())
-        num_chords_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(get_num_chords_cv() - 1)) + 255) >> 9;
+        num_chords_cv = (oc::ADC::value((get_num_chords_cv() - 1)) + 255) >> 9;
 
       switch (playmode) {
 
@@ -695,7 +695,7 @@ public:
                num_chords_last_ = num_chords;
                active_progression_ = num_progression;
                // process input:
-               active_chord_ = input_map_.Process(oc::ADC::value(static_cast<ADC_CHANNEL>(playmode - _SH1)));
+               active_chord_ = input_map_.Process(oc::ADC::value((playmode - _SH1)));
              }
              progression_advance_last_ = _progression_advance_trig;
           }
@@ -715,7 +715,7 @@ public:
              num_chords_last_ = num_chords;
              active_progression_ = num_progression;
              // process input:
-             active_chord_ = input_map_.Process(oc::ADC::value(static_cast<ADC_CHANNEL>(playmode - _CV1)));
+             active_chord_ = input_map_.Process(oc::ADC::value((playmode - _CV1)));
           }
           break;
           default:
@@ -770,8 +770,8 @@ public:
       }
       else {
         pitch = quantizer_.enabled()
-                  ? oc::ADC::raw_pitch_value(static_cast<ADC_CHANNEL>(cv_source))
-                  : oc::ADC::pitch_value(static_cast<ADC_CHANNEL>(cv_source));
+                  ? oc::ADC::raw_pitch_value((cv_source))
+                  : oc::ADC::pitch_value((cv_source));
       }
 
       switch (cv_source) {
@@ -785,38 +785,38 @@ public:
 
     // S/H mode
       if (get_root_cv()) {
-          root += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_root_cv() - 1)) + 127) >> 8;
+          root += (oc::ADC::value((get_root_cv() - 1)) + 127) >> 8;
           CONSTRAIN(root, 0, 15);
       }
 
       if (get_octave_cv()) {
-        octave += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_octave_cv() - 1)) + 255) >> 9;
+        octave += (oc::ADC::value((get_octave_cv() - 1)) + 255) >> 9;
         CONSTRAIN(octave, -4, 4);
       }
 
       if (get_transpose_cv()) {
-        transpose += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_transpose_cv() - 1)) + 63) >> 7;
+        transpose += (oc::ADC::value((get_transpose_cv() - 1)) + 63) >> 7;
         CONSTRAIN(transpose, -15, 15);
       }
 
       if (get_quality_cv()) {
-        _quality += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_quality_cv() - 1)) + 255) >> 9;
+        _quality += (oc::ADC::value((get_quality_cv() - 1)) + 255) >> 9;
         CONSTRAIN(_quality, 0,  oc::Chords::CHORDS_QUALITY_LAST - 1);
       }
 
       if (get_inversion_cv()) {
-        _inversion += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_inversion_cv() - 1)) + 511) >> 10;
+        _inversion += (oc::ADC::value((get_inversion_cv() - 1)) + 511) >> 10;
         CONSTRAIN(_inversion, 0,  oc::Chords::CHORDS_INVERSION_LAST - 1);
       }
 
       if (get_voicing_cv()) {
-        _voicing += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_voicing_cv() - 1)) + 255) >> 9;
+        _voicing += (oc::ADC::value((get_voicing_cv() - 1)) + 255) >> 9;
         CONSTRAIN(_voicing, 0,  oc::Chords::CHORDS_VOICING_LAST - 1);
       }
 
       int32_t quantized = quantizer_.Process(pitch, root << 7, transpose);
       // main sample, S/H:
-      sample_a = temp_sample = oc::DAC::pitch_to_scaled_voltage_dac(DAC_CHANNEL_A, quantized, octave + oc::inversion[_inversion][0], oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
+      sample_a = temp_sample = oc::DAC::pitch_to_scaled_voltage_dac(0, quantized, octave + oc::inversion[_inversion][0], oc::DAC::get_voltage_scaling(0));
 
       // now derive chords ...
       transpose += oc::qualities[_quality][1];
@@ -827,14 +827,14 @@ public:
       int32_t sample_d  = quantizer_.Process(pitch, root << 7, transpose);
 
       //todo voicing for root note
-      sample_b = oc::DAC::pitch_to_scaled_voltage_dac(DAC_CHANNEL_B, sample_b, octave + oc::voicing[_voicing][1] + oc::inversion[_inversion][1], oc::DAC::get_voltage_scaling(DAC_CHANNEL_B));
-      sample_c = oc::DAC::pitch_to_scaled_voltage_dac(DAC_CHANNEL_C, sample_c, octave + oc::voicing[_voicing][2] + oc::inversion[_inversion][2], oc::DAC::get_voltage_scaling(DAC_CHANNEL_C));
-      sample_d = oc::DAC::pitch_to_scaled_voltage_dac(DAC_CHANNEL_D, sample_d, octave + oc::voicing[_voicing][3] + oc::inversion[_inversion][3], oc::DAC::get_voltage_scaling(DAC_CHANNEL_D));
+      sample_b = oc::DAC::pitch_to_scaled_voltage_dac(1, sample_b, octave + oc::voicing[_voicing][1] + oc::inversion[_inversion][1], oc::DAC::get_voltage_scaling(1));
+      sample_c = oc::DAC::pitch_to_scaled_voltage_dac(2, sample_c, octave + oc::voicing[_voicing][2] + oc::inversion[_inversion][2], oc::DAC::get_voltage_scaling(2));
+      sample_d = oc::DAC::pitch_to_scaled_voltage_dac(3, sample_d, octave + oc::voicing[_voicing][3] + oc::inversion[_inversion][3], oc::DAC::get_voltage_scaling(3));
 
-      oc::DAC::set<DAC_CHANNEL_A>(sample_a);
-      oc::DAC::set<DAC_CHANNEL_B>(sample_b);
-      oc::DAC::set<DAC_CHANNEL_C>(sample_c);
-      oc::DAC::set<DAC_CHANNEL_D>(sample_d);
+      oc::DAC::set(0, sample_a);
+      oc::DAC::set(1, sample_b);
+      oc::DAC::set(2, sample_c);
+      oc::DAC::set(3, sample_d);
     }
 
     bool changed = (last_sample_ != sample_a);

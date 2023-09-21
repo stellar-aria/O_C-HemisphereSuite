@@ -23,7 +23,7 @@
 #ifndef UTIL_BUTTON_H_
 #define UTIL_BUTTON_H_
 
-#include <Arduino.h>
+
 #include "util/macros.h"
 
 namespace UI {

@@ -1,7 +1,7 @@
 #ifndef OC_AUTOTUNE_PRESETS_H_
 #define OC_AUTOTUNE_PRESETS_H_
 
-#include <Arduino.h>
+
 #include "oc/config.h"
 
 namespace oc {

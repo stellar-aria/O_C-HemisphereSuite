@@ -1,6 +1,29 @@
 {
   "C_Cpp.intelliSenseEngine": "disabled",
   "clangd.arguments": [
-    "--query-driver=C:\\Users\\Kate\\.platformio\\packages\\toolchain-gccarmnoneeabi@1.50401.190816\\bin\\arm-none-eabi-g++.exe"
-  ]
+    "--log=verbose",
+    "--query-driver=C:\\Users\\Kate\\.platformio\\packages\\toolchain-gccarmnoneeabi\\bin\\arm-none-eabi-g++.exe"
+  ],
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "googletest.failed",
+        "settings": {
+          "foreground": "#f00"
+        }
+      },
+      {
+        "scope": "googletest.passed",
+        "settings": {
+          "foreground": "#0f0"
+        }
+      },
+      {
+        "scope": "googletest.run",
+        "settings": {
+          "foreground": "#0f0"
+        }
+      }
+    ]
+  }
 }

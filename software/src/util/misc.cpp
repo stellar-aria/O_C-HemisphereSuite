@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include <stdarg.h>
 #include "util/misc.h"
 

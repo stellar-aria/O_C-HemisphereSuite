@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include "oc/config.h"
 #include "oc/core.h"
 #include "oc/bitmaps.h"
@@ -67,9 +67,9 @@ void screensaver() {
 static const size_t kScopeDepth = 64;
 
 uint16_t scope_history[DAC::kHistoryDepth];
-uint16_t averaged_scope_history[DAC_CHANNEL_LAST][kScopeDepth];
+uint16_t averaged_scope_history[oc::kNumDacChannels][kScopeDepth];
 size_t averaged_scope_tail = 0;
-DAC_CHANNEL scope_update_channel = DAC_CHANNEL_A;
+size_t scope_update_channel = 0;
 
 template <size_t size>
 inline uint16_t calc_average(const uint16_t *data) {
@@ -83,25 +83,25 @@ inline uint16_t calc_average(const uint16_t *data) {
 template <unsigned rshift, uint16_t bitmask>
 void scope_averaging() {
     switch (scope_update_channel) {
-    case DAC_CHANNEL_A:
-      DAC::getHistory<DAC_CHANNEL_A>(scope_history);
-      averaged_scope_history[DAC_CHANNEL_A][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
-      scope_update_channel = DAC_CHANNEL_B;
+    case 0:
+      DAC::getHistory<0>(scope_history);
+      averaged_scope_history[0][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
+      scope_update_channel = 1;
       break;
-    case DAC_CHANNEL_B:
-      DAC::getHistory<DAC_CHANNEL_B>(scope_history);
-      averaged_scope_history[DAC_CHANNEL_B][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
-      scope_update_channel = DAC_CHANNEL_C;
+    case 1:
+      DAC::getHistory<1>(scope_history);
+      averaged_scope_history[1][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
+      scope_update_channel = 2;
       break;
-    case DAC_CHANNEL_C:
-      DAC::getHistory<DAC_CHANNEL_C>(scope_history);
-      averaged_scope_history[DAC_CHANNEL_C][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
-      scope_update_channel = DAC_CHANNEL_D;
+    case 2:
+      DAC::getHistory<2>(scope_history);
+      averaged_scope_history[2][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
+      scope_update_channel = 3;
       break;
-    case DAC_CHANNEL_D:
-      DAC::getHistory<DAC_CHANNEL_D>(scope_history);
-      averaged_scope_history[DAC_CHANNEL_D][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
-      scope_update_channel = DAC_CHANNEL_A;
+    case 3:
+      DAC::getHistory<3>(scope_history);
+      averaged_scope_history[3][averaged_scope_tail] = ((65535U - calc_average<DAC::kHistoryDepth>(scope_history)) >> rshift) & bitmask;
+      scope_update_channel = 0;
       averaged_scope_tail = (averaged_scope_tail + 1) % kScopeDepth;
       break;
     default: break;
@@ -114,15 +114,15 @@ void scope_render() {
   for (weegfx::coord_t x = 0; x < (weegfx::coord_t)kScopeDepth - 1; ++x) {
     size_t index = (x + averaged_scope_tail + 1) % kScopeDepth;
     #ifdef BUCHLA_4U
-      graphics.setPixel(x, 0 + averaged_scope_history[DAC_CHANNEL_C][index]);
-      graphics.setPixel(64 + x, 0 + averaged_scope_history[DAC_CHANNEL_D][index]);
-      graphics.setPixel(x, 32 + averaged_scope_history[DAC_CHANNEL_A][index]);
-      graphics.setPixel(64 + x, 32 + averaged_scope_history[DAC_CHANNEL_B][index]);  
+      graphics.setPixel(x, 0 + averaged_scope_history[2][index]);
+      graphics.setPixel(64 + x, 0 + averaged_scope_history[3][index]);
+      graphics.setPixel(x, 32 + averaged_scope_history[0][index]);
+      graphics.setPixel(64 + x, 32 + averaged_scope_history[1][index]);  
     #else
-      graphics.setPixel(x, 0 + averaged_scope_history[DAC_CHANNEL_A][index]);
-      graphics.setPixel(64 + x, 0 + averaged_scope_history[DAC_CHANNEL_B][index]);
-      graphics.setPixel(x, 32 + averaged_scope_history[DAC_CHANNEL_C][index]);
-      graphics.setPixel(64 + x, 32 + averaged_scope_history[DAC_CHANNEL_D][index]);
+      graphics.setPixel(x, 0 + averaged_scope_history[0][index]);
+      graphics.setPixel(64 + x, 0 + averaged_scope_history[1][index]);
+      graphics.setPixel(x, 32 + averaged_scope_history[2][index]);
+      graphics.setPixel(64 + x, 32 + averaged_scope_history[3][index]);
     #endif
   }
 }
@@ -132,8 +132,8 @@ void vectorscope_render() {
 
   for (weegfx::coord_t x = 0; x < (weegfx::coord_t)kScopeDepth - 1; ++x) {
     size_t index = (x + averaged_scope_tail + 1) % kScopeDepth;
-    graphics.setPixel(averaged_scope_history[DAC_CHANNEL_A][index], averaged_scope_history[DAC_CHANNEL_B][index]);
-    graphics.setPixel(64 + averaged_scope_history[DAC_CHANNEL_C][index], averaged_scope_history[DAC_CHANNEL_D][index]);
+    graphics.setPixel(averaged_scope_history[0][index], averaged_scope_history[1][index]);
+    graphics.setPixel(64 + averaged_scope_history[2][index], averaged_scope_history[3][index]);
   }
 }
 

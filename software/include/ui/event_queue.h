@@ -23,7 +23,7 @@
 #ifndef UI_EVENTS_QUEUE_H_
 #define UI_EVENTS_QUEUE_H_
 
-#include <Arduino.h>
+
 #include "ui/events.h"
 #include "util/ringbuffer.h"
 

@@ -266,7 +266,7 @@ public:
 
   inline static void Draw() {
     
-    if (oc::DAC::get_voltage_scaling(DAC_CHANNEL_A) || oc::DAC::get_voltage_scaling(DAC_CHANNEL_B) || oc::DAC::get_voltage_scaling(DAC_CHANNEL_C) || oc::DAC::get_voltage_scaling(DAC_CHANNEL_D))
+    if (oc::DAC::get_voltage_scaling(0) || oc::DAC::get_voltage_scaling(1) || oc::DAC::get_voltage_scaling(2) || oc::DAC::get_voltage_scaling(3))
       graphics.drawHLineDots(start_x, kMenuLineH, kDisplayWidth - start_x);
     else
       graphics.drawHLine(start_x, kMenuLineH, kDisplayWidth - start_x);

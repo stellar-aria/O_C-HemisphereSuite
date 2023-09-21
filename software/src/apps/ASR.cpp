@@ -424,7 +424,7 @@ public:
 
         int8_t _buflen = get_buffer_length();
         if (get_cv4_destination() == ASR_DEST_BUFLEN) {
-          _buflen += ((oc::ADC::value<ADC_CHANNEL_4>() + 31) >> 6);
+          _buflen += ((oc::ADC::value(3) + 31) >> 6);
           CONSTRAIN(_buflen, NUM_ASR_CHANNELS, ASR_HOLD_BUF_SIZE - 0x1);
         }
         _ASR.Freeze(_buflen);
@@ -434,21 +434,21 @@ public:
 
       // update outputs:
       _offset = _delay;
-      *(_asr_buf + DAC_CHANNEL_A) = _ASR.Poke(_offset++);
+      *(_asr_buf + 0) = _ASR.Poke(_offset++);
       // delay mechanics ...
       _delay = delay_type_ ? 0x0 : _delay;
       // continue updating
       _offset +=_delay;
-      *(_asr_buf + DAC_CHANNEL_B) = _ASR.Poke(_offset++);
+      *(_asr_buf + 1) = _ASR.Poke(_offset++);
       _offset +=_delay;
-      *(_asr_buf + DAC_CHANNEL_C) = _ASR.Poke(_offset++);
+      *(_asr_buf + 2) = _ASR.Poke(_offset++);
       _offset +=_delay;
-      *(_asr_buf + DAC_CHANNEL_D) = _ASR.Poke(_offset++);
+      *(_asr_buf + 3) = _ASR.Poke(_offset++);
   }
 
   inline void update() {
 
-     bool update = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
+     bool update = oc::DigitalInputs::clocked(0);
      clock_display_.Update(1, update);
 
      trigger_delay_.Update();
@@ -462,33 +462,33 @@ public:
 
          bool _freeze_switch, _freeze = digitalReadFast(TR2);
          int8_t _root  = get_root();
-         int8_t _index = get_index() + ((oc::ADC::value<ADC_CHANNEL_2>() + 31) >> 6);
+         int8_t _index = get_index() + ((oc::ADC::value(1) + 31) >> 6);
          int8_t _octave = get_octave();
          int8_t _transpose = 0;
          int8_t _mult = get_mult();
-         int32_t _pitch = oc::ADC::raw_pitch_value(ADC_CHANNEL_1);
+         int32_t _pitch = oc::ADC::raw_pitch_value(0);
          int32_t _asr_buffer[NUM_ASR_CHANNELS];
 
          bool forced_update = force_update_;
          force_update_ = false;
-         update_scale(forced_update, (oc::ADC::value<ADC_CHANNEL_3>() + 127) >> 8);
+         update_scale(forced_update, (oc::ADC::value(2) + 127) >> 8);
 
          // cv4 destination, defaults to octave:
          switch(get_cv4_destination()) {
 
             case ASR_DEST_OCTAVE:
-              _octave += (oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9;
+              _octave += (oc::ADC::value(3) + 255) >> 9;
             break;
             case ASR_DEST_ROOT:
-              _root += (oc::ADC::value<ADC_CHANNEL_4>() + 127) >> 8;
+              _root += (oc::ADC::value(3) + 127) >> 8;
               CONSTRAIN(_root, 0, 11);
             break;
             case ASR_DEST_TRANSPOSE:
-              _transpose += (oc::ADC::value<ADC_CHANNEL_4>() + 63) >> 7;
+              _transpose += (oc::ADC::value(3) + 63) >> 7;
               CONSTRAIN(_transpose, -12, 12);
             break;
             case ASR_DEST_INPUT_SCALING:
-              _mult += (oc::ADC::value<ADC_CHANNEL_4>() + 63) >> 7;
+              _mult += (oc::ADC::value(3) + 63) >> 7;
               CONSTRAIN(_mult, 0, NUM_INPUT_SCALING - 1);
             break;
             // CV for buffer length happens in updateASR_indexed
@@ -685,14 +685,14 @@ public:
              }
 
              _sample = quantizer_.Process(_sample, _root << 7, _transpose);
-             _sample = oc::DAC::pitch_to_scaled_voltage_dac(static_cast<DAC_CHANNEL>(i), _sample, _octave, oc::DAC::get_voltage_scaling(i));
+             _sample = oc::DAC::pitch_to_scaled_voltage_dac(static_cast<size_t>(i), _sample, _octave, oc::DAC::get_voltage_scaling(i));
              scrolling_history_[i].Push(_sample);
              _asr_buffer[i] = _sample;
          }
 
         // ... and write to DAC
         for (int i = 0; i < NUM_ASR_CHANNELS; ++i)
-          oc::DAC::set(static_cast<DAC_CHANNEL>(i), _asr_buffer[i]);
+          oc::DAC::set(static_cast<size_t>(i), _asr_buffer[i]);
 
         MENU_REDRAW = 0x1;
       }

@@ -1,7 +1,7 @@
 #ifndef OC_PATTERNS_PRESETS_H_
 #define OC_PATTERNS_PRESETS_H_
 
-#include <Arduino.h>
+
 
 namespace oc {
 

@@ -14,10 +14,6 @@ extern void set8565_CHC(uint32_t data);
 extern void set8565_CHD(uint32_t data);
 extern void SPI_init();
 
-enum DAC_CHANNEL {
-  DAC_CHANNEL_A, DAC_CHANNEL_B, DAC_CHANNEL_C, DAC_CHANNEL_D, DAC_CHANNEL_LAST
-};
-
 enum OutputVoltageScaling {
   VOLTAGE_SCALING_1V_PER_OCT,    // 0
   VOLTAGE_SCALING_CARLOS_ALPHA,  // 1
@@ -33,6 +29,7 @@ enum OutputVoltageScaling {
 } ;
 
 namespace oc {
+constexpr size_t kNumDacChannels = 4;
 
 class DAC {
 public:
@@ -51,7 +48,7 @@ public:
   #endif
 
   struct CalibrationData {
-    uint16_t calibrated_octaves[DAC_CHANNEL_LAST][OCTAVES + 1];
+    uint16_t calibrated_octaves[kNumDacChannels][OCTAVES + 1];
   };
 
   static void Init(CalibrationData *calibration_data);
@@ -71,16 +68,11 @@ public:
   static void init_Vbias();
   
   static void set_all(uint32_t value) {
-    for (int i = DAC_CHANNEL_A; i < DAC_CHANNEL_LAST; ++i)
+    for (size_t i = 0; i < kNumDacChannels; ++i)
       values_[i] = USAT16(value);
   }
 
-  template <DAC_CHANNEL channel>
-  static void set(uint32_t value) {
-    values_[channel] = USAT16(value);
-  }
-
-  static void set(DAC_CHANNEL channel, uint32_t value) {
+  static void set(size_t channel, uint32_t value) {
     values_[channel] = USAT16(value);
   }
 
@@ -92,7 +84,7 @@ public:
   // Expected semitone resolution is 12 bit.
   //
   // @return DAC output value
-  static int32_t semitone_to_dac(DAC_CHANNEL channel, int32_t semi, int32_t octave_offset) {
+  static int32_t semitone_to_dac(size_t channel, int32_t semi, int32_t octave_offset) {
     return pitch_to_dac(channel, semi << 7, octave_offset);
   }
 
@@ -101,7 +93,7 @@ public:
   // 0 = C1 = 0V, C2 = 24 << 7 = 1V etc. Automatically shifts for LUT range.
   //
   // @return DAC output value
-  static int32_t pitch_to_dac(DAC_CHANNEL channel, int32_t pitch, int32_t octave_offset) {
+  static int32_t pitch_to_dac(size_t channel, int32_t pitch, int32_t octave_offset) {
     pitch += (kOctaveZero + octave_offset) * 12 << 7;
     
     CONSTRAIN(pitch, 0, (120 << 7));
@@ -120,11 +112,11 @@ public:
 
   // Specialised versions with voltage scaling
 
-  static int32_t semitone_to_scaled_voltage_dac(DAC_CHANNEL channel, int32_t semi, int32_t octave_offset, uint8_t voltage_scaling) {
+  static int32_t semitone_to_scaled_voltage_dac(size_t channel, int32_t semi, int32_t octave_offset, uint8_t voltage_scaling) {
     return pitch_to_scaled_voltage_dac(channel, semi << 7, octave_offset, voltage_scaling);
   }
   
-  static int32_t pitch_to_scaled_voltage_dac(DAC_CHANNEL channel, int32_t pitch, int32_t octave_offset, uint8_t voltage_scaling) {
+  static int32_t pitch_to_scaled_voltage_dac(size_t channel, int32_t pitch, int32_t octave_offset, uint8_t voltage_scaling) {
     pitch += (octave_offset * 12) << 7;
 
  
@@ -174,61 +166,54 @@ public:
 
     return sample;
   }
-    
-  // Set channel to semitone value
-  template <DAC_CHANNEL channel>
-  static void set_semitone(int32_t semitone, int32_t octave_offset) {
-    set<channel>(semitone_to_dac(channel, semitone, octave_offset));
-  }
 
   // Set channel to semitone value
-  template <DAC_CHANNEL channel>
-  static void set_voltage_scaled_semitone(int32_t semitone, int32_t octave_offset, uint8_t voltage_scaling) {
-    set<channel>(semitone_to_scaled_voltage_dac(channel, semitone, octave_offset, voltage_scaling));
+  static void set_voltage_scaled_semitone(size_t channel, int32_t semitone, int32_t octave_offset, uint8_t voltage_scaling) {
+    set(channel, semitone_to_scaled_voltage_dac(channel, semitone, octave_offset, voltage_scaling));
   }
 
   // Set channel to pitch value
-  static void set_pitch(DAC_CHANNEL channel, int32_t pitch, int32_t octave_offset) {
+  static void set_pitch(size_t channel, int32_t pitch, int32_t octave_offset) {
     set(channel, pitch_to_dac(channel, pitch, octave_offset));
   }
 
   // Set integer voltage value, where 0 = 0V, 1 = 1V
-  static void set_octave(DAC_CHANNEL channel, int v) {
+  static void set_octave(size_t channel, int v) {
     set(channel, calibration_data_->calibrated_octaves[channel][kOctaveZero + v]);
   }
 
   // Set all channels to integer voltage value, where 0 = 0V, 1 = 1V
   static void set_all_octave(int v) {
-    set_octave(DAC_CHANNEL_A, v);
-    set_octave(DAC_CHANNEL_B, v);
-    set_octave(DAC_CHANNEL_C, v);
-    set_octave(DAC_CHANNEL_D, v);
+    set_octave(0, v);
+    set_octave(1, v);
+    set_octave(2, v);
+    set_octave(3, v);
   }
 
-  static uint32_t get_zero_offset(DAC_CHANNEL channel) {
+  static uint32_t get_zero_offset(size_t channel) {
     return calibration_data_->calibrated_octaves[channel][kOctaveZero];
   }
 
-  static uint32_t get_octave_offset(DAC_CHANNEL channel, int octave) {
+  static uint32_t get_octave_offset(size_t channel, int octave) {
     return calibration_data_->calibrated_octaves[channel][kOctaveZero + octave];
   }
 
   static void Update() {
 
-    set8565_CHA(values_[DAC_CHANNEL_A]);
-    set8565_CHB(values_[DAC_CHANNEL_B]);
-    set8565_CHC(values_[DAC_CHANNEL_C]);
-    set8565_CHD(values_[DAC_CHANNEL_D]);
+    set8565_CHA(values_[0]);
+    set8565_CHB(values_[1]);
+    set8565_CHC(values_[2]);
+    set8565_CHD(values_[3]);
 
     size_t tail = history_tail_;
-    history_[DAC_CHANNEL_A][tail] = values_[DAC_CHANNEL_A];
-    history_[DAC_CHANNEL_B][tail] = values_[DAC_CHANNEL_B];
-    history_[DAC_CHANNEL_C][tail] = values_[DAC_CHANNEL_C];
-    history_[DAC_CHANNEL_D][tail] = values_[DAC_CHANNEL_D];
+    history_[0][tail] = values_[0];
+    history_[1][tail] = values_[1];
+    history_[2][tail] = values_[2];
+    history_[3][tail] = values_[3];
     history_tail_ = (tail + 1) % kHistoryDepth;
   }
 
-  template <DAC_CHANNEL channel>
+  template <size_t channel>
   static void getHistory(uint16_t *dst){
     size_t head = (history_tail_ + 1) % kHistoryDepth;
 
@@ -245,10 +230,10 @@ public:
 
 private:
   static CalibrationData *calibration_data_;
-  static uint32_t values_[DAC_CHANNEL_LAST];
-  static uint16_t history_[DAC_CHANNEL_LAST][kHistoryDepth];
+  static uint32_t values_[oc::kNumDacChannels];
+  static uint16_t history_[oc::kNumDacChannels][kHistoryDepth];
   static volatile size_t history_tail_;
-  static uint8_t DAC_scaling[DAC_CHANNEL_LAST];
+  static uint8_t DAC_scaling[oc::kNumDacChannels];
 };
 
 }; // namespace oc

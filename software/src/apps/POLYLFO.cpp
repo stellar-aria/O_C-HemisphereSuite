@@ -250,14 +250,14 @@ struct {
 
 void FASTRUN POLYLFO_isr() {
 
-  bool reset_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
-  bool freeze = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_2>();
-  bool tempo_sync = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_3>();
+  bool reset_phase = oc::DigitalInputs::clocked(0);
+  bool freeze = oc::DigitalInputs::read_immediate(1);
+  bool tempo_sync = oc::DigitalInputs::clocked(2);
  
-  poly_lfo.cv_freq.push(oc::ADC::value<ADC_CHANNEL_1>());
-  poly_lfo.cv_shape.push(oc::ADC::value<ADC_CHANNEL_2>());
-  poly_lfo.cv_spread.push(oc::ADC::value<ADC_CHANNEL_3>());
-  poly_lfo.cv_mappable.push(oc::ADC::value<ADC_CHANNEL_4>());
+  poly_lfo.cv_freq.push(oc::ADC::value(0));
+  poly_lfo.cv_shape.push(oc::ADC::value(1));
+  poly_lfo.cv_spread.push(oc::ADC::value(2));
+  poly_lfo.cv_mappable.push(oc::ADC::value(3));
 
   // Range in settings is (0-256] so this gets scaled to (0,65535]
   // CV value is 12 bit so also needs scaling
@@ -347,10 +347,10 @@ void FASTRUN POLYLFO_isr() {
   if (!freeze && !poly_lfo.frozen())
     poly_lfo.lfo.Render(freq, reset_phase, tempo_sync, freq_mult);
 
-  oc::DAC::set<DAC_CHANNEL_A>(poly_lfo.lfo.dac_code(0));
-  oc::DAC::set<DAC_CHANNEL_B>(poly_lfo.lfo.dac_code(1));
-  oc::DAC::set<DAC_CHANNEL_C>(poly_lfo.lfo.dac_code(2));
-  oc::DAC::set<DAC_CHANNEL_D>(poly_lfo.lfo.dac_code(3));
+  oc::DAC::set(0, poly_lfo.lfo.dac_code(0));
+  oc::DAC::set(1, poly_lfo.lfo.dac_code(1));
+  oc::DAC::set(2, poly_lfo.lfo.dac_code(2));
+  oc::DAC::set(3, poly_lfo.lfo.dac_code(3));
 }
 
 void POLYLFO_init() {

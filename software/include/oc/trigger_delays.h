@@ -56,7 +56,7 @@ public:
 
 protected:
 
-  util::TriggerDelay<max_delay> delays_[DIGITAL_INPUT_LAST];
+  util::TriggerDelay<max_delay> delays_[kNumDigitalInputs];
 
 };
 

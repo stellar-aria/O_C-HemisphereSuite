@@ -36,7 +36,7 @@ void HEMISPHERE_init();
 size_t HEMISPHERE_storageSize();
 size_t HEMISPHERE_save(void *storage);
 size_t HEMISPHERE_restore(const void *storage);
-void FASTRUN HEMISPHERE_isr();
+void HEMISPHERE_isr();
 void HEMISPHERE_handleAppEvent(oc::AppEvent event);
 void HEMISPHERE_loop(); // Essentially deprecated in favor of ISR
 void HEMISPHERE_menu();

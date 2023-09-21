@@ -119,7 +119,7 @@ public:
     		 * the game.
     		 */
 	    int32_t current_value;
-	    current_value = oc::ADC::raw_pitch_value(ADC_CHANNEL_1);
+	    current_value = oc::ADC::raw_pitch_value(0);
 	    if (current_value < -CENTER_DETENT) MovePaddleUp();
 	    if (current_value > CENTER_DETENT) MovePaddleDown();
 
@@ -145,10 +145,10 @@ public:
     		// Player paddle position CV (0 to 4-ish volts), based on the center of the paddle
     		uint32_t out_D = ((paddle_y + (paddle_h / 2)) - BOUNDARY_TOP) * Y_POSITION_COEFF;
 
-	    oc::DAC::set_pitch(DAC_CHANNEL_A, 1, out_A);
-	    oc::DAC::set_pitch(DAC_CHANNEL_B, 1, out_B);
-	    oc::DAC::set_pitch(DAC_CHANNEL_C, out_C, 0);
-	    oc::DAC::set_pitch(DAC_CHANNEL_D, out_D, 0);
+	    oc::DAC::set_pitch(0, 1, out_A);
+	    oc::DAC::set_pitch(1, 1, out_B);
+	    oc::DAC::set_pitch(2, out_C, 0);
+	    oc::DAC::set_pitch(3, out_D, 0);
     }
 
     int get_score() {return score;}

@@ -90,12 +90,12 @@ void calibration_flip() {
     uint16_t flip_adc;
     for (int i = 0; i < 2; ++i) {
         flip_adc = oc::calibration_data.adc.offset[i];
-        oc::calibration_data.adc.offset[i] = oc::calibration_data.adc.offset[ADC_CHANNEL_LAST-1 - i];
-        oc::calibration_data.adc.offset[ADC_CHANNEL_LAST-1 - i] = flip_adc;
+        oc::calibration_data.adc.offset[i] = oc::calibration_data.adc.offset[ADC::kNumAdcChannels-1 - i];
+        oc::calibration_data.adc.offset[ADC::kNumAdcChannels-1 - i] = flip_adc;
 
         memcpy(flip_dac, oc::calibration_data.dac.calibrated_octaves[i], sizeof(flip_dac));
-        memcpy(oc::calibration_data.dac.calibrated_octaves[i], oc::calibration_data.dac.calibrated_octaves[DAC_CHANNEL_LAST-1 - i], sizeof(flip_dac));
-        memcpy(oc::calibration_data.dac.calibrated_octaves[DAC_CHANNEL_LAST-1 - i], flip_dac, sizeof(flip_dac));
+        memcpy(oc::calibration_data.dac.calibrated_octaves[i], oc::calibration_data.dac.calibrated_octaves[oc::kNumDacChannels-1 - i], sizeof(flip_dac));
+        memcpy(oc::calibration_data.dac.calibrated_octaves[oc::kNumDacChannels-1 - i], flip_dac, sizeof(flip_dac));
     }
 }
 #endif
@@ -198,12 +198,12 @@ struct CalibrationStep {
   int min, max;
 };
 
-DAC_CHANNEL step_to_channel(int step) {
-  if (step >= DAC_D_VOLT_3m) return DAC_CHANNEL_D;
-  if (step >= DAC_C_VOLT_3m) return DAC_CHANNEL_C;
-  if (step >= DAC_B_VOLT_3m) return DAC_CHANNEL_B;
+size_t step_to_channel(int step) {
+  if (step >= DAC_D_VOLT_3m) return 3;
+  if (step >= DAC_C_VOLT_3m) return 2;
+  if (step >= DAC_B_VOLT_3m) return 1;
   /*if (step >= DAC_B_VOLT_3m)*/ 
-  return DAC_CHANNEL_A;
+  return 0;
 }
 
 struct CalibrationState {
@@ -419,10 +419,10 @@ const CalibrationStep calibration_steps[CALIBRATION_STEP_LAST] = {
     { V_BIAS_ASYMMETRIC, "0.000V: asym.", "--> 0.000V", default_help_r, default_footer, CALIBRATE_VBIAS_ASYMMETRIC, 0, nullptr, 0, 4095 },
   #endif
   
-  { CV_OFFSET_0, "ADC CV1", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, ADC_CHANNEL_1, nullptr, 0, 4095 },
-  { CV_OFFSET_1, "ADC CV2", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, ADC_CHANNEL_2, nullptr, 0, 4095 },
-  { CV_OFFSET_2, "ADC CV3", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, ADC_CHANNEL_3, nullptr, 0, 4095 },
-  { CV_OFFSET_3, "ADC CV4", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, ADC_CHANNEL_4, nullptr, 0, 4095 },
+  { CV_OFFSET_0, "ADC CV1", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, 1, nullptr, 0, 4095 },
+  { CV_OFFSET_1, "ADC CV2", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, 2, nullptr, 0, 4095 },
+  { CV_OFFSET_2, "ADC CV3", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, 3, nullptr, 0, 4095 },
+  { CV_OFFSET_3, "ADC CV4", "ADC value at 0V", default_help_r, default_footer, CALIBRATE_ADC_OFFSET, 4, nullptr, 0, 4095 },
 
   #if defined(BUCHLA_4U) && !defined(IO_10V)
     { ADC_PITCH_C2, "ADC cal. octave #1", "CV1: Input 1.2V", "[R] Long press to set", default_footer, CALIBRATE_ADC_1V, 0, nullptr, 0, 0 },
@@ -471,10 +471,10 @@ void oc::Ui::Calibrate() {
   while (!calibration_complete) {
 
     uint32_t ticks = tick_count.Update();
-    digital_input_displays[0].Update(ticks, DigitalInputs::read_immediate<DIGITAL_INPUT_1>());
-    digital_input_displays[1].Update(ticks, DigitalInputs::read_immediate<DIGITAL_INPUT_2>());
-    digital_input_displays[2].Update(ticks, DigitalInputs::read_immediate<DIGITAL_INPUT_3>());
-    digital_input_displays[3].Update(ticks, DigitalInputs::read_immediate<DIGITAL_INPUT_4>());
+    digital_input_displays[0].Update(ticks, DigitalInputs::read_immediate(0));
+    digital_input_displays[1].Update(ticks, DigitalInputs::read_immediate(1));
+    digital_input_displays[2].Update(ticks, DigitalInputs::read_immediate(2));
+    digital_input_displays[3].Update(ticks, DigitalInputs::read_immediate(3));
 
     while (event_queue_.available()) {
       const UI::Event event = event_queue_.PullEvent();
@@ -492,10 +492,10 @@ void oc::Ui::Calibrate() {
           if (UI::EVENT_BUTTON_LONG_PRESS == event.type) {
             switch (calibration_state.current_step->step) {
               case ADC_PITCH_C2:
-                calibration_state.adc_1v = oc::ADC::value(ADC_CHANNEL_1);
+                calibration_state.adc_1v = oc::ADC::value(0);
                 break;
               case ADC_PITCH_C4:
-                calibration_state.adc_3v = oc::ADC::value(ADC_CHANNEL_1);
+                calibration_state.adc_3v = oc::ADC::value(0);
                 break;
               default: break;
             }
@@ -576,7 +576,7 @@ void oc::Ui::Calibrate() {
 
       case CALIBRATE_ADC_1V:
       case CALIBRATE_ADC_3V:
-        SERIAL_PRINTLN("offset=%d", oc::calibration_data.adc.offset[ADC_CHANNEL_1]);
+        SERIAL_PRINTLN("offset=%d", oc::calibration_data.adc.offset[1]);
         break;
 
       case CALIBRATE_SCREENSAVER:
@@ -646,7 +646,7 @@ void calibration_draw(const CalibrationState &state) {
     case CALIBRATE_ADC_OFFSET:
       graphics.print(step->message);
       graphics.setPrintPos(kValueX, y + 2);
-      graphics.print((int)oc::ADC::value(static_cast<ADC_CHANNEL>(step->index)), 5);
+      graphics.print((int)oc::ADC::value((step->index)), 5);
       menu::DrawEditIcon(kValueX, y, state.encoder_value, step->min, step->max);
       break;
 
@@ -664,7 +664,7 @@ void calibration_draw(const CalibrationState &state) {
       graphics.print(step->message);
       y += menu::kMenuLineH;
       graphics.setPrintPos(menu::kIndentDx, y + 2);
-      graphics.print((int)oc::ADC::value(ADC_CHANNEL_1), 2);
+      graphics.print((int)oc::ADC::value(0), 2);
       break;
 
     case CALIBRATE_NONE:
@@ -707,7 +707,7 @@ void calibration_draw(const CalibrationState &state) {
 
   weegfx::coord_t x = menu::kDisplayWidth - 22;
   y = 2;
-  for (int input = oc::DIGITAL_INPUT_1; input < oc::DIGITAL_INPUT_LAST; ++input) {
+  for (int input = 1; input < oc::kNumDigitalInputs; ++input) {
     uint8_t state = (digital_input_displays[input].getState() + 3) >> 2;
     if (state)
       graphics.drawBitmap8(x, y, 4, oc::bitmap_gate_indicators_8 + (state << 2));
@@ -787,8 +787,8 @@ uint32_t adc_average() {
   delay(OC_CORE_TIMER_RATE + 1);
 
   return
-    oc::ADC::smoothed_raw_value(ADC_CHANNEL_1) + oc::ADC::smoothed_raw_value(ADC_CHANNEL_2) +
-    oc::ADC::smoothed_raw_value(ADC_CHANNEL_3) + oc::ADC::smoothed_raw_value(ADC_CHANNEL_4);
+    oc::ADC::smoothed_raw_value(1) + oc::ADC::smoothed_raw_value(2) +
+    oc::ADC::smoothed_raw_value(3) + oc::ADC::smoothed_raw_value(4);
 }
 
 // end

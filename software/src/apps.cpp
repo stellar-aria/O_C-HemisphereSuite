@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <Arduino.h>
+
 #include "oc/apps.h"
 #include "oc/digital_inputs.h"
 #include "oc/autotune.h"
@@ -85,64 +85,27 @@ EXTERN_APP(Settings);
 }
 
 oc::App available_apps[] = {
-
-  #ifdef ENABLE_APP_CALIBR8OR
   DECLARE_APP('C','8', "Calibr8or", Calibr8or),
-  #endif
   DECLARE_APP('H','S', "Hemisphere", HEMISPHERE),
-  #ifdef ENABLE_APP_ASR
   DECLARE_APP('A','S', "CopierMaschine", ASR),
-  #endif
-  #ifdef ENABLE_APP_H1200
   DECLARE_APP('H','A', "Harrington 1200", H1200),
-  #endif
-  #ifdef ENABLE_APP_AUTOMATONNETZ
   DECLARE_APP('A','T', "Automatonnetz", Automatonnetz),
-  #endif
-  #ifdef ENABLE_APP_QUANTERMAIN
   DECLARE_APP('Q','Q', "Quantermain", QQ),
-  #endif
-  #ifdef ENABLE_APP_METAQ
   DECLARE_APP('M','!', "Meta-Q", DQ),
-  #endif
-  #ifdef ENABLE_APP_POLYLFO
   DECLARE_APP('P','L', "Quadraturia", POLYLFO),
-  #endif
-  #ifdef ENABLE_APP_LORENZ
   DECLARE_APP('L','R', "Low-rents", LORENZ),
-  #endif
-  #ifdef ENABLE_APP_PIQUED
   DECLARE_APP('E','G', "Piqued", ENVGEN),
-  #endif
-  #ifdef ENABLE_APP_SEQUINS
   DECLARE_APP('S','Q', "Sequins", SEQ),
-  #endif
-  #ifdef ENABLE_APP_BBGEN
   DECLARE_APP('B','B', "Dialectic Pong", BBGEN),
-  #endif
-  #ifdef ENABLE_APP_BYTEBEATGEN
   DECLARE_APP('B','Y', "Viznutcracker", BYTEBEATGEN),
-  #endif
-  #ifdef ENABLE_APP_CHORDS
   DECLARE_APP('A','C', "Acid Curds", CHORDS),
-  #endif
-  #ifdef ENABLE_APP_MIDI
   DECLARE_APP('M','I', "Captain MIDI", MIDI),
-  #endif
-  #ifdef ENABLE_APP_DARKEST_TIMELINE
   DECLARE_APP('D','2', "Darkest Timeline", TheDarkestTimeline),
-  #endif
-  #ifdef ENABLE_APP_ENIGMA
   DECLARE_APP('E','N', "Enigma", EnigmaTMWS),
-  #endif
-  #ifdef ENABLE_APP_NEURAL_NETWORK
   DECLARE_APP('N','N', "Neural Net", NeuralNetwork),
-  #endif
   DECLARE_APP('S','C', "Scale Editor", SCALEEDITOR),
   DECLARE_APP('W','A', "Waveform Editor", WaveformEditor),
-  #ifdef ENABLE_APP_PONG
   DECLARE_APP('P','O', "Pong", PONGGAME),
-  #endif
   DECLARE_APP('B','R', "Backup / Restore", Backup),
   DECLARE_APP('S','E', "Setup / About", Settings),
 };
@@ -166,7 +129,7 @@ struct GlobalSettings {
   oc::Pattern user_patterns[oc::Patterns::PATTERN_USER_ALL];
   hemisphere::TuringMachine user_turing_machines[hemisphere::TuringMachine::COUNT];
   hemisphere::VOSegment user_waveforms[hemisphere::VO_SEGMENT_COUNT];
-  oc::Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
+  oc::Autotune_data auto_calibration_data[oc::kNumDacChannels];
 };
 
 // App settings are packed into a single blob of binary data; each app's chunk

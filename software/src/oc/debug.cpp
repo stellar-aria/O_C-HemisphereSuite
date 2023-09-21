@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include "oc/ADC.h"
 #include "oc/config.h"
 #include "oc/core.h"
@@ -39,7 +39,7 @@ extern void ASR_debug();
 
 namespace oc {
 
-namespace DEBUG {
+namespace debug {
   debug::AveragedCycles ISR_cycles;
   debug::AveragedCycles UI_cycles;
   debug::AveragedCycles MENU_draw_cycles;
@@ -47,11 +47,13 @@ namespace DEBUG {
   uint32_t UI_max_queue_depth;
   uint32_t UI_queue_overflow;
 
+  DebugPins debugpins;
+
   void Init() {
     debug::CycleMeasurement::Init();
     DebugPins::Init();
   }
-}; // namespace DEBUG
+}; // namespace debug
 
 static void debug_menu_core() {
 
@@ -59,22 +61,22 @@ static void debug_menu_core() {
   graphics.printf("%uMHz %uus+%uus", F_CPU / 1000 / 1000, OC_CORE_TIMER_RATE, OC_UI_TIMER_RATE);
   
   graphics.setPrintPos(2, 22);
-  uint32_t isr_us = debug::cycles_to_us(DEBUG::ISR_cycles.value());
+  uint32_t isr_us = debug::cycles_to_us(debug::ISR_cycles.value());
   graphics.printf("CORE%3u/%3u/%3u %2u%%",
-                  debug::cycles_to_us(DEBUG::ISR_cycles.min_value()),
+                  debug::cycles_to_us(debug::ISR_cycles.min_value()),
                   isr_us,
-                  debug::cycles_to_us(DEBUG::ISR_cycles.max_value()),
+                  debug::cycles_to_us(debug::ISR_cycles.max_value()),
                   (isr_us * 100) /  OC_CORE_TIMER_RATE);
 
   graphics.setPrintPos(2, 32);
   graphics.printf("POLL%3u/%3u/%3u",
-                  debug::cycles_to_us(DEBUG::UI_cycles.min_value()),
-                  debug::cycles_to_us(DEBUG::UI_cycles.value()),
-                  debug::cycles_to_us(DEBUG::UI_cycles.max_value()));
+                  debug::cycles_to_us(debug::UI_cycles.min_value()),
+                  debug::cycles_to_us(debug::UI_cycles.value()),
+                  debug::cycles_to_us(debug::UI_cycles.max_value()));
 
 #ifdef OC_UI_DEBUG
   graphics.setPrintPos(2, 42);
-  graphics.printf("UI   !%u #%u", DEBUG::UI_queue_overflow, DEBUG::UI_event_count);
+  graphics.printf("UI   !%u #%u", debug::UI_queue_overflow, debug::UI_event_count);
   graphics.setPrintPos(2, 52);
 #endif
 }
@@ -107,23 +109,23 @@ static void debug_menu_gfx() {
 
   graphics.setPrintPos(2, 22);
   graphics.printf("MENU %3u/%3u/%3u",
-                  debug::cycles_to_us(DEBUG::MENU_draw_cycles.min_value()),
-                  debug::cycles_to_us(DEBUG::MENU_draw_cycles.value()),
-                  debug::cycles_to_us(DEBUG::MENU_draw_cycles.max_value()));
+                  debug::cycles_to_us(debug::MENU_draw_cycles.min_value()),
+                  debug::cycles_to_us(debug::MENU_draw_cycles.value()),
+                  debug::cycles_to_us(debug::MENU_draw_cycles.max_value()));
 }
 
 static void debug_menu_adc() {
   graphics.setPrintPos(2, 12);
-  graphics.printf("CV1 %5d %5u", ADC::value<ADC_CHANNEL_1>(), ADC::raw_value(ADC_CHANNEL_1));
+  graphics.printf("CV1 %5d %5u", ADC::value(1), ADC::raw_value(1));
 
   graphics.setPrintPos(2, 22);
-  graphics.printf("CV2 %5d %5u", ADC::value<ADC_CHANNEL_2>(), ADC::raw_value(ADC_CHANNEL_2));
+  graphics.printf("CV2 %5d %5u", ADC::value(2), ADC::raw_value(2));
 
   graphics.setPrintPos(2, 32);
-  graphics.printf("CV3 %5d %5u", ADC::value<ADC_CHANNEL_3>(), ADC::raw_value(ADC_CHANNEL_3));
+  graphics.printf("CV3 %5d %5u", ADC::value(3), ADC::raw_value(3));
 
   graphics.setPrintPos(2, 42);
-  graphics.printf("CV4 %5d %5u", ADC::value<ADC_CHANNEL_4>(), ADC::raw_value(ADC_CHANNEL_4));
+  graphics.printf("CV4 %5d %5u", ADC::value(4), ADC::raw_value(4));
 
 //      graphics.setPrintPos(2, 42);
 //      graphics.print((long)ADC::busy_waits());

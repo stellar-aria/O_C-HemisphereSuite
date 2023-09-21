@@ -188,12 +188,12 @@ public:
                     ClockOut(2, gate_ticks);
 
                     // Send the MIDI Note On
-                    if (last_midi_note[0] > -1) usbMIDI.sendNoteOff(last_midi_note[0], 0, last_midi_channel[0]);
+                    if (last_midi_note[0] > -1) usbMIDI.SendNoteOff( last_midi_channel[0], last_midi_note[0], 0);
                     if (midi_channel()) {
                         last_midi_channel[0] = midi_channel();
                         last_midi_note[0] = MIDIQuantizer::NoteNumber(get_data_at(idx, DT_CV_TIMELINE), transpose);
                         vel = Proportion(cv, FIVE_VOLTS, 127);
-                        usbMIDI.sendNoteOn(last_midi_note[0], vel, last_midi_channel[0]);
+                        usbMIDI.SendNoteOn( last_midi_channel[0], last_midi_note[0], vel);
                         last_length[0] = oc::core::ticks - last_clock[0];
                         last_clock[0] = oc::core::ticks;
                     }
@@ -205,13 +205,13 @@ public:
                     ClockOut(3, gate_ticks);
 
                     // Send the MIDI Note On for Alternate Universe
-                    if (last_midi_note[1] > -1) usbMIDI.sendNoteOff(last_midi_note[1], 0, last_midi_channel[1]);
+                    if (last_midi_note[1] > -1) usbMIDI.SendNoteOff( last_midi_channel[1], last_midi_note[1], 0);
                     if (midi_channel_alt()) {
                         last_midi_channel[1] = midi_channel_alt();
                         uint8_t alt_idx = (idx + length()) % 32;
                         last_midi_note[1] = MIDIQuantizer::NoteNumber(get_data_at(alt_idx, DT_CV_TIMELINE));
                         vel = Proportion(get_data_at(alt_idx, DT_PROBABILITY_TIMELINE), FIVE_VOLTS, 127);
-                        usbMIDI.sendNoteOn(last_midi_note[1], vel, last_midi_channel[1]);
+                        usbMIDI.SendNoteOn( last_midi_channel[1], last_midi_note[1], vel);
                         last_length[1] = oc::core::ticks - last_clock[1];
                         last_clock[1] = oc::core::ticks;
                     }
@@ -223,7 +223,7 @@ public:
         for (uint8_t ch = 0; ch < 2; ch++)
         {
             if (last_midi_note[ch] > -1 && (oc::core::ticks - last_clock[ch]) > (last_length[ch]) * 2) {
-                usbMIDI.sendNoteOff(last_midi_note[ch], 0, last_midi_channel[ch]);
+                usbMIDI.SendNoteOff( last_midi_channel[ch], last_midi_note[ch], 0);
                 last_midi_note[ch] = -1;
             }
         }

@@ -184,15 +184,15 @@ struct {
 
 void FASTRUN LORENZ_isr() {
 
-  bool reset1_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
-  bool reset2_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_2>();
-  bool reset_both_phase = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_3>();
-  bool freeze = oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_4>();
+  bool reset1_phase = oc::DigitalInputs::clocked(0);
+  bool reset2_phase = oc::DigitalInputs::clocked(1);
+  bool reset_both_phase = oc::DigitalInputs::clocked(2);
+  bool freeze = oc::DigitalInputs::read_immediate(3);
 
-  lorenz_generator.cv_freq1.push(oc::ADC::value<ADC_CHANNEL_1>());
-  lorenz_generator.cv_rho1.push(oc::ADC::value<ADC_CHANNEL_2>());
-  lorenz_generator.cv_freq2.push(oc::ADC::value<ADC_CHANNEL_3>());
-  lorenz_generator.cv_rho2.push(oc::ADC::value<ADC_CHANNEL_4>());
+  lorenz_generator.cv_freq1.push(oc::ADC::value(0));
+  lorenz_generator.cv_rho1.push(oc::ADC::value(1));
+  lorenz_generator.cv_freq2.push(oc::ADC::value(2));
+  lorenz_generator.cv_rho2.push(oc::ADC::value(3));
 
   // Range in settings is (0-256] so this gets scaled to (0,65535]
   // CV value is 12 bit so also needs scaling
@@ -235,10 +235,10 @@ void FASTRUN LORENZ_isr() {
   if (!freeze && !lorenz_generator.frozen())
     lorenz_generator.lorenz.Process(freq1, freq2, reset1_phase, reset2_phase, lorenz_generator.get_freq_range1(), lorenz_generator.get_freq_range2());
 
-  oc::DAC::set<DAC_CHANNEL_A>(lorenz_generator.lorenz.dac_code(0));
-  oc::DAC::set<DAC_CHANNEL_B>(lorenz_generator.lorenz.dac_code(1));
-  oc::DAC::set<DAC_CHANNEL_C>(lorenz_generator.lorenz.dac_code(2));
-  oc::DAC::set<DAC_CHANNEL_D>(lorenz_generator.lorenz.dac_code(3));
+  oc::DAC::set(0, lorenz_generator.lorenz.dac_code(0));
+  oc::DAC::set(1, lorenz_generator.lorenz.dac_code(1));
+  oc::DAC::set(2, lorenz_generator.lorenz.dac_code(2));
+  oc::DAC::set(3, lorenz_generator.lorenz.dac_code(3));
 }
 
 void LORENZ_init() {

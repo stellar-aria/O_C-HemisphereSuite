@@ -126,7 +126,7 @@ public:
   }
 #endif // BBGEN_DEBUG
 
-  inline void apply_cv_mapping(BouncingBallSettings cv_setting, const int32_t cvs[ADC_CHANNEL_LAST], int32_t segments[kMaxBouncingBallParameters]) {
+  inline void apply_cv_mapping(BouncingBallSettings cv_setting, const int32_t cvs[oc::kNumAdcChannels], int32_t segments[kMaxBouncingBallParameters]) {
     int mapping = values_[cv_setting];
     uint8_t bb_cv_rshift = 13 ;
     switch (mapping) {
@@ -149,8 +149,8 @@ public:
       segments[mapping - BB_CV_MAPPING_GRAVITY] += (cvs[cv_setting - BB_SETTING_CV1]) << (16 - bb_cv_rshift) ;
   }
 
-  template <DAC_CHANNEL dac_channel>
-  void Update(uint32_t triggers, const int32_t cvs[ADC_CHANNEL_LAST]) {
+  template <size_t dac_channel>
+  void Update(uint32_t triggers, const int32_t cvs[oc::kNumAdcChannels]) {
 
     s[0] = SCALE8_16(static_cast<int32_t>(get_gravity()));
     s[1] = SCALE8_16(static_cast<int32_t>(get_bounce_loss()));
@@ -216,7 +216,7 @@ SETTINGS_DECLARE(BouncingBall, BB_SETTING_LAST) {
   { 96, 0, 255, "Bounce loss", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Amplitude", NULL, settings::STORAGE_TYPE_U8 },
   { 228, 0, 255, "Velocity", NULL, settings::STORAGE_TYPE_U8 },
-  { oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_4, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U8 },
+  { 0, 0, 3, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U8 },
   { 0, 0, 255, "Retrigger", NULL, settings::STORAGE_TYPE_U8 },
   { BB_CV_MAPPING_NONE, BB_CV_MAPPING_NONE, BB_CV_MAPPING_LAST - 1, "CV1 -> ", bb_cv_mapping_names, settings::STORAGE_TYPE_U4 },
   { BB_CV_MAPPING_NONE, BB_CV_MAPPING_NONE, BB_CV_MAPPING_LAST - 1, "CV2 -> ", bb_cv_mapping_names, settings::STORAGE_TYPE_U4 },
@@ -233,7 +233,7 @@ public:
   // QuadBouncingBalls = QuadEnvelopeGenerator, bbgen = envgen, BBGEN = ENVGEN
 
   void Init() {
-    int input = oc::DIGITAL_INPUT_1;
+    int input = 0;
     for (auto &bb : balls_) {
       bb.Init(static_cast<oc::DigitalInput>(input));
       ++input;
@@ -247,18 +247,18 @@ public:
   }
 
   void ISR() {
-    cv1.push(oc::ADC::value<ADC_CHANNEL_1>());
-    cv2.push(oc::ADC::value<ADC_CHANNEL_2>());
-    cv3.push(oc::ADC::value<ADC_CHANNEL_3>());
-    cv4.push(oc::ADC::value<ADC_CHANNEL_4>());
+    cv1.push(oc::ADC::value(0));
+    cv2.push(oc::ADC::value(1));
+    cv3.push(oc::ADC::value(2));
+    cv4.push(oc::ADC::value(3));
 
-    const int32_t cvs[ADC_CHANNEL_LAST] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
+    const int32_t cvs[oc::kNumAdcChannels] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
     uint32_t triggers = oc::DigitalInputs::clocked();
 
-    balls_[0].Update<DAC_CHANNEL_A>(triggers, cvs);
-    balls_[1].Update<DAC_CHANNEL_B>(triggers, cvs);
-    balls_[2].Update<DAC_CHANNEL_C>(triggers, cvs);
-    balls_[3].Update<DAC_CHANNEL_D>(triggers, cvs);
+    balls_[0].Update<0>(triggers, cvs);
+    balls_[1].Update<1>(triggers, cvs);
+    balls_[2].Update<2>(triggers, cvs);
+    balls_[3].Update<3>(triggers, cvs);
   }
 
   enum LeftEditMode {

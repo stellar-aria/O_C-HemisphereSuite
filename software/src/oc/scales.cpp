@@ -1,5 +1,5 @@
 #include "oc/scales.h"
-#include <Arduino.h>
+
 
 namespace oc {
 

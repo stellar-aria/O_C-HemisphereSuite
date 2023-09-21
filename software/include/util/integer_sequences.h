@@ -27,13 +27,12 @@
 #include <stdio.h>
 #include "oc/strings.h"
 #include "oc/ADC.h"
+#include "sky/random.hpp"
 
 namespace util {
 
 class IntegerSequence {
 public:
-
-
 
   void Init(int16_t i, int16_t l) {
     n_ = 0; // index of integer series
@@ -52,7 +51,7 @@ public:
   	// msb_pos_ = 0;
   	bit_sum_ = 0;
   	pending_bit_ = 0;
-  	uint32_t _seed = oc::ADC::value<ADC_CHANNEL_1>() + oc::ADC::value<ADC_CHANNEL_2>() + oc::ADC::value<ADC_CHANNEL_3>() + oc::ADC::value<ADC_CHANNEL_4>();
+  	uint32_t _seed = oc::ADC::value(0) + oc::ADC::value(1) + oc::ADC::value(2) + oc::ADC::value(3);
     randomSeed(_seed);
   }
 

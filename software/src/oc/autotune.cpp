@@ -3,14 +3,14 @@
 
 namespace oc {
 
-    Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
+    Autotune_data auto_calibration_data[oc::kNumDacChannels];
 
     /*static*/
-    const int AUTOTUNE::NUM_DAC_CHANNELS = DAC_CHANNEL_LAST;
+    const int AUTOTUNE::NUM_DAC_CHANNELS = oc::kNumDacChannels;
 
     /*static*/
     void AUTOTUNE::Init() {
-      for (size_t i = 0; i < DAC_CHANNEL_LAST; i++)
+      for (size_t i = 0; i < oc::kNumDacChannels; i++)
         memcpy(&auto_calibration_data[i], &oc::autotune_data_default[0], sizeof(Autotune_data));
     }
     /*static*/

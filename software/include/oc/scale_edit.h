@@ -243,27 +243,27 @@ void ScaleEditor<Owner>::Draw() {
     y += 5;
     graphics.setPrintPos(x, y);
     graphics.print(oc::Strings::scaling_string[0]);
-    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_A]);
+    graphics.print(oc::Strings::channel_id[0]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_A)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(0)]);
     y += 16;
     graphics.setPrintPos(x, y);
     graphics.print(oc::Strings::scaling_string[0]);
-    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_B]);
+    graphics.print(oc::Strings::channel_id[1]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_B)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(1)]);
     y += 16;
     graphics.setPrintPos(x, y);
     graphics.print(oc::Strings::scaling_string[0]);
-    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_C]);
+    graphics.print(oc::Strings::channel_id[2]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_C)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(2)]);
     y += 16;
     graphics.setPrintPos(x, y);
     graphics.print(oc::Strings::scaling_string[0]);
-    graphics.print(oc::Strings::channel_id[DAC_CHANNEL_D]);
+    graphics.print(oc::Strings::channel_id[3]);
     graphics.setPrintPos(x + 87, y);
-    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(DAC_CHANNEL_D)]);
+    graphics.print(oc::voltage_scalings[oc::DAC::get_voltage_scaling(3)]);
     // draw cursor:
     graphics.invertRect(x - 2, (scaling_cursor_pos_ << 4) + 3, w - 6, 11);
   }
@@ -417,7 +417,7 @@ void ScaleEditor<Owner>::HandleEncoderEvent(const UI::Event &event) {
         case _SCALING:
         {
          int item = scaling_cursor_pos_ + event.value;
-         CONSTRAIN(item, DAC_CHANNEL_A, DAC_CHANNEL_LAST - 0x1);
+         CONSTRAIN(item, 0, oc::kNumDacChannels - 0x1);
          scaling_cursor_pos_ = item;
         }
         break;

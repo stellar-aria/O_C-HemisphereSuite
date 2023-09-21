@@ -1,29 +1,18 @@
 #ifndef OC_ADC_H_
 #define OC_ADC_H_
 
-#include <Arduino.h>
 #include "oc/config.h"
-#include "settings_defines.h"
 
 #include <stdint.h>
 #include <string.h>
 
-#include <ADC.h>
 //#define ENABLE_ADC_DEBUG
-
-enum ADC_CHANNEL {
-  ADC_CHANNEL_1,
-  ADC_CHANNEL_2,
-  ADC_CHANNEL_3,
-  ADC_CHANNEL_4,
-  ADC_CHANNEL_LAST,
-};
 
 namespace oc {
 
 class ADC {
 public:
-
+  static constexpr uint8_t kNumAdcChannels = 4;
   static constexpr uint8_t kAdcResolution = 12;
   static constexpr uint32_t kAdcSmoothing = 4;
   static constexpr uint32_t kAdcSmoothBits = 8; // fractional bits for smoothing
@@ -33,14 +22,12 @@ public:
   // 16 bit has best-case 13 bits useable, but we only want 12 so we discard 4 anyway
   static constexpr uint8_t kAdcScanResolution = 16;
   static constexpr uint8_t kAdcScanAverages = 16;
-  static constexpr ADC_settings::ADC_SAMPLING_SPEED kAdcSamplingSpeed = ADC_settings::ADC_SAMPLING_SPEED::HIGH_SPEED;
-  static constexpr ADC_settings::ADC_CONVERSION_SPEED kAdcConversionSpeed = ADC_settings::ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS;
 
   static constexpr uint32_t kAdcValueShift = kAdcSmoothBits;
 
 
   struct CalibrationData {
-    uint16_t offset[ADC_CHANNEL_LAST];
+    uint16_t offset[ADC::kNumAdcChannels];
     uint16_t pitch_cv_scale;
     int16_t pitch_cv_offset;
   };
@@ -54,53 +41,31 @@ public:
   // ISR timing restrictions.
   static void Scan();
 
-  template <ADC_CHANNEL channel>
-  static int32_t value() {
+  static int32_t value(size_t channel) {
     return calibration_data_->offset[channel] - (smoothed_[channel] >> kAdcValueShift);
   }
 
-  static int32_t value(ADC_CHANNEL channel) {
-    return calibration_data_->offset[channel] - (smoothed_[channel] >> kAdcValueShift);
-  }
-
-  static uint32_t raw_value(ADC_CHANNEL channel) {
+  static uint32_t raw_value(size_t channel) {
     return raw_[channel] >> kAdcValueShift;
   }
 
-  static uint32_t smoothed_raw_value(ADC_CHANNEL channel) {
+  static uint32_t smoothed_raw_value(size_t channel) {
     return smoothed_[channel] >> kAdcValueShift;
   }
 
-  static int32_t pitch_value(ADC_CHANNEL channel) {
+  static int32_t pitch_value(size_t channel) {
     return (value(channel) * calibration_data_->pitch_cv_scale) >> 12;
   }
 
-  static int32_t raw_pitch_value(ADC_CHANNEL channel) {
+  static int32_t raw_pitch_value(size_t channel) {
     int32_t value = calibration_data_->offset[channel] - raw_value(channel);
     return (value * calibration_data_->pitch_cv_scale) >> 12;
   }
 
-#ifdef ENABLE_ADC_DEBUG
-  // DEBUG
-  static uint16_t fail_flag0() {
-    return adc_.adc0->fail_flag;
-  }
-
-  static uint16_t fail_flag1() {
-    return adc_.adc1->fail_flag;
-  }
-
-  static uint32_t busy_waits() {
-    return busy_waits_;
-  }
-#endif
-
   static void CalibratePitch(int32_t c2, int32_t c4);
 
 private:
-
-  template <ADC_CHANNEL channel>
-  static void update(uint32_t value) {
+  static void update(size_t channel, uint32_t value) {
     value = (value  >> (kAdcScanResolution - kAdcResolution)) << kAdcSmoothBits;
     raw_[channel] = value;
     // division should be shift if kAdcSmoothing is power-of-two
@@ -108,16 +73,11 @@ private:
     smoothed_[channel] = value;
   }
 
-  static ::ADC adc_;
   static size_t scan_channel_;
   static CalibrationData *calibration_data_;
 
-  static uint32_t raw_[ADC_CHANNEL_LAST];
-  static uint32_t smoothed_[ADC_CHANNEL_LAST];
-
-#ifdef ENABLE_ADC_DEBUG
-  static volatile uint32_t busy_waits_;
-#endif
+  static uint32_t raw_[ADC::kNumAdcChannels];
+  static uint32_t smoothed_[ADC::kNumAdcChannels];
 };
 
 };

@@ -132,12 +132,12 @@ enum IntTriggerType {
 
 inline int TriggerSettingToChannel(int setting_value) __attribute__((always_inline));
 inline int TriggerSettingToChannel(int setting_value) {
-  return (setting_value - oc::DIGITAL_INPUT_LAST) / INT_TRIGGER_LAST;
+  return (setting_value - oc::kNumDigitalInputs) / INT_TRIGGER_LAST;
 }
 
 static inline IntTriggerType TriggerSettingToType(int setting_value, int channel) __attribute__((always_inline));
 static inline IntTriggerType TriggerSettingToType(int setting_value, int channel) {
-  return static_cast<IntTriggerType>((setting_value - oc::DIGITAL_INPUT_LAST) - channel * INT_TRIGGER_LAST);
+  return static_cast<IntTriggerType>((setting_value - oc::kNumDigitalInputs) - channel * INT_TRIGGER_LAST);
 }
 
 namespace menu = oc::menu;
@@ -323,7 +323,7 @@ public:
     return 0;
   }
 
-  inline void apply_cv_mapping(EnvelopeSettings cv_setting, const int32_t cvs[ADC_CHANNEL_LAST], int32_t segments[CV_MAPPING_LAST]) {
+  inline void apply_cv_mapping(EnvelopeSettings cv_setting, const int32_t cvs[oc::kNumAdcChannels], int32_t segments[CV_MAPPING_LAST]) {
     // segments is indexed directly with CVMapping enum values
     int mapping = values_[cv_setting];
     switch (mapping) {
@@ -425,8 +425,8 @@ public:
     return false;
   }
 
-  template <DAC_CHANNEL dac_channel>
-  void Update(uint32_t triggers, uint32_t internal_trigger_mask, const int32_t cvs[ADC_CHANNEL_LAST]) {
+  template <size_t dac_channel>
+  void Update(uint32_t triggers, uint32_t internal_trigger_mask, const int32_t cvs[oc::kNumAdcChannels]) {
     int32_t s[CV_MAPPING_LAST];
     s[CV_MAPPING_NONE] = 0; // unused, but needs a placeholder to align with enum CVMapping
     s[CV_MAPPING_SEG1] = SCALE8_16(static_cast<int32_t>(get_segment_value(0)));
@@ -503,7 +503,7 @@ public:
     int trigger_input = get_trigger_input();
     bool triggered = false;
     bool gate_raised = false;
-    if (trigger_input < oc::DIGITAL_INPUT_LAST) {
+    if (trigger_input < oc::kNumDigitalInputs) {
       triggered = triggers & DIGITAL_INPUT_MASK(trigger_input);
       gate_raised = oc::DigitalInputs::read_immediate(static_cast<oc::DigitalInput>(trigger_input));
     } else {
@@ -738,7 +738,7 @@ SETTINGS_DECLARE(EnvelopeGenerator, ENV_SETTING_LAST) {
   { 128, 0, 255, "S2", NULL, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "S3", NULL, settings::STORAGE_TYPE_U16 },
   { 128, 0, 255, "S4", NULL, settings::STORAGE_TYPE_U16 },
-  { oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_1, oc::DIGITAL_INPUT_4 + 3 * INT_TRIGGER_LAST, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U4 },
+  { 0, 0, 3 + 3 * INT_TRIGGER_LAST, "Trigger input", oc::Strings::trigger_input_names, settings::STORAGE_TYPE_U4 },
   { TRIGGER_DELAY_OFF, TRIGGER_DELAY_OFF, TRIGGER_DELAY_LAST - 1, "Tr delay mode", trigger_delay_modes, settings::STORAGE_TYPE_U4 },
   { 1, 1, EnvelopeGenerator::kMaxDelayedTriggers, "Tr delay count", NULL, settings::STORAGE_TYPE_U8 },
   { 0, 0, 999, "Tr delay msecs", NULL, settings::STORAGE_TYPE_U16 },
@@ -773,7 +773,7 @@ public:
   static constexpr int32_t kCvSmoothing = 16;
 
   void Init() {
-    int input = oc::DIGITAL_INPUT_1;
+    int input = 0;
     for (auto &env : envelopes_) {
       env.Init(static_cast<oc::DigitalInput>(input));
       ++input;
@@ -789,12 +789,12 @@ public:
   }
 
   void ISR() {
-    cv1.push(oc::ADC::value<ADC_CHANNEL_1>());
-    cv2.push(oc::ADC::value<ADC_CHANNEL_2>());
-    cv3.push(oc::ADC::value<ADC_CHANNEL_3>());
-    cv4.push(oc::ADC::value<ADC_CHANNEL_4>());
+    cv1.push(oc::ADC::value(0));
+    cv2.push(oc::ADC::value(1));
+    cv3.push(oc::ADC::value(2));
+    cv4.push(oc::ADC::value(3));
 
-    const int32_t cvs[ADC_CHANNEL_LAST] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
+    const int32_t cvs[oc::kNumAdcChannels] = { cv1.value(), cv2.value(), cv3.value(), cv4.value() };
     uint32_t triggers = oc::DigitalInputs::clocked();
 
     uint32_t internal_trigger_mask =
@@ -803,10 +803,10 @@ public:
         envelopes_[2].internal_trigger_mask() << 16 |
         envelopes_[3].internal_trigger_mask() << 24;
 
-    envelopes_[0].Update<DAC_CHANNEL_A>(triggers, internal_trigger_mask, cvs);
-    envelopes_[1].Update<DAC_CHANNEL_B>(triggers, internal_trigger_mask, cvs);
-    envelopes_[2].Update<DAC_CHANNEL_C>(triggers, internal_trigger_mask, cvs);
-    envelopes_[3].Update<DAC_CHANNEL_D>(triggers, internal_trigger_mask, cvs);
+    envelopes_[0].Update<0>(triggers, internal_trigger_mask, cvs);
+    envelopes_[1].Update<1>(triggers, internal_trigger_mask, cvs);
+    envelopes_[2].Update<2>(triggers, internal_trigger_mask, cvs);
+    envelopes_[3].Update<3>(triggers, internal_trigger_mask, cvs);
   }
 
   bool euclidean_edit_active() const {
@@ -989,7 +989,7 @@ void ENVGEN_menu_settings() {
       case ENV_SETTING_TRIGGER_INPUT:
         if (EnvelopeGenerator::indentSetting(static_cast<EnvelopeSettings>(setting)))
           list_item.x += menu::kIndentDx;
-        if (value < oc::DIGITAL_INPUT_LAST) {
+        if (value < oc::kNumDigitalInputs) {
           list_item.DrawDefault(value, attr);
         } else {
           const int trigger_channel = TriggerSettingToChannel(value);

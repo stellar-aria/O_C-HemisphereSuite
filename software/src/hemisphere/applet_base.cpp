@@ -53,7 +53,7 @@ void AppletBase::BaseController(bool master_clock_on) {
   master_clock_bus = (master_clock_on && hemisphere == RIGHT_HEMISPHERE);
   ForEachChannel(ch) {
     // Set CV inputs
-    ADC_CHANNEL channel = (ADC_CHANNEL)(ch + io_offset);
+    size_t channel = (size_t)(ch + io_offset);
     inputs[channel] = oc::ADC::raw_pitch_value(channel);
     if (abs(inputs[channel] - last_cv[channel]) > HEMISPHERE_CHANGE_THRESHOLD) {
       changed_cv[channel] = 1;

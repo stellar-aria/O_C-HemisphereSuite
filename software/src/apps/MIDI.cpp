@@ -307,7 +307,7 @@ public:
         {
             for (int channel = 1; channel <= 16; channel++)
             {
-                usbMIDI.sendNoteOff(note, 0, channel);
+                usbMIDI.SendNoteOff( channel, note, 0);
             }
         }
     }
@@ -556,7 +556,7 @@ private:
 
                     if (legato_on[ch] && midi_note != note_out[ch]) {
                         // Send note off if the note has changed
-                        usbMIDI.sendNoteOff(note_out[ch], 0, last_channel[ch]);
+                        usbMIDI.SendNoteOff( last_channel[ch], note_out[ch], 0);
                         UpdateLog(0, ch, 1, last_channel[ch], note_out[ch], 0);
                         note_out[ch] = -1;
                         indicator = 1;
@@ -575,7 +575,7 @@ private:
                             }
                         }
                         velocity = constrain(velocity, 0, 127);
-                        usbMIDI.sendNoteOn(midi_note, velocity, out_ch);
+                        usbMIDI.SendNoteOn( out_ch, midi_note, velocity);
                         UpdateLog(0, ch, 0, out_ch, midi_note, velocity);
                         indicator = 1;
                         note_out[ch] = midi_note;
@@ -585,7 +585,7 @@ private:
                 }
 
                 if (!read_gate && gated[ch]) { // A note off message should be sent
-                    usbMIDI.sendNoteOff(note_out[ch], 0, last_channel[ch]);
+                    usbMIDI.SendNoteOff( last_channel[ch], note_out[ch], 0);
                     UpdateLog(0, ch, 1, last_channel[ch], note_out[ch], 0);
                     note_out[ch] = -1;
                     indicator = 1;
@@ -610,7 +610,7 @@ private:
                     value = constrain(value, 0, 127);
                     if (cc == 64) value = (value >= 60) ? 127 : 0; // On or off for sustain pedal
 
-                    usbMIDI.sendControlChange(cc, value, out_ch);
+                    usbMIDI.SendControlChange( out_ch, cc, value);
                     UpdateLog(0, ch, 2, out_ch, cc, value);
                     indicator = 1;
                 }
@@ -619,7 +619,7 @@ private:
                 if (out_fn == MIDI_OUT_AFTERTOUCH) {
                     int value = Proportion(In(ch), FIVE_VOLTS, 127);
                     value = constrain(value, 0, 127);
-                    usbMIDI.sendAfterTouch(value, out_ch);
+                    usbMIDI.SendAfterTouch( out_ch, value);
                     UpdateLog(0, ch, 3, out_ch, 0, value);
                     indicator = 1;
                 }
@@ -628,7 +628,7 @@ private:
                 if (out_fn == MIDI_OUT_PITCHBEND) {
                     int16_t bend = Proportion(In(ch) + THREE_VOLTS, THREE_VOLTS * 2, 16383);
                     bend = constrain(bend, 0, 16383);
-                    usbMIDI.sendPitchBend(bend, out_ch);
+                    usbMIDI.SendPitchBend( out_ch, bend);
                     UpdateLog(0, ch, 4, out_ch, 0, bend - 8192);
                     indicator = 1;
                 }

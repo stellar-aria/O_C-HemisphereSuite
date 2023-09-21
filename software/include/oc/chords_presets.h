@@ -3,7 +3,7 @@
 
 #include "oc/scales.h"
 #include "oc/chords.h"
-#include <Arduino.h>
+
 
 namespace oc {
 

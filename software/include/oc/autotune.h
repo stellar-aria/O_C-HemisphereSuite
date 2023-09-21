@@ -15,7 +15,7 @@ public:
   static const Autotune_data &GetAutotune_data(int channel);
 };
 
-extern Autotune_data auto_calibration_data[DAC_CHANNEL_LAST];
+extern Autotune_data auto_calibration_data[oc::kNumDacChannels];
 };
 
 #endif // OC_AUTOTUNE_H_

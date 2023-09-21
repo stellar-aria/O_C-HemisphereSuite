@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include <algorithm>
 
 #include "oc/apps.h"

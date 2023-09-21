@@ -88,8 +88,8 @@ const char *clock_fraction_names[] = {
   " \0\0\0\0", "  1/8", "  1/7", "  1/6", "  1/5", "  1/4", "  1/3", "  1/2"
 };
 
-static constexpr uint32_t TRIGGER_MASK_GRID = oc::DIGITAL_INPUT_1_MASK;
-static constexpr uint32_t TRIGGER_MASK_ARP = oc::DIGITAL_INPUT_2_MASK;
+static constexpr uint32_t TRIGGER_MASK_GRID = DIGITAL_INPUT_MASK(0);
+static constexpr uint32_t TRIGGER_MASK_ARP = DIGITAL_INPUT_MASK(1);
 static constexpr uint32_t kTriggerOutTicks = 1000U / OC_CORE_TIMER_RATE;
 
 enum CellSettings {
@@ -389,7 +389,7 @@ void FASTRUN AutomatonnetzState::ISR() {
     }
   }
 
-  if ((triggers & TRIGGER_MASK_GRID) && oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_3>())
+  if ((triggers & TRIGGER_MASK_GRID) && oc::DigitalInputs::read_immediate(2))
     reset = true;
 
   bool update = false;
@@ -434,7 +434,7 @@ void FASTRUN AutomatonnetzState::ISR() {
     strum_inhibit_ = false;
   } else if ((triggers & TRIGGER_MASK_ARP) &&
              !reset &&
-             !oc::DigitalInputs::read_immediate<oc::DIGITAL_INPUT_4>()) {
+             !oc::DigitalInputs::read_immediate(3)) {
     ++arp_index_;
     if (arp_index_ >= 3) {
       arp_index_ = 0;
@@ -461,37 +461,37 @@ void AutomatonnetzState::Reset() {
 void AutomatonnetzState::update_outputs(bool chord_changed, int transpose, int inversion) {
 
   int32_t root =
-      quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_1)) + transpose;
+      quantizer.Process(oc::ADC::raw_pitch_value(0)) + transpose;
 
-  inversion += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+  inversion += ((oc::ADC::value(3) + 255) >> 9);
   CONSTRAIN(inversion, CELL_MIN_INVERSION * 2, CELL_MAX_INVERSION * 2);
 
   tonnetz_state.render(root, inversion);
 
   switch (output_mode()) {
     case OUTPUTA_MODE_ROOT:
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), octave(), oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
+      oc::DAC::set_voltage_scaled_semitone(0, tonnetz_state.outputs(0), octave(), oc::DAC::get_voltage_scaling(0));
       break;
     case OUTPUTA_MODE_TRIG:
       if (chord_changed) {
         trigger_out_ticks_ = kTriggerOutTicks;
-        oc::DAC::set_octave(DAC_CHANNEL_A, 5);
+        oc::DAC::set_octave(0, 5);
       }
       break;
     case OUTPUTA_MODE_ARP:
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(arp_index_ + 1), octave(), oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
+      oc::DAC::set_voltage_scaled_semitone(0, tonnetz_state.outputs(arp_index_ + 1), octave(), oc::DAC::get_voltage_scaling(0));
     case OUTPUTA_MODE_STRUM:
       if (!strum_inhibit_)
-          oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(arp_index_ + 1), octave(), oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
+          oc::DAC::set_voltage_scaled_semitone(0, tonnetz_state.outputs(arp_index_ + 1), octave(), oc::DAC::get_voltage_scaling(0));
       break;
     case OUTPUTA_MODE_LAST:
     default:
       break;
   }
 
-  oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(1), octave(), oc::DAC::get_voltage_scaling(DAC_CHANNEL_B));
-  oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(2), octave(), oc::DAC::get_voltage_scaling(DAC_CHANNEL_C));
-  oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(3), octave(), oc::DAC::get_voltage_scaling(DAC_CHANNEL_D));
+  oc::DAC::set_voltage_scaled_semitone(1, tonnetz_state.outputs(1), octave(), oc::DAC::get_voltage_scaling(1));
+  oc::DAC::set_voltage_scaled_semitone(2, tonnetz_state.outputs(2), octave(), oc::DAC::get_voltage_scaling(2));
+  oc::DAC::set_voltage_scaled_semitone(3, tonnetz_state.outputs(3), octave(), oc::DAC::get_voltage_scaling(3));
 }
 
 void AutomatonnetzState::update_trigger_out() {
@@ -499,7 +499,7 @@ void AutomatonnetzState::update_trigger_out() {
     uint32_t ticks = trigger_out_ticks_;
     --ticks;
     if (!ticks)
-      oc::DAC::set_octave(DAC_CHANNEL_A, 0);
+      oc::DAC::set_octave(0, 0);
     trigger_out_ticks_ = ticks;
   }
 }

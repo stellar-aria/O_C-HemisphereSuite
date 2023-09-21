@@ -75,7 +75,7 @@ void DAC::Init(CalibrationData *calibration_data) {
 #endif
 
   history_tail_ = 0;
-  memset(history_, 0, sizeof(uint16_t) * kHistoryDepth * DAC_CHANNEL_LAST);
+  memset(history_, 0, sizeof(uint16_t) * kHistoryDepth * oc::kNumDacChannels);
 
   if (F_BUS == 60000000 || F_BUS == 48000000) 
     SPIFIFO.begin(DAC_CS, SPICLOCK_30MHz, SPI_MODE0);  
@@ -94,7 +94,7 @@ void DAC::set_auto_channel_calibration_data(uint8_t channel_id) {
   
   SERIAL_PRINTLN("use auto calibration data ... (channel: %d)", channel_id + 1);
   
-  if (channel_id < DAC_CHANNEL_LAST) {
+  if (channel_id < oc::kNumDacChannels) {
   
     oc::Autotune_data *_autotune_data = &oc::auto_calibration_data[channel_id];
     if (_autotune_data->use_auto_calibration_ == 0xFF)  { // = data available ?
@@ -112,7 +112,7 @@ void DAC::set_default_channel_calibration_data(uint8_t channel_id) {
   
   SERIAL_PRINTLN("reset to core/default calibration data ... (channel: %d)", channel_id + 1);
   
-  if (channel_id < DAC_CHANNEL_LAST) {
+  if (channel_id < oc::kNumDacChannels) {
 
     // reset data
     for (int i = 0; i < OCTAVES + 1; i++) 
@@ -130,7 +130,7 @@ void DAC::update_auto_channel_calibration_data(uint8_t channel_id, int8_t octave
   
   SERIAL_PRINTLN("update: ch.#%d -> %d (%d)", (int)(channel_id + 1), (int)pitch_data, (int)octave);
   
-  if (channel_id < DAC_CHANNEL_LAST) {
+  if (channel_id < oc::kNumDacChannels) {
 
       // write data
       oc::Autotune_data *autotune_data = &oc::auto_calibration_data[channel_id];
@@ -146,7 +146,7 @@ void DAC::update_auto_channel_calibration_data(uint8_t channel_id, int8_t octave
 void DAC::reset_auto_channel_calibration_data(uint8_t channel_id) {
   
   // reset data
-  if (channel_id < DAC_CHANNEL_LAST) {
+  if (channel_id < oc::kNumDacChannels) {
     SERIAL_PRINTLN("reset channel# %d calibration data", (int)(channel_id + 1));
     oc::Autotune_data *autotune_data = &oc::auto_calibration_data[channel_id];
     autotune_data->use_auto_calibration_ = 0x0;
@@ -156,14 +156,14 @@ void DAC::reset_auto_channel_calibration_data(uint8_t channel_id) {
 }
 /*static*/
 void DAC::reset_all_auto_channel_calibration_data(){
-   for (int i = 0; i < DAC_CHANNEL_LAST; i++)
+   for (int i = 0; i < oc::kNumDacChannels; i++)
       reset_auto_channel_calibration_data(i);
 }
 /*static*/
 void DAC::choose_calibration_data() {
   
   // at this point, global settings are restored
-  for (int i = 0; i < DAC_CHANNEL_LAST; i++) {
+  for (int i = 0; i < oc::kNumDacChannels; i++) {
     
     const oc::Autotune_data &autotune_data = oc::AUTOTUNE::GetAutotune_data(i);
 
@@ -185,14 +185,14 @@ uint8_t DAC::get_voltage_scaling(uint8_t channel_id) {
 /*static*/
 void DAC::set_scaling(uint8_t scaling, uint8_t channel_id) {
 
-  if (channel_id < DAC_CHANNEL_LAST)
+  if (channel_id < oc::kNumDacChannels)
     DAC_scaling[channel_id] = scaling;
 }
 /*static*/
 void DAC::restore_scaling(uint32_t scaling) {
   
   // restore scaling from global settings
-  for (int i = 0; i < DAC_CHANNEL_LAST; i++) {
+  for (int i = 0; i < oc::kNumDacChannels; i++) {
     uint8_t _scaling = (scaling >> (i * 8)) & 0xFF;
     set_scaling(_scaling, i);
   }
@@ -201,7 +201,7 @@ uint32_t DAC::store_scaling() {
 
   uint32_t _scaling = 0;
   // merge values into uint32_t : 
-  for (int i = 0; i < DAC_CHANNEL_LAST; i++)
+  for (int i = 0; i < oc::kNumDacChannels; i++)
     _scaling |= (DAC_scaling[i] << (i * 8)); 
   return _scaling;
 }
@@ -221,13 +221,13 @@ void DAC::set_Vbias(uint32_t data) {
 /*static*/
 DAC::CalibrationData *DAC::calibration_data_ = nullptr;
 /*static*/
-uint32_t DAC::values_[DAC_CHANNEL_LAST];
+uint32_t DAC::values_[oc::kNumDacChannels];
 /*static*/
-uint16_t DAC::history_[DAC_CHANNEL_LAST][DAC::kHistoryDepth];
+uint16_t DAC::history_[oc::kNumDacChannels][DAC::kHistoryDepth];
 /*static*/ 
 volatile size_t DAC::history_tail_;
 /*static*/ 
-uint8_t DAC::DAC_scaling[DAC_CHANNEL_LAST];
+uint8_t DAC::DAC_scaling[oc::kNumDacChannels];
 }; // namespace oc
 
 void set8565_CHA(uint32_t data) {

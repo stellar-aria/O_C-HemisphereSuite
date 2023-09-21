@@ -150,8 +150,8 @@ private:
   inline void PushEvent(UI::EventType t, uint16_t c, int16_t v, uint16_t m) {
 #ifdef OC_UI_DEBUG
     if (!event_queue_.writable())
-      ++DEBUG::UI_queue_overflow;
-    ++DEBUG::UI_event_count;
+      ++debug::UI_queue_overflow;
+    ++debug::UI_event_count;
 #endif
     event_queue_.PushEvent(t, c, v, m);
   }

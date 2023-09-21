@@ -24,7 +24,7 @@
 // Main startup/loop for O&C firmware
 
 
-#include <Arduino.h>
+
 #include <EEPROM.h>
 
 #include "oc/apps.h"
@@ -48,14 +48,17 @@ uint_fast8_t MENU_REDRAW = true;
 oc::UiMode ui_mode = oc::UI_MODE_MENU;
 const bool DUMMY = false;
 
+//daisy::GPIO debug_pin;
+
+
 /*  ------------------------ UI timer ISR ---------------------------   */
 
 IntervalTimer UI_timer;
 
 void FASTRUN UI_timer_ISR() {
-  OC_DEBUG_PROFILE_SCOPE(oc::DEBUG::UI_cycles);
+  OC_DEBUG_PROFILE_SCOPE(oc::debug::UI_cycles);
   oc::ui.Poll();
-  OC_DEBUG_RESET_CYCLES(oc::ui.ticks(), 2048, oc::DEBUG::UI_cycles);
+  OC_DEBUG_RESET_CYCLES(oc::ui.ticks(), 2048, oc::debug::UI_cycles);
 }
 
 /*  ------------------------ core timer ISR ---------------------------   */
@@ -64,8 +67,8 @@ volatile bool oc::core::app_isr_enabled = false;
 volatile uint32_t oc::core::ticks = 0;
 
 void FASTRUN CORE_timer_ISR() {
-  DEBUG_PIN_SCOPE(OC_GPIO_DEBUG_PIN2);
-  OC_DEBUG_PROFILE_SCOPE(oc::DEBUG::ISR_cycles);
+  //DEBUG_PIN_SCOPE(OC_GPIO_DEBUG_PIN2);
+  OC_DEBUG_PROFILE_SCOPE(oc::debug::ISR_cycles);
 
   // DAC and display share SPI. By first updating the DAC values, then starting
   // a DMA transfer to the display things are fairly nicely interleaved. In the
@@ -96,7 +99,7 @@ void FASTRUN CORE_timer_ISR() {
   if (oc::core::app_isr_enabled)
     oc::apps::ISR();
 
-  OC_DEBUG_RESET_CYCLES(oc::core::ticks, 16384, oc::DEBUG::ISR_cycles);
+  OC_DEBUG_RESET_CYCLES(oc::core::ticks, 16384, oc::debug::ISR_cycles);
 }
 
 /*       ---------------------------------------------------------         */
@@ -108,7 +111,7 @@ void setup() {
   SERIAL_PRINTLN("* O&C BOOTING...");
   SERIAL_PRINTLN("* %s", OC_VERSION);
 
-  oc::DEBUG::Init();
+  oc::debug::Init();
   oc::DigitalInputs::Init();
   delay(400); 
   oc::ADC::Init(&oc::calibration_data.adc); // Yes, it's using the calibration_data before it's loaded...
@@ -174,8 +177,8 @@ void FASTRUN loop() {
     if (MENU_REDRAW) {
       GRAPHICS_BEGIN_FRAME(false); // Don't busy wait
         if (oc::UI_MODE_MENU == ui_mode) {
-          OC_DEBUG_RESET_CYCLES(menu_redraws, 512, oc::DEBUG::MENU_draw_cycles);
-          OC_DEBUG_PROFILE_SCOPE(oc::DEBUG::MENU_draw_cycles);
+          OC_DEBUG_RESET_CYCLES(menu_redraws, 512, oc::debug::MENU_draw_cycles);
+          OC_DEBUG_PROFILE_SCOPE(oc::debug::MENU_draw_cycles);
           oc::apps::current_app->DrawMenu();
           ++menu_redraws;
 

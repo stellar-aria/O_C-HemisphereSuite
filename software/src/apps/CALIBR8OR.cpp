@@ -207,8 +207,8 @@ public:
 	}
 
     void Controller() {
-        bool clock_sync = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
-        bool reset = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_4>();
+        bool clock_sync = oc::DigitalInputs::clocked(0);
+        bool reset = oc::DigitalInputs::clocked(3);
         bool midi_sync = 0;
 
         // flush MIDI input and catch incoming Clock

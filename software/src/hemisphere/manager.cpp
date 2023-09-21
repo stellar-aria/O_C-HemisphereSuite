@@ -79,8 +79,8 @@ void Manager::Controller() {
     }
   }
 
-  bool clock_sync = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_1>();
-  bool reset = oc::DigitalInputs::clocked<oc::DIGITAL_INPUT_4>();
+  bool clock_sync = oc::DigitalInputs::clocked(1);
+  bool reset = oc::DigitalInputs::clocked(4);
 
   // Paused means wait for clock-sync to start
   if (clock_m->IsPaused() && clock_sync) clock_m->Start();

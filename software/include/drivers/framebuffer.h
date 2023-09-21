@@ -48,11 +48,11 @@ public:
   }
 
   void read() {
-    ++read_ptr_;
+    read_ptr_ = read_ptr_ + 1;
   }
 
   void written() {
-    ++write_ptr_;
+    write_ptr_ = write_ptr_ + 1;
   }
 
 private:

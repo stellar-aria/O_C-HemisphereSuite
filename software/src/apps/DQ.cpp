@@ -440,7 +440,7 @@ public:
     schedule_scale_update_ = true;
   }
 
-  inline void Update(uint32_t triggers, DAC_CHANNEL dac_channel, DAC_CHANNEL aux_channel) {
+  inline void Update(uint32_t triggers, size_t dac_channel, size_t aux_channel) {
 
     ticks_++;
 
@@ -472,7 +472,7 @@ public:
 
     if (get_scale_seq_mode()) {
         // to do, don't hardcode ..
-      uint8_t _advance_trig = (dac_channel == DAC_CHANNEL_A) ? digitalReadFast(TR2) : digitalReadFast(TR4);
+      uint8_t _advance_trig = (dac_channel == 0) ? digitalReadFast(TR2) : digitalReadFast(TR4);
       if (_advance_trig < scale_advance_state_)
         scale_advance_ = true;
       scale_advance_state_ = _advance_trig;
@@ -506,7 +506,7 @@ public:
 
       source = cv_source = get_source();
       _aux_cv_destination = get_aux_cv_dest();
-      channel_id = (dac_channel == DAC_CHANNEL_A) ? 1 : 3; // hardcoded to use CV2, CV4, for now
+      channel_id = (dac_channel == 0) ? 1 : 3; // hardcoded to use CV2, CV4, for now
 
       if (_aux_cv_destination != prev_destination_)
         clear_dest();
@@ -528,23 +528,23 @@ public:
           case DQ_DEST_NONE:
           break;
           case DQ_DEST_SCALE_SLOT:
-            display_scale_slot_ += (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 255) >> 9;
+            display_scale_slot_ += (oc::ADC::value((channel_id)) + 255) >> 9;
             // if scale changes, we have to update the root and transpose values, too; mask gets updated in update_scale
             root = get_root(display_scale_slot_);
             transpose = get_transpose(display_scale_slot_);
             schedule_scale_update_ = true;
           break;
           case DQ_DEST_ROOT:
-              root += (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 127) >> 8;
+              root += (oc::ADC::value((channel_id)) + 127) >> 8;
           break;
           case DQ_DEST_MASK:
-              schedule_mask_rotate_ = (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 127) >> 8;
+              schedule_mask_rotate_ = (oc::ADC::value((channel_id)) + 127) >> 8;
           break;
           case DQ_DEST_OCTAVE:
-            octave += (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 255) >> 9;
+            octave += (oc::ADC::value((channel_id)) + 255) >> 9;
           break;
           case DQ_DEST_TRANSPOSE:
-            transpose += (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 64) >> 7;
+            transpose += (oc::ADC::value((channel_id)) + 64) >> 7;
           break;
           default:
           break;
@@ -571,8 +571,8 @@ public:
 
       // now, acquire + process sample:
       pitch = quantizer_.enabled()
-                ? oc::ADC::raw_pitch_value(static_cast<ADC_CHANNEL>(cv_source))
-                : oc::ADC::pitch_value(static_cast<ADC_CHANNEL>(cv_source));
+                ? oc::ADC::raw_pitch_value((cv_source))
+                : oc::ADC::pitch_value((cv_source));
 
       switch (source) {
 
@@ -641,7 +641,7 @@ public:
             case DQ_DEST_NONE:
             break;
             case DQ_DEST_SCALE_SLOT:
-            _aux_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 255) >> 9;
+            _aux_cv = (oc::ADC::value((channel_id)) + 255) >> 9;
             if (_aux_cv !=  prev_scale_cv_) {
                 display_scale_slot_ += _aux_cv;
                 CONSTRAIN(display_scale_slot_, 0, NUM_SCALE_SLOTS - 0x1);
@@ -655,7 +655,7 @@ public:
             }
             break;
             case DQ_DEST_TRANSPOSE:
-              _aux_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 63) >> 7;
+              _aux_cv = (oc::ADC::value((channel_id)) + 63) >> 7;
               if (_aux_cv != prev_transpose_cv_) {
                   transpose = get_transpose(display_scale_slot_) + _aux_cv;
                   CONSTRAIN(transpose, -12, 12);
@@ -664,7 +664,7 @@ public:
               }
             break;
             case DQ_DEST_ROOT:
-              _aux_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 127) >> 8;
+              _aux_cv = (oc::ADC::value((channel_id)) + 127) >> 8;
               if (_aux_cv != prev_root_cv_) {
                   display_root_ = root = get_root(display_scale_slot_) + _aux_cv;
                   CONSTRAIN(root, 0, 11);
@@ -673,7 +673,7 @@ public:
               }
             break;
             case DQ_DEST_OCTAVE:
-              _aux_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 255) >> 9;
+              _aux_cv = (oc::ADC::value((channel_id)) + 255) >> 9;
               if (_aux_cv != prev_octave_cv_) {
                   octave = get_octave() + _aux_cv;
                   CONSTRAIN(octave, -4, 4);
@@ -682,7 +682,7 @@ public:
               }
             break;
             case DQ_DEST_MASK:
-              schedule_mask_rotate_ = (oc::ADC::value(static_cast<ADC_CHANNEL>(channel_id)) + 127) >> 8;
+              schedule_mask_rotate_ = (oc::ADC::value((channel_id)) + 127) >> 8;
               schedule_scale_update_ = true;
             break;
             default:
@@ -1228,8 +1228,8 @@ void DQ_isr() {
 
   uint32_t triggers = oc::DigitalInputs::clocked();
 
-  dq_quantizer_channels[0].Update(triggers, DAC_CHANNEL_A, DAC_CHANNEL_C);
-  dq_quantizer_channels[1].Update(triggers, DAC_CHANNEL_B, DAC_CHANNEL_D);
+  dq_quantizer_channels[0].Update(triggers, 0, 2);
+  dq_quantizer_channels[1].Update(triggers, 1, 3);
 }
 
 void DQ_loop() {
@@ -1528,7 +1528,7 @@ void DQ_QuantizerChannel::RenderScreensaver(weegfx::coord_t start_x) const {
       break;
     default: {
       graphics.setPixel(start_x + DQ_OFFSET_X - 16, 4);
-      int32_t cv = oc::ADC::value(static_cast<ADC_CHANNEL>(source));
+      int32_t cv = oc::ADC::value((source));
       cv = (cv * 20 + 2047) >> 11;
       if (cv < 0)
         graphics.drawRect(start_x + DQ_OFFSET_X - 16 + cv, 6, -cv, 2);

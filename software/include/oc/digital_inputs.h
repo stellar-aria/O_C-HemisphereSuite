@@ -5,89 +5,43 @@
 #include "oc/config.h"
 #include "oc/core.h"
 #include "oc/gpio.h"
+#include "oc/hw.h"
+
+#include "sky/bit_ops.h"
 
 namespace oc {
 
-enum DigitalInput {
-  DIGITAL_INPUT_1,
-  DIGITAL_INPUT_2,
-  DIGITAL_INPUT_3,
-  DIGITAL_INPUT_4,
-  DIGITAL_INPUT_LAST
-};
+static constexpr uint32_t DIGITAL_INPUT_MASK(size_t x) { return 0x1 << x; }
 
-#define DIGITAL_INPUT_MASK(x) (0x1 << (x))
-
-static constexpr uint32_t DIGITAL_INPUT_1_MASK = DIGITAL_INPUT_MASK(DIGITAL_INPUT_1);
-static constexpr uint32_t DIGITAL_INPUT_2_MASK = DIGITAL_INPUT_MASK(DIGITAL_INPUT_2);
-static constexpr uint32_t DIGITAL_INPUT_3_MASK = DIGITAL_INPUT_MASK(DIGITAL_INPUT_3);
-static constexpr uint32_t DIGITAL_INPUT_4_MASK = DIGITAL_INPUT_MASK(DIGITAL_INPUT_4);
-
-template <DigitalInput> struct InputPinDesc { };
-template <> struct InputPinDesc<DIGITAL_INPUT_1> { static constexpr int PIN = TR1; };
-template <> struct InputPinDesc<DIGITAL_INPUT_2> { static constexpr int PIN = TR2; };
-template <> struct InputPinDesc<DIGITAL_INPUT_3> { static constexpr int PIN = TR3; };
-template <> struct InputPinDesc<DIGITAL_INPUT_4> { static constexpr int PIN = TR4; };
+constexpr size_t kNumDigitalInputs = 4;
 
 class DigitalInputs {
 public:
-
-  static void Init();
-
-  static void reInit();
-
-  static void Scan();
-
-  // @return mask of all pins cloked since last call, reset state
+  // @return mask of all pins clocked since last call, reset state
   static inline uint32_t clocked() {
-    return clocked_mask_;
-  }
-
-  // @return mask if pin clocked since last call and reset state
-  template <DigitalInput input> static inline uint32_t clocked() {
-    return clocked_mask_ & (0x1 << input);
+    uint32_t out = 0;
+    for (uint32_t i = 0; i < hw.GATE_IN_LAST; i++) {
+      if (hw.gate_input[i].Trig()) {
+        bit::Set(out, i);
+      }
+    }
+    return out;
   }
 
   // @return mask if pin clocked since last call, reset state
-  static inline uint32_t clocked(DigitalInput input) {
-    return clocked_mask_ & (0x1 << input);
-  }
-
-  template <DigitalInput input> static inline bool read_immediate() {
-    return !digitalReadFast(InputPinDesc<input>::PIN);
-  }
-
-  static inline bool read_immediate(DigitalInput input) {
-    return !digitalReadFast(InputPinMap(input));
-  }
-
-  template <DigitalInput input> static inline void clock() {
-    clocked_[input] = 1;
-  }
-
-private:
-
-  inline static int InputPinMap(DigitalInput input) {
-    switch (input) {
-      case DIGITAL_INPUT_1: return InputPinDesc<DIGITAL_INPUT_1>::PIN;
-      case DIGITAL_INPUT_2: return InputPinDesc<DIGITAL_INPUT_2>::PIN;
-      case DIGITAL_INPUT_3: return InputPinDesc<DIGITAL_INPUT_3>::PIN;
-      case DIGITAL_INPUT_4: return InputPinDesc<DIGITAL_INPUT_4>::PIN;
-      default: break;
-    }
-    return 0;
-  }
-
-  static uint32_t clocked_mask_;
-  static volatile uint32_t clocked_[DIGITAL_INPUT_LAST];
-
-  template <DigitalInput input>
-  static uint32_t ScanInput() {
-    if (clocked_[input]) {
-      clocked_[input] = 0;
-      return DIGITAL_INPUT_MASK(input);
+  static inline uint32_t clocked(size_t input) {
+    if (input < hw.GATE_IN_LAST) {
+      return hw.gate_input[input].Trig();
     } else {
-      return 0;
+      return false;
+    }    
+  }
+
+  static inline bool read_immediate(size_t input) {
+    if (input < hw.GATE_IN_LAST) {
+      return hw.gate_input[input].State();
+    } else {
+      return false;
     }
   }
 };
@@ -126,6 +80,6 @@ private:
   uint32_t phase_;
 };
 
-};
+}
 
 #endif // OC_DIGITAL_INPUTS_H_

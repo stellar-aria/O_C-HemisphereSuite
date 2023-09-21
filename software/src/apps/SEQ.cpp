@@ -818,7 +818,7 @@ public:
     sequence_manual_ = display_num_sequence_;
     sequence_advance_state_ = false;
     pendulum_fwd_ = true;
-    uint32_t _seed = oc::ADC::value<ADC_CHANNEL_1>() + oc::ADC::value<ADC_CHANNEL_2>() + oc::ADC::value<ADC_CHANNEL_3>() + oc::ADC::value<ADC_CHANNEL_4>();
+    uint32_t _seed = oc::ADC::value(0) + oc::ADC::value(1) + oc::ADC::value(2) + oc::ADC::value(3);
     randomSeed(_seed);
     clock_display_.Init();
     arpeggiator_.Init();
@@ -873,7 +873,7 @@ public:
 
   /* main channel update below: */
 
-  inline void Update(uint32_t triggers, DAC_CHANNEL dac_channel) {
+  inline void Update(uint32_t triggers, size_t dac_channel) {
 
      // increment channel ticks ..
      subticks_++;
@@ -898,7 +898,7 @@ public:
      // clocked ?
      _none = SEQ_CHANNEL_TRIGGER_NONE == _clock_source;
      // TR1 or TR3?
-     _triggered = _clock_source ? (!_none && (triggers & (1 << oc::DIGITAL_INPUT_3))) : (!_none && (triggers & (1 << oc::DIGITAL_INPUT_1)));
+     _triggered = _clock_source ? (!_none && (triggers & (1 << 2))) : (!_none && (triggers & (1 << 0)));
      _tock = false;
      _sync = false;
 
@@ -928,7 +928,7 @@ public:
          _multiplier = get_multiplier();
 
          if (get_mult_cv_source()) {
-            _multiplier += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_mult_cv_source() - 1)) + 127) >> 8;
+            _multiplier += (oc::ADC::value((get_mult_cv_source() - 1)) + 127) >> 8;
             CONSTRAIN(_multiplier, 0, MULT_MAX);
          }
 
@@ -1064,7 +1064,7 @@ public:
 
          // mask CV ?
          if (get_scale_mask_cv_source()) {
-            int16_t _rotate = (oc::ADC::value(static_cast<ADC_CHANNEL>(get_scale_mask_cv_source() - 1)) + 127) >> 8;
+            int16_t _rotate = (oc::ADC::value((get_scale_mask_cv_source() - 1)) + 127) >> 8;
             rotate_scale(_rotate);
          }
 
@@ -1076,17 +1076,17 @@ public:
 
             int8_t _octave = get_octave();
             if (get_octave_cv_source())
-              _octave += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_octave_cv_source() - 1)) + 255) >> 9;
+              _octave += (oc::ADC::value((get_octave_cv_source() - 1)) + 255) >> 9;
 
             int8_t _transpose = 0x0;
             if (get_transpose_cv_source()) {
-              _transpose += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_transpose_cv_source() - 1)) + 64) >> 7;
+              _transpose += (oc::ADC::value((get_transpose_cv_source() - 1)) + 64) >> 7;
               CONSTRAIN(_transpose, -12, 12);
             }
 
             int8_t _root = get_root(0x0);
             if (get_root_cv_source()) {
-              _root += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_root_cv_source() - 1)) + 127) >> 8;
+              _root += (oc::ADC::value((get_root_cv_source() - 1)) + 127) >> 8;
               CONSTRAIN(_root, 0, 11);
             }
 
@@ -1098,14 +1098,14 @@ public:
 
               int8_t arp_range = get_arp_range();
               if (get_arp_range_cv_source()) {
-                arp_range += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_arp_range_cv_source() - 1)) + 255) >> 9;
+                arp_range += (oc::ADC::value((get_arp_range_cv_source() - 1)) + 255) >> 9;
                 CONSTRAIN(arp_range, 0, 4);
               }
               arpeggiator_.set_range(arp_range);
 
               int8_t arp_direction = get_arp_direction();
               if (get_arp_direction_cv_source()) {
-                arp_direction += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_arp_direction_cv_source() - 1)) + 255) >> 9;
+                arp_direction += (oc::ADC::value((get_arp_direction_cv_source() - 1)) + 255) >> 9;
                 CONSTRAIN(arp_direction, 0, 4);
               }
               arpeggiator_.set_direction(arp_direction);
@@ -1129,23 +1129,23 @@ public:
                 case ENV_ADR:
                 case ENV_ADSR:
                   if (get_attack_duration_cv()) {
-                    _attack += oc::ADC::value(static_cast<ADC_CHANNEL>(get_attack_duration_cv() - 1)) << 3;
+                    _attack += oc::ADC::value((get_attack_duration_cv() - 1)) << 3;
                     USAT16(_attack) ;
                   }
                   if (get_decay_duration_cv()) {
-                    _decay += oc::ADC::value(static_cast<ADC_CHANNEL>(get_decay_duration_cv() - 1)) << 3;
+                    _decay += oc::ADC::value((get_decay_duration_cv() - 1)) << 3;
                     USAT16(_decay);
                   }
                   if (get_sustain_level_cv()) {
-                    _sustain += oc::ADC::value(static_cast<ADC_CHANNEL>(get_sustain_level_cv() - 1)) << 4;
+                    _sustain += oc::ADC::value((get_sustain_level_cv() - 1)) << 4;
                     CONSTRAIN(_sustain, 0, 65534);
                   }
                   if (get_release_duration_cv()) {
-                    _release += oc::ADC::value(static_cast<ADC_CHANNEL>(get_release_duration_cv() - 1)) << 3;
+                    _release += oc::ADC::value((get_release_duration_cv() - 1)) << 3;
                     USAT16(_release) ;
                   }
                   if (get_env_loops_cv_source()) {
-                    _loops += oc::ADC::value(static_cast<ADC_CHANNEL>(get_env_loops_cv_source() - 1)) ;
+                    _loops += oc::ADC::value((get_env_loops_cv_source() - 1)) ;
                     CONSTRAIN(_loops,1<<8, 65534) ;
                   }
                   // set the specified reset behaviours
@@ -1165,7 +1165,7 @@ public:
                 {
                   int8_t _octave_aux = _octave + get_octave_aux();
                   if (get_octave_aux_cv_source())
-                    _octave_aux += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_octave_aux_cv_source() - 1)) + 255) >> 9;
+                    _octave_aux += (oc::ADC::value((get_octave_aux_cv_source() - 1)) + 255) >> 9;
 
                   if (_playmode != PM_ARP)
                     step_pitch_aux_ = get_pitch_at_step(display_num_sequence_, clk_cnt_) + (_octave_aux * 12 << 7);
@@ -1229,7 +1229,7 @@ public:
             // CV?
             if (get_pulsewidth_cv_source()) {
 
-              _pulsewidth += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_pulsewidth_cv_source() - 1)) + 4) >> 3;
+              _pulsewidth += (oc::ADC::value((get_pulsewidth_cv_source() - 1)) + 4) >> 3;
               if (!_gates)
                 CONSTRAIN(_pulsewidth, 1, PULSEW_MAX);
               else // CV for 50% duty cycle:
@@ -1313,12 +1313,12 @@ public:
       }
 
       if (get_sequence_cv_source()) {
-        num_sequence_cv = _num_seq += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_sequence_cv_source() - 1)) + 255) >> 9;
+        num_sequence_cv = _num_seq += (oc::ADC::value((get_sequence_cv_source() - 1)) + 255) >> 9;
         CONSTRAIN(_num_seq, 0, oc::Patterns::PATTERN_USER_LAST - 0x1);
       }
 
       if (get_sequence_length_cv_source())
-        sequence_length_cv = (oc::ADC::value(static_cast<ADC_CHANNEL>(get_sequence_length_cv_source() - 1)) + 64) >> 7;
+        sequence_length_cv = (oc::ADC::value((get_sequence_length_cv_source() - 1)) + 64) >> 7;
 
       switch (_playmode) {
 
@@ -1376,7 +1376,7 @@ public:
           sequence_max = _playmode - PM_SEQ3;
           prev_playmode_ = _playmode;
           // trigger?
-          uint8_t _advance_trig = (channel_id_ == DAC_CHANNEL_A) ? digitalReadFast(TR2) : digitalReadFast(TR4);
+          uint8_t _advance_trig = (channel_id_ == 0) ? digitalReadFast(TR2) : digitalReadFast(TR4);
 
           if (_advance_trig < sequence_advance_state_) {
 
@@ -1421,9 +1421,9 @@ public:
 
            // process input:
            if (!input_range)
-              clk_cnt_ = input_map_.Process(oc::ADC::value(static_cast<ADC_CHANNEL>(_playmode - PM_SH1)));
+              clk_cnt_ = input_map_.Process(oc::ADC::value((_playmode - PM_SH1)));
            else
-              clk_cnt_ = input_map_.Process(0xFFF - oc::ADC::smoothed_raw_value(static_cast<ADC_CHANNEL>(_playmode - PM_SH1)));
+              clk_cnt_ = input_map_.Process(0xFFF - oc::ADC::smoothed_raw_value((_playmode - PM_SH1)));
         }
         break;
         case PM_CV1:
@@ -1446,9 +1446,9 @@ public:
 
            // process input:
            if (!input_range)
-              clk_cnt_ = input_map_.Process(oc::ADC::value(static_cast<ADC_CHANNEL>(_playmode - PM_CV1))); // = 5V
+              clk_cnt_ = input_map_.Process(oc::ADC::value((_playmode - PM_CV1))); // = 5V
            else
-              clk_cnt_ = input_map_.Process(0xFFF - oc::ADC::smoothed_raw_value(static_cast<ADC_CHANNEL>(_playmode - PM_CV1))); // = 10V
+              clk_cnt_ = input_map_.Process(0xFFF - oc::ADC::smoothed_raw_value((_playmode - PM_CV1))); // = 10V
 
            // update output, if slot # changed:
            if (prev_slot_ == clk_cnt_)
@@ -1508,7 +1508,7 @@ public:
     _direction = get_direction();
 
     if (get_direction_cv()) {
-       _direction += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_direction_cv() - 1)) + 255) >> 9;
+       _direction += (oc::ADC::value((get_direction_cv() - 1)) + 255) >> 9;
        CONSTRAIN(_direction, 0, SEQ_DIRECTIONS_LAST - 0x1);
     }
 
@@ -1546,7 +1546,7 @@ public:
         int16_t brown_prb = get_brownian_probability();
 
         if (get_brownian_probability_cv()) {
-          brown_prb += (oc::ADC::value(static_cast<ADC_CHANNEL>(get_brownian_probability_cv() - 1)) + 8) >> 3;
+          brown_prb += (oc::ADC::value((get_brownian_probability_cv() - 1)) + 8) >> 3;
           CONSTRAIN(brown_prb, 0, 256);
         }
         if (random(0,256) < brown_prb)
@@ -1841,14 +1841,14 @@ public:
    num_enabled_settings_ = settings - enabled_settings_;
   }
 
-  template <DAC_CHANNEL dacChannel>
+  template <size_t dacChannel>
   void update_main_channel() {
     int32_t _output = oc::DAC::pitch_to_scaled_voltage_dac(dacChannel, get_step_pitch(), 0, oc::DAC::get_voltage_scaling(dacChannel));
     oc::DAC::set<dacChannel>(_output);
 
   }
 
-  template <DAC_CHANNEL dacChannel>
+  template <size_t dacChannel>
   void update_aux_channel()
   {
 
@@ -2139,24 +2139,24 @@ void SEQ_isr() {
 
   uint32_t triggers = oc::DigitalInputs::clocked();
 
-  if (triggers & (1 << oc::DIGITAL_INPUT_1)) {
+  if (triggers & (1 << 0)) {
     ext_frequency[SEQ_CHANNEL_TRIGGER_TR1] = ticks_src1;
     ticks_src1 = 0x0;
   }
-  if (triggers & (1 << oc::DIGITAL_INPUT_3)) {
+  if (triggers & (1 << 2)) {
     ext_frequency[SEQ_CHANNEL_TRIGGER_TR2] = ticks_src2;
     ticks_src2 = 0x0;
   }
 
   // update sequencer channels 1, 2:
-  seq_channel[0].Update(triggers, DAC_CHANNEL_A);
-  seq_channel[1].Update(triggers, DAC_CHANNEL_B);
+  seq_channel[0].Update(triggers, 0);
+  seq_channel[1].Update(triggers, 1);
   // update DAC channels A, B:
-  seq_channel[0].update_main_channel<DAC_CHANNEL_A>();
-  seq_channel[1].update_main_channel<DAC_CHANNEL_B>();
+  seq_channel[0].update_main_channel<0>();
+  seq_channel[1].update_main_channel<1>();
   // update DAC channels C, D:
-  seq_channel[0].update_aux_channel<DAC_CHANNEL_C>();
-  seq_channel[1].update_aux_channel<DAC_CHANNEL_D>();
+  seq_channel[0].update_aux_channel<2>();
+  seq_channel[1].update_aux_channel<3>();
 }
 
 void SEQ_handleButtonEvent(const UI::Event &event) {

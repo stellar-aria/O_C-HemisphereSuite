@@ -485,13 +485,13 @@ SETTINGS_DECLARE(H1200Settings, H1200_SETTING_LAST) {
   { 0, 0, 31,  " H EuOffs", NULL, settings::STORAGE_TYPE_U8 },
 };
 
-static constexpr uint32_t TRIGGER_MASK_TR1 = oc::DIGITAL_INPUT_1_MASK;
-static constexpr uint32_t TRIGGER_MASK_P = oc::DIGITAL_INPUT_2_MASK;
-static constexpr uint32_t TRIGGER_MASK_L = oc::DIGITAL_INPUT_3_MASK;
-static constexpr uint32_t TRIGGER_MASK_R = oc::DIGITAL_INPUT_4_MASK;
-static constexpr uint32_t TRIGGER_MASK_N = oc::DIGITAL_INPUT_2_MASK;
-static constexpr uint32_t TRIGGER_MASK_S = oc::DIGITAL_INPUT_3_MASK;
-static constexpr uint32_t TRIGGER_MASK_H = oc::DIGITAL_INPUT_4_MASK;
+static constexpr uint32_t TRIGGER_MASK_TR1 = oc::DIGITAL_INPUT_MASK(0);
+static constexpr uint32_t TRIGGER_MASK_P = oc::DIGITAL_INPUT_MASK(1);
+static constexpr uint32_t TRIGGER_MASK_L = oc::DIGITAL_INPUT_MASK(2);
+static constexpr uint32_t TRIGGER_MASK_R = oc::DIGITAL_INPUT_MASK(3);
+static constexpr uint32_t TRIGGER_MASK_N = oc::DIGITAL_INPUT_MASK(1);
+static constexpr uint32_t TRIGGER_MASK_S = oc::DIGITAL_INPUT_MASK(2);
+static constexpr uint32_t TRIGGER_MASK_H = oc::DIGITAL_INPUT_MASK(3);
 static constexpr uint32_t TRIGGER_MASK_DIRTY = 0x10;
 static constexpr uint32_t TRIGGER_MASK_RESET = TRIGGER_MASK_TR1 | TRIGGER_MASK_DIRTY;
 
@@ -634,17 +634,17 @@ public:
 
     switch (output_mode) {
     case OUTPUT_CHORD_VOICING: {
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(1), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_B));
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(2), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_C));
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(3), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_D));
+      oc::DAC::set_voltage_scaled_semitone(0, tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(0));
+      oc::DAC::set_voltage_scaled_semitone(1, tonnetz_state.outputs(1), 0, oc::DAC::get_voltage_scaling(1));
+      oc::DAC::set_voltage_scaled_semitone(2, tonnetz_state.outputs(2), 0, oc::DAC::get_voltage_scaling(2));
+      oc::DAC::set_voltage_scaled_semitone(3, tonnetz_state.outputs(3), 0, oc::DAC::get_voltage_scaling(3));
     }
     break;
     case OUTPUT_TUNE: {
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_A>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_A));
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_B>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_B));
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_C>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_C));
-      oc::DAC::set_voltage_scaled_semitone<DAC_CHANNEL_D>(tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(DAC_CHANNEL_D));
+      oc::DAC::set_voltage_scaled_semitone(0, tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(0));
+      oc::DAC::set_voltage_scaled_semitone(1, tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(1));
+      oc::DAC::set_voltage_scaled_semitone(2, tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(2));
+      oc::DAC::set_voltage_scaled_semitone(3, tonnetz_state.outputs(0), 0, oc::DAC::get_voltage_scaling(3));
     }
     break;
     default: break;
@@ -717,16 +717,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
   if (triggers || (h1200_settings.get_cv_sampling() == H1200_CV_SAMPLING_CONT)) {
         switch (h1200_settings.get_root_offset_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_1));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(0));
             break ;
           case H1200_CV_SOURCE_CV2:
-            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_2));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(1));
             break ;
           case H1200_CV_SOURCE_CV3:
-            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_3));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(2));
             break ;
           case H1200_CV_SOURCE_CV4:
-            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(ADC_CHANNEL_4));
+            root_ += h1200_state.quantizer.Process(oc::ADC::raw_pitch_value(3));
             break ;
           default:
             break; 
@@ -734,16 +734,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       
         switch (h1200_settings.get_octave_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            octave_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            octave_ += ((oc::ADC::value(0) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            octave_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            octave_ += ((oc::ADC::value(1) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            octave_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            octave_ += ((oc::ADC::value(2) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            octave_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            octave_ += ((oc::ADC::value(3) + 255) >> 9);
             break ;
           default:
             break; 
@@ -756,16 +756,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       
         switch (h1200_settings.get_inversion_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            inversion_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value(0) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            inversion_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value(1) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            inversion_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value(2) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            inversion_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            inversion_ += ((oc::ADC::value(3) + 255) >> 9);
             break ;
           default:
             break; 
@@ -774,16 +774,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       
         switch (h1200_settings.get_transform_priority_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value(0) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value(1) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value(2) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            plr_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            plr_transform_priority_ += ((oc::ADC::value(3) + 255) >> 9);
             break ;
           default:
             break; 
@@ -793,16 +793,16 @@ void FASTRUN H1200_clock(uint32_t triggers) {
         
         switch (h1200_settings.get_nsh_transform_priority_cv_src()) {
           case H1200_CV_SOURCE_CV1:
-            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_1>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value(0) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV2:
-            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_2>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value(1) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV3:
-            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_3>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value(2) + 255) >> 9);
             break ;
           case H1200_CV_SOURCE_CV4:
-            nsh_transform_priority_ += ((oc::ADC::value<ADC_CHANNEL_4>() + 255) >> 9);
+            nsh_transform_priority_ += ((oc::ADC::value(3) + 255) >> 9);
             break ;
           default:
             break; 
@@ -922,10 +922,10 @@ void FASTRUN H1200_clock(uint32_t triggers) {
       h1200_state.h_euclidean_fill_ = h1200_settings.get_h_euclidean_fill() ;
       h1200_state.h_euclidean_offset_ = h1200_settings.get_h_euclidean_offset() ;
 
-      int channel_1_cv_ = ((oc::ADC::value<ADC_CHANNEL_1>() + 127) >> 8);
-      int channel_2_cv_ = ((oc::ADC::value<ADC_CHANNEL_2>() + 127) >> 8);
-      int channel_3_cv_ = ((oc::ADC::value<ADC_CHANNEL_3>() + 127) >> 8);
-      int channel_4_cv_ = ((oc::ADC::value<ADC_CHANNEL_4>() + 127) >> 8);
+      int channel_1_cv_ = ((oc::ADC::value(0) + 127) >> 8);
+      int channel_2_cv_ = ((oc::ADC::value(1) + 127) >> 8);
+      int channel_3_cv_ = ((oc::ADC::value(2) + 127) >> 8);
+      int channel_4_cv_ = ((oc::ADC::value(3) + 127) >> 8);
 
  
       h1200_state.map_euclidean_cv(h1200_settings.get_euclidean_cv1_mapping(), channel_1_cv_) ;
@@ -1213,8 +1213,8 @@ void H1200_screensaver() {
 
 #ifdef H1200_DEBUG  
 void H1200_debug() {
-  int cv = oc::ADC::value<ADC_CHANNEL_4>();
-  int scaled = ((oc::ADC::value<ADC_CHANNEL_4>() + 127) >> 8);
+  int cv = oc::ADC::value(3);
+  int scaled = ((oc::ADC::value(3) + 127) >> 8);
 
   graphics.setPrintPos(2, 12);
   graphics.printf("I: %4d %4d", cv, scaled);

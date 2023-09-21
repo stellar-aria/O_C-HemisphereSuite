@@ -1,18 +1,19 @@
 #ifndef UTIL_DEBUGPINS_H_
 #define UTIL_DEBUGPINS_H_
-#include <Arduino.h>
+#include "per/gpio.h"
 
 namespace util {
 
-template <int pin>
 struct scoped_debug_pin {
-  scoped_debug_pin() {
-    digitalWriteFast(pin, HIGH);
+  scoped_debug_pin(daisy::GPIO &debug_pin) : gpio_(debug_pin) {
+    gpio_.Write(true);
   }
 
   ~scoped_debug_pin() {
-    digitalWriteFast(pin, LOW);
+    gpio_.Write(false);
   }
+private:
+  daisy::GPIO &gpio_;
 };
 
 }; // namespace util
